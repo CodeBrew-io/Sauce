@@ -6,10 +6,17 @@ object ApplicationBuild extends Build {
 
   import Dependencies._
 
-  val appName         = "ws"
-  val appVersion      = "1.0-SNAPSHOT"
+  val eval = Project(
+  	id = "eval", 
+  	base = file("modules/eval"),
+  	settings = Settings.default ++ Project.defaultSettings ++ Seq(
+      libraryDependencies ++= akkaStack
+  	)
+  )
 
-  val appDependencies = Seq()
-
-  val main = play.Project(appName, appVersion, appDependencies)
+  val main = play.Project( "ws", 
+    Settings.appVersion, 
+    akkaStack
+  ).settings(Settings.default: _*).
+    dependsOn(eval)
 }
