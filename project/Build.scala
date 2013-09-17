@@ -16,7 +16,7 @@ object ApplicationBuild extends Build {
 
   val main = play.Project( "ws", 
     Settings.appVersion, 
-    akkaStack
+    frontEnd
   ).settings(Settings.default: _*).
     dependsOn(eval)
 }

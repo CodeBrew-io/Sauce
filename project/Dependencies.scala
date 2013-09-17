@@ -11,4 +11,12 @@ object Dependencies {
 		akkaRemote,
 		akkaKernel
 	)
+
+	val webjars =  "org.webjars" %% "webjars-play" % "2.2.0-RC1"
+	val bootstrap = "org.webjars" % "bootstrap" % "3.0.0"
+
+	val frontEnd = Seq(
+		webjars,
+		bootstrap
+	)
 }
