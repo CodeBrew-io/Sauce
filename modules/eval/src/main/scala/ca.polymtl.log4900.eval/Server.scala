@@ -2,7 +2,7 @@ package ca.polymtl.log4900.eval
 
 import akka.kernel.Bootable
 import akka.actor.{ Props, Actor, ActorSystem }
-import com.typesafe.config.ConfigFactory
+import com.typesafe.config._
 
 class SimpleCalculatorActor extends Actor {
   def receive = {
@@ -12,6 +12,12 @@ class SimpleCalculatorActor extends Actor {
     case Subtract(n1, n2) ⇒
       println("Calculating %d - %d".format(n1, n2))
       sender ! SubtractResult(n1, n2, n1 - n2)
+    case Multiply(n1, n2) ⇒
+      println("Calculating %d * %d".format(n1, n2))
+      sender ! MultiplicationResult(n1, n2, n1 * n2)
+    case Divide(n1, n2) ⇒
+      println("Calculating %.0f / %d".format(n1, n2))
+      sender ! DivisionResult(n1, n2, n1 / n2)
   }
 }
 
