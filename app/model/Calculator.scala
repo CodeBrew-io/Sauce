@@ -12,9 +12,9 @@ import akka.actor.ReceiveTimeout
 import ca.polymtl.log4900.eval._
 
 object LookupApplication extends Bootable {
-  val system = ActorSystem("LookupApplication", ConfigFactory.load.getConfig("remotelookup"))
-  val remotePath = "akka.tcp://CalculatorApplication@127.0.0.1:2552/user/simpleCalculator"
-  val actor = system.actorOf(Props(classOf[LookupActor], remotePath), "lookupActor")
+  lazy val system = ActorSystem("LookupApplication", ConfigFactory.load.getConfig("remotelookup"))
+  lazy val remotePath = "akka.tcp://CalculatorApplication@127.0.0.1:2552/user/simpleCalculator"
+  lazy val actor = system.actorOf(Props(classOf[LookupActor], remotePath), "lookupActor")
 
   def doSomething(op: MathOp): Unit = actor ! op
 

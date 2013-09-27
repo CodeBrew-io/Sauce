@@ -1,3 +1,6 @@
-GET     /                           controllers.Application.index
-GET     /assets/*file               controllers.Assets.at(path="/public", file)
-GET     /webjars/*file              controllers.WebJarAssets.at(file)
+GET     /                           	controllers.Application.index
+GET		/eval							controllers.Application.eval
+
+
+GET     /assets/*file               	controllers.Assets.at(path="/public", file)
+GET     /webjars/*file              	controllers.WebJarAssets.at(file)

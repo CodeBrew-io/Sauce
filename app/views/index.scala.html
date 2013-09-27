@@ -1,5 +1,11 @@
-@(message: String)
+@(implicit request: RequestHeader)
 
-@main("Welcome") {
-    <h1>Hello world</h1>
+@main("Hey") {
+	<form action="@routes.Application.eval.webSocketURL()">
+		<input name="op1"> + <input name="op2">
+		<input type="submit">
+		<span class="result"></span>
+	</form>
+}{
+	<script src="@routes.Assets.at("javascripts/chat.js")"></script>
 }

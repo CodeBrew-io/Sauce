@@ -14,9 +14,11 @@ object Dependencies {
 
 	val webjars =  "org.webjars" %% "webjars-play" % "2.2.0-RC1"
 	val bootstrap = "org.webjars" % "bootstrap" % "3.0.0"
+	val jquery = "org.webjars" % "jquery" % "2.0.3"
 
 	val frontEnd = Seq(
 		webjars,
-		bootstrap
+		bootstrap,
+		jquery
 	)
 }

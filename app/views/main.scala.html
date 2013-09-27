@@ -1,4 +1,4 @@
-@(title: String)(content: Html)
+@(title: String)(content: Html)(scripts: Html)
 
 <!DOCTYPE html>
 
@@ -11,5 +11,7 @@
     </head>
     <body>
         @content
+        <script type='text/javascript' src='@routes.WebJarAssets.at(WebJarAssets.locate("jquery.min.js"))'></script>
+        @scripts
     </body>
 </html>
