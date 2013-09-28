@@ -8,15 +8,15 @@ $(function(){
 
     	chatSocket.send(
     		JSON.stringify({
-    			op1: parseInt($("[name='op1']").val()),
-    			op2: parseInt($("[name='op2']").val())
+    			firstName: $("[name='firstName']").val(),
+    			lastName: $("[name='lastName']").val()
     		})
     	);
     	return false;
     });
 
-    chatSocket.onmessage = function(e){
+    chatSocket.onmessage = function(event){
 		var data = JSON.parse(event.data)
-		$(".result").text(data.result || data.error);
+		$(".result").text(data.response);
     };
 });

@@ -8,4 +8,12 @@ object Settings {
 		organization := "ca.polymtl.log4900",
 		version := appVersion
 	)
+
+	// thrift
+	import com.twitter.scrooge._
+	import ScroogeSBT._
+	lazy val scrooge = ScroogeSBT.newSettings ++ Seq(
+    	scroogeBuildOptions := Seq("--ostrich","--finagle"),
+    	libraryDependencies ++= Dependencies.scroogeStack
+    )
 }

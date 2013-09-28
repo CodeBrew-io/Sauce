@@ -2,9 +2,11 @@
 
 @main("Hey") {
 	<form action="@routes.Application.eval.webSocketURL()">
-		<input name="op1"> + <input name="op2">
+		<p>say hi</p>
+		<input name="firstName">
+		<input name="lastName">
 		<input type="submit">
-		<span class="result"></span>
+		<span class="result">result</span>
 	</form>
 }{
 	<script src="@routes.Assets.at("javascripts/chat.js")"></script>

@@ -1,49 +1,49 @@
-package ca.polymtl.log4900.eval
+package ca.polymtl.log4900
+package eval
 
-import akka.kernel.Bootable
-import akka.actor.{ Props, Actor, ActorSystem }
-import com.typesafe.config._
+import api._
 
-class SimpleCalculatorActor extends Actor {
-  def receive = {
-    case Add(n1, n2) ⇒
-      println("Calculating %d + %d".format(n1, n2))
-      sender ! AddResult(n1, n2, n1 + n2)
-    case Subtract(n1, n2) ⇒
-      println("Calculating %d - %d".format(n1, n2))
-      sender ! SubtractResult(n1, n2, n1 - n2)
-    case Multiply(n1, n2) ⇒
-      println("Calculating %d * %d".format(n1, n2))
-      sender ! MultiplicationResult(n1, n2, n1 * n2)
-    case Divide(n1, n2) ⇒
-      println("Calculating %.0f / %d".format(n1, n2))
-      sender ! DivisionResult(n1, n2, n1 / n2)
+import com.twitter._
+import util.Future
+import finagle._
+import thrift.ThriftServerFramedCodec
+import builder.ServerBuilder
+import builder.Server
+
+import org.apache.thrift.protocol.TBinaryProtocol
+import java.net.InetSocketAddress
+
+object HelloServer {
+	var server = Option.empty[Server]
+	def start() {
+		val protocol = new TBinaryProtocol.Factory()
+		val serverService = new HelloUser.FinagledService(new HelloUserImpl, protocol)
+		val address = new InetSocketAddress(Config.host, Config.port)
+
+		val s = ServerBuilder()
+			.codec(ThriftServerFramedCodec())
+			.name("binary_service")
+			.bindTo(address)
+			.build(serverService)
+
+		println("+++Server Started+++")
+		server = Some(s)
+	}
+
+	def stop(){
+		println("---Server Stoped---")
+		server.map(_.close())
+	}
+}
+
+class HelloUserImpl extends HelloUser.FutureIface {
+  def hello(user: User): Future[String] = {
+  	val ret = "hello " + user
+  	println(ret)
+    Future.value(ret)
   }
 }
 
-class CalculatorApplication extends Bootable {
-  val system = ActorSystem("CalculatorApplication", ConfigFactory.load.getConfig("calculator"))
-  val actor = system.actorOf(Props[SimpleCalculatorActor], "simpleCalculator")
-
-  def startup() { }
-  def shutdown() { system.shutdown() }
+object Main extends App {
+	HelloServer.start()
 }
-
-object CalcApp {
-  def main(args: Array[String]) {
-    new CalculatorApplication
-    println("Started Calculator Application - waiting for messages")
-  }
-}
-
-trait MathOp
-case class Add(nbr1: Int, nbr2: Int) extends MathOp
-case class Subtract(nbr1: Int, nbr2: Int) extends MathOp
-case class Multiply(nbr1: Int, nbr2: Int) extends MathOp
-case class Divide(nbr1: Double, nbr2: Int) extends MathOp
-
-trait MathResult
-case class AddResult(nbr: Int, nbr2: Int, result: Int) extends MathResult
-case class SubtractResult(nbr1: Int, nbr2: Int, result: Int) extends MathResult
-case class MultiplicationResult(nbr1: Int, nbr2: Int, result: Int) extends MathResult
-case class DivisionResult(nbr1: Double, nbr2: Int, result: Double) extends MathResult

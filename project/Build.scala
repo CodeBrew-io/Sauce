@@ -6,17 +6,27 @@ object ApplicationBuild extends Build {
 
   import Dependencies._
 
-  val eval = Project(
-  	id = "eval", 
-  	base = file("modules/eval"),
-  	settings = Settings.default ++ Project.defaultSettings ++ Seq(
-      libraryDependencies ++= akkaStack
-  	)
+  val api = Project(
+    id = "api",
+    base = file("modules/api"),
+    settings = Project.defaultSettings ++ Settings.default ++ Settings.scrooge ++ Seq(
+      name := "api"
+    )
   )
 
-  val main = play.Project( "ws", 
+  val eval = Project(
+    id = "eval",
+    base = file("modules/eval"),
+    settings = Settings.default ++ Seq(
+      name := "eval",
+      libraryDependencies += finableOstrich
+    )
+  ) dependsOn( api )
+
+  val main = play.Project(
+    "server", 
     Settings.appVersion, 
-    frontEnd
+    frontEnd ++ test
   ).settings(Settings.default: _*).
-    dependsOn(eval)
+    dependsOn(api)
 }
