@@ -10,16 +10,18 @@ object ApplicationBuild extends Build {
     id = "api",
     base = file("modules/api"),
     settings = Project.defaultSettings ++ Settings.default ++ Settings.scrooge ++ Seq(
-      name := "api"
+      name := "api",
+      playAssetsDirectories := Seq()
     )
   )
 
   val eval = Project(
     id = "eval",
     base = file("modules/eval"),
-    settings = Settings.default ++ Seq(
+    settings = Project.defaultSettings ++ Settings.default ++ Seq(
       name := "eval",
-      libraryDependencies += finableOstrich
+      libraryDependencies += finableOstrich,
+      playAssetsDirectories := Seq()
     )
   ) dependsOn( api )
 

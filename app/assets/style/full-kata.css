@@ -1,0 +1,22 @@
+html, body, #main,
+.kata-form,
+.kata-code-wrap,
+.kata-result-wrap,
+.kata-form .CodeMirror,
+.kata-form .CodeMirror-scroll {
+    height: 100%;
+    max-height: none;
+}
+
+.kata-form.with-results .kata-code-wrap {
+    height: 80%;
+}
+
+.kata-form.with-results .kata-result-window {
+    height: 20%;
+}
+
+.kata-form textarea {
+    height:100%;
+    max-height:none;
+}

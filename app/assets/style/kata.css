@@ -1,0 +1,92 @@
+.kata-result-window .error .severity,
+.kata-result-window .error .message,
+.kata-result-window .error .line {
+    padding-right: 10px;
+    display: inline-block;
+}
+
+.kata-result-window .error .line {
+    color: blue;
+    text-decoration: underline;
+    cursor: pointer;
+}
+
+.kata-code-wrap .line-eval {
+    margin-top: -11px;
+    padding-right: 100px
+}
+
+.kata-form {
+    position: relative;
+}
+
+.kata-controls {
+    z-index: 2;
+    position: absolute;
+    top: 0;
+    right: 0;
+}
+
+.kata-controls button {
+    float: right;
+    clear: both;
+    display: block;
+    margin: 10px;
+}
+
+.kata-vertical-resize-handle {
+    margin: 0;
+    border: none;
+    height: 5px;
+    background-color: black;
+}
+
+.kata-form .CodeMirror {
+    line-height: 1.45em;
+    font-size:16px;
+}
+
+.kata-form .CodeMirror-sizer {
+    padding-top: 10px;
+}
+
+.kata-form .CodeMirror,
+.kata-form .CodeMirror-scroll {
+    height: auto;
+}
+
+.kata-form .CodeMirror-gutters {
+    border-top-right-radius: 20px;
+    border-bottom-right-radius: 20px;
+    padding: 0;
+    box-shadow: none;
+    width: 40px;
+}
+
+.kata-form .kata-result-window {
+    visibility: hidden;
+}
+
+.kata-form.with-results .kata-result-window {
+    visibility: visible;
+}
+
+.kata-console, .kata-result {
+    tab-size: 3;
+}
+
+/* No Javascript */
+.kata-form .CodeMirror-scroll,
+.kata-form textarea {
+    max-height: 400px;
+}
+
+.kata-form textarea {
+    padding: 0;
+    width: 100%;
+}
+
+/* Solarized custom */
+.cm-s-solarized .cm-tab:before {
+    content: none;
+}

@@ -7,3 +7,5 @@ addSbtPlugin("com.typesafe.play" % "sbt-plugin" % "2.2.0")
 //resolvers += "gui maven" at "http://masseguillaume.github.io/maven"
 
 addSbtPlugin("com.twitter" %% "scrooge-sbt-plugin" % "3.9.0")
+
+addSbtPlugin("com.jamesward" %% "play-auto-refresh" % "0.0.5")

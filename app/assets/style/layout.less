@@ -1,0 +1,101 @@
+@import 'val.less';
+
+html, body, .escritoire {
+	height: 100%;
+}
+
+@header-height: 50px;
+
+.app {
+	height: calc(~"100% -"@header-height);
+}
+
+header {
+	padding: 5px;
+	// padding-right: 0;
+
+	height: @header-height;
+	@title-width: 50px;
+
+	.search {
+		position: relative;
+		float: right;
+		width: 40%;
+
+		.dropdown {
+			z-index: 10;
+		}
+
+		input[type=text] {
+		    font-size: 32px;
+		    line-height: 36px;
+		    height: 40px;
+		}
+
+		.doc {
+			background-color: @fire;
+
+			h3 {
+				margin-top: 75px;
+			}
+		}
+
+		.snippet {
+			background-color: @light-earth;
+
+			h3 {
+				margin-top: 107px;
+			}
+		}
+
+		 h3 {
+		    width: @title-width;
+		    font-size: 32px;
+		    font-weight: 300;
+		    color: white;
+		    float: left;
+		    -webkit-transform: rotate(-90deg);
+		}
+
+		 ul {
+		    background-color: #FFF;
+		    margin: 0;
+		    margin-left: @title-width;
+		    padding: 0;
+		    list-style: none;
+		}
+
+		.results {
+		    min-height: 64px;
+		    opacity: 0.35;
+		    border-bottom: 1px solid black;
+		}
+
+		 .results.active {
+		    opacity: 1;
+		}
+
+		 .results.active .name {
+		    color: black;
+		}
+
+		.results .name {
+		    font-size: 20px;
+		    line-height: 30px;
+		}
+
+		.results p {
+		    margin-bottom: 5px;
+		}
+	}
+}
+
+.code, .insight {	
+	display: inline-block;
+	vertical-align: top;
+}
+
+.code, .insight {
+	width: (100% / 2);
+	height: 100%;	
+}

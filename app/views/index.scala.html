@@ -1,13 +1,41 @@
 @(implicit request: RequestHeader)
 
 @main("Hey") {
-	<form action="@routes.Application.eval.webSocketURL()">
-		<p>say hi</p>
-		<input name="firstName">
-		<input name="lastName">
-		<input type="submit">
-		<span class="result">result</span>
-	</form>
-}{
-	<script src="@routes.Assets.at("javascripts/chat.js")"></script>
+<div class="escritoire" ng-controller="CodeCtrl">
+    <header>
+        <nav>
+            <typeahead class="search" items="all"
+                term="term" search="search(term)" select="select(item)">
+                <div class="doc">
+                    <h3 ng-show="hasDocs()">Doc</h3>
+                    <ul>
+                        <li typeahead-item="doc" ng-repeat="doc in docs" class="results">
+                            <span class="class">{{doc.class}}</span>
+                            <span class="fun">{{doc.fun}}</span>
+                            <span class="signature">{{doc.signature}}</span>
+                            <textarea ui-codemirror="options3" ng-model="doc.code"></textarea>
+                        </li>
+                    </ul>
+                </div>
+                <div class="snippet">
+                    <h3 ng-show="hasSnippets()">Snippet</h3>
+                    <ul>
+                        <li typeahead-item="snippet" ng-repeat="snippet in snippets" class="results">
+                            <textarea ui-codemirror="options3" ng-model="snippet.code"></textarea>
+                        </li>
+                    </ul>
+                </div>
+            </typeahead>
+        </nav>
+    </header>
+
+    <div class="app">
+        <div class="code">
+            <textarea ui-codemirror="options" ng-model="code"></textarea>
+        <!-- display: inline-block is space dependent-->
+        </div><div class="insight" ng-class="insightState">
+            <textarea ui-codemirror="options2" ng-model="insightCode"></textarea>
+        </div>
+    </div>
+</div>
 }
