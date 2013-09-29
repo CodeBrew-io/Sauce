@@ -1,8 +1,10 @@
 import sbt._
 
 object Dependencies {
-	val akkaVersion = "2.2.1"
-	val akka = "com.typesafe.akka" %% "akka-actor" % akkaVersion
+	// val akkaVersion = "2.2.1"
+	// val akka = "com.typesafe.akka" %% "akka-actor" % akkaVersion
+
+	val insight = "com.github.jedesah" %% "codesheet-api" % "0.2-RC1"
 
 	private val finagleVer = "6.5.0"
 	lazy val thrift = "org.apache.thrift" % "libthrift" % "0.8.0"

@@ -14,5 +14,5 @@ object EvalService {
     .hostConnectionLimit(1)
     .build()
 
-  lazy val client = new HelloUser.FinagledClient(service)
+  lazy val client = new Insight.FinagledClient(service)
 }

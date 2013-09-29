@@ -21,19 +21,20 @@ object Application extends Controller {
   implicit val timeout = Timeout(5 seconds)
 
   def index = Action { implicit request =>
-    Ok(views.html.index(request))
+    Ok(views.html.index())
   }
 
   def eval = WebSocket.using[JsValue] { implicit request =>
     val (enumerator, channel) = Concurrent.broadcast[JsValue]
-
     val in = Iteratee.foreach[JsValue](content => {
-      val firstName = (content \ "firstName").as[String]
-      val lastName = (content \ "lastName").as[String]
-
-      EvalService.client.hello(User(firstName, lastName)).map(r => {
-        println(r)
-        channel.push(JsObject(Seq("response" -> JsString(r))))
+      val code = (content \ "code").as[String]
+      val callback = (content \ "callback_id").as[Int]
+      
+      EvalService.client.eval(code).map(r => {
+        channel.push(JsObject(Seq(
+          "response" -> JsArray(r.map(s => JsString(s))),
+          "callback_id" -> JsNumber(callback)
+        )))
       })
     }) 
     (in, enumerator)

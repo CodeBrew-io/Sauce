@@ -3,6 +3,8 @@ package eval
 
 import api._
 
+import com.github.jedesah.codesheet.api.ScalaCodeSheet
+
 import com.twitter._
 import util.Future
 import finagle._
@@ -13,11 +15,11 @@ import builder.Server
 import org.apache.thrift.protocol.TBinaryProtocol
 import java.net.InetSocketAddress
 
-object HelloServer {
+object InsightServer {
 	var server = Option.empty[Server]
 	def start() {
 		val protocol = new TBinaryProtocol.Factory()
-		val serverService = new HelloUser.FinagledService(new HelloUserImpl, protocol)
+		val serverService = new Insight.FinagledService(new InsightImpl, protocol)
 		val address = new InetSocketAddress(Config.host, Config.port)
 
 		val s = ServerBuilder()
@@ -36,14 +38,12 @@ object HelloServer {
 	}
 }
 
-class HelloUserImpl extends HelloUser.FutureIface {
-  def hello(user: User): Future[String] = {
-  	val ret = "hello " + user
-  	println(ret)
-    Future.value(ret)
-  }
+class InsightImpl extends Insight.FutureIface {
+	def eval(code: String): Future[List[String]] = {
+		Future.value(ScalaCodeSheet.computeResults(code))
+	}
 }
 
 object Main extends App {
-	HelloServer.start()
+	InsightServer.start()
 }

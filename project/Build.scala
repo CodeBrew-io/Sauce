@@ -8,20 +8,21 @@ object ApplicationBuild extends Build {
 
   val api = Project(
     id = "api",
-    base = file("modules/api"),
+    base = file("api"),
     settings = Project.defaultSettings ++ Settings.default ++ Settings.scrooge ++ Seq(
       name := "api",
-      playAssetsDirectories := Seq()
+      playAssetsDirectories := Seq() // no livereload
     )
   )
 
   val eval = Project(
     id = "eval",
-    base = file("modules/eval"),
+    base = file("eval"),
     settings = Project.defaultSettings ++ Settings.default ++ Seq(
       name := "eval",
-      libraryDependencies += finableOstrich,
-      playAssetsDirectories := Seq()
+      resolvers := Seq("gui maven" at "http://masseguillaume.github.io/maven"),
+      libraryDependencies ++= Seq(finableOstrich, insight),
+      playAssetsDirectories := Seq() // no livereload
     )
   ) dependsOn( api )
 
@@ -29,6 +30,5 @@ object ApplicationBuild extends Build {
     "server", 
     Settings.appVersion, 
     frontEnd ++ test
-  ).settings(Settings.default: _*).
-    dependsOn(api)
+  ).settings(Settings.default: _*).dependsOn(api)
 }
