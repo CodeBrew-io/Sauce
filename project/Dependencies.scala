@@ -1,16 +1,13 @@
 import sbt._
 
 object Dependencies {
-	// val akkaVersion = "2.2.1"
-	// val akka = "com.typesafe.akka" %% "akka-actor" % akkaVersion
-
 	val insight = "com.github.jedesah" %% "codesheet-api" % "0.2-RC1"
 
 	private val finagleVer = "6.5.0"
 	lazy val thrift = "org.apache.thrift" % "libthrift" % "0.8.0"
 	val finagleCore = "com.twitter" %% "finagle-core" % finagleVer
 	val finagleThrift = "com.twitter"  %% "finagle-thrift" % finagleVer
-	val finableOstrich = "com.twitter" %% "finagle-ostrich4" % finagleVer
+	//val finableOstrich = "com.twitter" %% "finagle-ostrich4" % finagleVer
 	val scroogeRuntime = "com.twitter" %% "scrooge-runtime" % "3.9.0"
 
 	val scroogeStack = Seq(  

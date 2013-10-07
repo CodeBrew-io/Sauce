@@ -1,7 +1,7 @@
 package ca.polymtl.log4900
 package eval
 
-import api._
+import api.eval._
 
 import com.github.jedesah.codesheet.api.ScalaCodeSheet
 
@@ -24,16 +24,14 @@ object InsightServer {
 
 		val s = ServerBuilder()
 			.codec(ThriftServerFramedCodec())
-			.name("binary_service")
+			.name("insight-service")
 			.bindTo(address)
 			.build(serverService)
 
-		println("+++Server Started+++")
 		server = Some(s)
 	}
 
 	def stop(){
-		println("---Server Stoped---")
 		server.map(_.close())
 	}
 }
@@ -46,4 +44,5 @@ class InsightImpl extends Insight.FutureIface {
 
 object Main extends App {
 	InsightServer.start()
+	Register.ready()
 }
