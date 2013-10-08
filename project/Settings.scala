@@ -9,11 +9,23 @@ object Settings {
 		version := appVersion
 	)
 
-	// thrift
+	// scrooge
 	import com.twitter.scrooge._
 	import ScroogeSBT._
 	lazy val scrooge = Seq(
     	scroogeBuildOptions := Seq("--ostrich","--finagle"),
     	libraryDependencies ++= Dependencies.scroogeStack
     ) ++ ScroogeSBT.newSettings
+
+	import play.Keys._
+    val noplay = Seq(
+    	// no typescript
+		requireJs := Seq(),
+		requireJsFolder := "",
+		requireJsShim := "",
+		requireNativePath := None,
+
+		// no livereload
+		playAssetsDirectories := Seq() 
+    )
 }

@@ -1,5 +1,4 @@
-# Deploy locally
+# typescript
 
-* scrooge-sbt-plugin scrooge-runtime
-* https://github.com/jamesward/play-auto-refresh
-* https://github.com/mumoshu/play2-typescript
+* files in app/assets/javascript/*.ts
+* <script src='@routes.Assets.at("javascript/app.js")'></script>
