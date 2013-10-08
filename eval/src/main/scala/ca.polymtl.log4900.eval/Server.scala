@@ -38,7 +38,7 @@ object InsightServer {
 
 class InsightImpl extends Insight.FutureIface {
 	def eval(code: String): Future[List[String]] = {
-		Future.value(ScalaCodeSheet.computeResults(code))
+		Future.value(ScalaCodeSheet.computeResults(code, false).userRepr.split('\n').toList)
 	}
 }
 
