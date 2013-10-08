@@ -8,10 +8,9 @@
                     <h3 ng-show="hasDocs()">Doc</h3>
                     <ul>
                         <li typeahead-item="doc" ng-repeat="doc in docs" class="results">
-                            <span class="class">{{doc.class}}</span>
-                            <span class="fun">{{doc.fun}}</span>
+                            <span class="class">{{doc.qualifiedName}}</span>
                             <span class="signature">{{doc.signature}}</span>
-                            <textarea ui-codemirror="options3" ng-model="doc.code"></textarea>
+                            <textarea ui-codemirror="options3" ng-model="doc.comment.example"></textarea>
                         </li>
                     </ul>
                 </div>

@@ -6,29 +6,35 @@ object ApplicationBuild extends Build {
 
   import Dependencies._
 
-  val api = Project(
-    id = "api",
-    base = file("api"),
-    settings = Project.defaultSettings ++ Settings.default ++ Settings.scrooge ++ Seq(
-      name := "api",
-      playAssetsDirectories := Seq() // no livereload
+  val evalApi = Project(
+    id = "eval-api",
+    base = file("eval-api"),
+    settings = Settings.scrooge ++ Seq(
+      name := "eval-api"
+    )
+  )
+
+  val lookupApi = Project(
+    id = "lookup-api",
+    base = file("lookup-api"),
+    settings = Settings.scrooge ++ Seq(
+      name := "lookup-api"
     )
   )
 
   val eval = Project(
     id = "eval",
     base = file("eval"),
-    settings = Project.defaultSettings ++ Settings.default ++ Seq(
+    settings = Project.defaultSettings ++ Settings.default ++ Settings.noplay ++ Seq(
       name := "eval",
       resolvers := Seq("gui maven" at "http://masseguillaume.github.io/maven"),
-      libraryDependencies ++= Seq(finableOstrich, insight),
-      playAssetsDirectories := Seq() // no livereload
+      libraryDependencies += insight
     )
-  ) dependsOn( api )
+  ).dependsOn(evalApi, lookupApi)
 
   val main = play.Project(
     "server", 
     Settings.appVersion, 
     frontEnd ++ test
-  ).settings(Settings.default: _*).dependsOn(api)
+  ).settings(Settings.default: _*).dependsOn(evalApi, lookupApi)
 }

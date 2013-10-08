@@ -7,13 +7,6 @@ app.controller('CodeCtrl', function CodeCtrl($scope, $timeout, snippets, scalado
     $scope.snippets = [];
 
     $scope.search = function(term){
-      if("map" !== term) {
-        $scope.docs = [];
-        $scope.snippets = [];
-        $scope.all = [];
-        return;
-      }
-
       $scope.docs = scaladoc.query(term);
       $scope.snippets = snippets.query(term);
       $scope.all = $scope.docs.concat($scope.snippets);

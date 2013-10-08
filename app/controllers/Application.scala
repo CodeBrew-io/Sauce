@@ -29,12 +29,14 @@ object Application extends Controller {
     val in = Iteratee.foreach[JsValue](content => {
       val code = (content \ "code").as[String]
       val callback = (content \ "callback_id").as[Int]
-      
-      EvalService.client.eval(code).map(r => {
-        channel.push(JsObject(Seq(
-          "response" -> JsArray(r.map(s => JsString(s))),
-          "callback_id" -> JsNumber(callback)
-        )))
+
+      Registry.getEval.map(service => {
+        service.eval(code).map(result =>{
+          channel.push(JsObject(Seq(
+            "response" -> JsArray(result.map(s => JsString(s))),
+            "callback_id" -> JsNumber(callback)
+          )))
+        })
       })
     }) 
     (in, enumerator)
