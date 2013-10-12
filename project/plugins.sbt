@@ -13,3 +13,5 @@ addSbtPlugin("com.twitter" %% "scrooge-sbt-plugin" % "3.9.0")
 addSbtPlugin("com.jamesward" %% "play-auto-refresh" % "0.0.5")
 
 addSbtPlugin("com.github.mumoshu" % "play2-typescript" % "0.2-RC10")
+
+addSbtPlugin("org.scala-sbt.plugins" % "sbt-onejar" % "0.8")
