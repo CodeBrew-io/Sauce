@@ -1,6 +1,7 @@
 import sbt._
 import Keys._
 import play.Project._
+import com.github.retronym.SbtOneJar._
 
 object ApplicationBuild extends Build {
 
@@ -10,7 +11,8 @@ object ApplicationBuild extends Build {
     id = "eval-api",
     base = file("eval-api"),
     settings = Settings.scrooge ++ Seq(
-      name := "eval-api"
+      name := "eval-api",
+      exportJars := true
     )
   )
 
@@ -18,20 +20,21 @@ object ApplicationBuild extends Build {
     id = "lookup-api",
     base = file("lookup-api"),
     settings = Settings.scrooge ++ Seq(
-      name := "lookup-api"
+      name := "lookup-api",
+      exportJars := true
     )
   )
 
-  val eval = Project(
-    id = "eval",
+  val scalaEval = Project(
+    id = "scalaEval",
     base = file("eval"),
     settings = Project.defaultSettings ++ Settings.default ++ Settings.noplay ++ Seq(
       name := "eval",
       resolvers := Seq("gui maven" at "http://masseguillaume.github.io/maven"),
       libraryDependencies += insight
-    )
+    ) ++ oneJarSettings
   ).dependsOn(evalApi, lookupApi)
-
+ 
   val main = play.Project(
     "server", 
     Settings.appVersion, 
