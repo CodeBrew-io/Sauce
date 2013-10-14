@@ -2,6 +2,34 @@
 <div class="escritoire" ng-controller="CodeCtrl">
     <header>
         <nav>
+            <div class="element" ng-click="onUserClick()">
+                <i class="icon-user icon-x"></i>
+                <span>User</span>
+                <div class="userddl" ng-show="userDropDownShow" ng-class="userDropDown">
+                    <ul>
+                        <li>
+                            <i class="icon-cog icon-x"></i>
+                            <span>Settings</span>
+                        </li>
+                        <li>
+                            <i class="icon-signin icon-x"></i>
+                            <span>Sign In</span>
+                        </li>
+                        <li>
+                            <i class="icon-signout icon-x"></i>
+                            <span>Sign Out</span>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+            <div class="element">
+                <i class="icon-book icon-x"></i>
+                <span>Browse</span>
+            </div>
+            <div class="element">
+                <i class="icon-question icon-x"></i>
+                <span>About</span>
+            </div>
             <typeahead class="search" items="all"
                 term="term" search="search(term)" select="select(item)">
                 <div class="doc">
@@ -27,15 +55,11 @@
     </header>
 
     <div class="app">
-        <div class="code" ng-class="{'expanded': insightShow==false}">
+        <div class="code">
             <textarea ui-codemirror="options" ng-model="code"></textarea>
         <!-- display: inline-block is space dependent-->
-        </div>
-        <div class="insight" ng-class="insightState" ng-show="insightShow">
+        </div><div class="insight" ng-class="insightState">
             <textarea ui-codemirror="options2" ng-model="insightCode"></textarea>
-        </div>
-        <div id="insight-expand-collapse" ng-class="{'anchorRight': insightShow==false}">
-            <i class="icon-x" ng-class="{'icon-chevron-right': insightShow==true, 'icon-chevron-left': insightShow==false}" ng-show="true" ng-click="insightToggler()"></i>
         </div>
     </div>
 </div>
