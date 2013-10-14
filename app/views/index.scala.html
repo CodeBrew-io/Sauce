@@ -27,11 +27,15 @@
     </header>
 
     <div class="app">
-        <div class="code">
+        <div class="code" ng-class="{'expanded': insightShow==false}">
             <textarea ui-codemirror="options" ng-model="code"></textarea>
         <!-- display: inline-block is space dependent-->
-        </div><div class="insight" ng-class="insightState">
+        </div>
+        <div class="insight" ng-class="insightState" ng-show="insightShow">
             <textarea ui-codemirror="options2" ng-model="insightCode"></textarea>
+        </div>
+        <div id="insight-expand-collapse" ng-class="{'anchorRight': insightShow==false}">
+            <i class="icon-x" ng-class="{'icon-chevron-right': insightShow==true, 'icon-chevron-left': insightShow==false}" ng-show="true" ng-click="insightToggler()"></i>
         </div>
     </div>
 </div>
