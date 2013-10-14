@@ -103,15 +103,6 @@ app.controller('CodeCtrl', function CodeCtrl($scope, $timeout, snippets, scalado
       readOnly: 'nocursor'
     };
   })();
-
-  /* How the InsightToggleIcon will react with the visibility of the InsightCode
-  $scope.insightToggleIcon = function(isInsightVisible) {
-    if (isInsightVisible) {
-      return 'icon-chevron-right';
-    } else {
-      return 'icon-chevron-left';
-    }
-  }*/
   
   /* Insight toggling */
   $scope.insightToggler = function() {
