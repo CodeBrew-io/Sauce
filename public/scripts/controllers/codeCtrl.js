@@ -36,7 +36,7 @@ app.controller('CodeCtrl', function CodeCtrl($scope, $timeout, snippets, scalado
     $scope.cmLeft = null;
     $scope.cmRight = null;
 
-    $scope.showInsight = false;
+    $scope.insightShow = true;
 
     $scope.options = {
       lineNumbers: true,
@@ -61,7 +61,7 @@ app.controller('CodeCtrl', function CodeCtrl($scope, $timeout, snippets, scalado
 
         // }, 1000);
 
-        $scope.insightCode = insight($scope.code);
+        //$scope.insightCode = insight($scope.code);
       },
       onScroll: function(cm) {
         if ($scope.cmLeft === null) {
@@ -103,31 +103,18 @@ app.controller('CodeCtrl', function CodeCtrl($scope, $timeout, snippets, scalado
       readOnly: 'nocursor'
     };
   })();
-  
-  (function() { /* Insight toggling */
-    $scope.insightToggler = function() {
 
-      $scope.showInsight = !$scope.showInsight;
-
-
-      var wrapCmRight = $scope.cmRight.getWrapperElement();
-      var codeEditor = document.getElementById('codeEditor');
-      var toggleIcon = document.getElementById('insight-expand-collapse');
-      var insightToggleIcon = document.getElementById('insightToggleIcon');
-      if (wrapCmRight.style.visibility == "") {
-        wrapCmRight.style.visibility = 'hidden'; 
-        codeEditor.setAttribute('style', 'width:100%;');
-        toggleIcon.setAttribute('class', 'anchorRight');
-        insightToggleIcon.setAttribute('class', 'icon-chevron-left icon-x');
-
-      } else {
-        var isCurrentlyVisible = wrapCmRight.style.visibility == 'visible';
-        wrapCmRight.style.visibility = isCurrentlyVisible ? 'hidden' : 'visible';
-        codeEditor.setAttribute('style', isCurrentlyVisible ? 'width:100%;' : '');
-        toggleIcon.setAttribute('class', isCurrentlyVisible ? 'anchorRight' : '');
-        insightToggleIcon.setAttribute('class', isCurrentlyVisible ? 'icon-chevron-left icon-x' : 'icon-chevron-right icon-x');
-      }
-
+  /* How the InsightToggleIcon will react with the visibility of the InsightCode
+  $scope.insightToggleIcon = function(isInsightVisible) {
+    if (isInsightVisible) {
+      return 'icon-chevron-right';
+    } else {
+      return 'icon-chevron-left';
     }
-  })();
+  }*/
+  
+  /* Insight toggling */
+  $scope.insightToggler = function() {
+      $scope.insightShow = !$scope.insightShow;
+  }
 });
