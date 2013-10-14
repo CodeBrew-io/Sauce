@@ -32,12 +32,6 @@ app.controller('CodeCtrl', function CodeCtrl($scope, $timeout, snippets, scalado
     $scope.code = "";
     $scope.insightCode = "";
 
-    /* Defining the Left and Right CodeMirroir */
-    $scope.cmLeft = null;
-    $scope.cmRight = null;
-
-    $scope.insightShow = true;
-
     $scope.options = {
       lineNumbers: true,
       mode: 'text/x-scala',
@@ -61,40 +55,14 @@ app.controller('CodeCtrl', function CodeCtrl($scope, $timeout, snippets, scalado
 
         // }, 1000);
 
-        //$scope.insightCode = insight($scope.code);
-      },
-      onScroll: function(cm) {
-        if ($scope.cmLeft === null) {
-          $scope.cmLeft = cm;
-        }
-
-        var scrollLeftInfo = cm.getScrollInfo();
-        if ($scope.cmRight !== null) {
-          $scope.cmRight.scrollTo(scrollLeftInfo['left'], scrollLeftInfo['top']);
-        }
-      },
-      onLoad: function(cm) {
-        $scope.cmLeft = cm;
+        $scope.insightCode = insight($scope.code);
       }
     };
     $scope.options2 = {
       lineNumbers: true,
       mode: 'text/x-scala',
       theme: 'solarized light',
-      readOnly: 'nocursor',
-      onScroll: function(cm) {
-        if($scope.cmRight === null) {
-          $scope.cmRight = cm;
-        }
-
-        var scrollRightInfo = cm.getScrollInfo();
-        if ($scope.cmLeft !== null) {
-          $scope.cmLeft.scrollTo(scrollRightInfo['left'], scrollRightInfo['top']);
-        }
-      },
-      onLoad: function(cm) {
-        $scope.cmRight = cm;
-      }
+      readOnly: 'nocursor'
     };
 
     $scope.options3 = {
@@ -103,9 +71,10 @@ app.controller('CodeCtrl', function CodeCtrl($scope, $timeout, snippets, scalado
       readOnly: 'nocursor'
     };
   })();
-  
-  /* Insight toggling */
-  $scope.insightToggler = function() {
-      $scope.insightShow = !$scope.insightShow;
+
+  /* This part of the code is for the User's behavior in the header of the site */
+  $scope.userDropDownShow = false;
+  $scope.onUserClick = function() {
+    $scope.userDropDownShow = !$scope.userDropDownShow;
   }
 });
