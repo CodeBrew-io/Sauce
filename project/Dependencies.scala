@@ -28,4 +28,5 @@ object Dependencies {
 
 	val specs2 = "org.specs2" %% "specs2" % "2.2.2" % "test"
 	val test = Seq(specs2)
+	val securesocial = ("securesocial" %% "securesocial" % "master-SNAPSHOT") exclude("org.scala-stm", "scala-stm_2.10.0")
 }

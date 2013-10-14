@@ -2,3 +2,7 @@
 
 * files in app/assets/javascript/*.ts
 * <script src='@routes.Assets.at("javascript/app.js")'></script>
+
+# auth
+
+* add auth from https://bitbucket.org/log4900/socialsecureproto/raw/329bc40a6eb6cdbcd70e92c92d08ded94acb5b7f/conf/securesocial.conf (private repo)
