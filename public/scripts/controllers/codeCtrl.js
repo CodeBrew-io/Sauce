@@ -32,6 +32,12 @@ app.controller('CodeCtrl', function CodeCtrl($scope, $timeout, snippets, scalado
     $scope.code = "";
     $scope.insightCode = "";
 
+    /* Defining the Left and Right CodeMirroir */
+    $scope.cmLeft = null;
+    $scope.cmRight = null;
+
+    $scope.showInsight = false;
+
     $scope.options = {
       lineNumbers: true,
       mode: 'text/x-scala',
@@ -56,13 +62,39 @@ app.controller('CodeCtrl', function CodeCtrl($scope, $timeout, snippets, scalado
         // }, 1000);
 
         $scope.insightCode = insight($scope.code);
+      },
+      onScroll: function(cm) {
+        if ($scope.cmLeft === null) {
+          $scope.cmLeft = cm;
+        }
+
+        var scrollLeftInfo = cm.getScrollInfo();
+        if ($scope.cmRight !== null) {
+          $scope.cmRight.scrollTo(scrollLeftInfo['left'], scrollLeftInfo['top']);
+        }
+      },
+      onLoad: function(cm) {
+        $scope.cmLeft = cm;
       }
     };
     $scope.options2 = {
       lineNumbers: true,
       mode: 'text/x-scala',
       theme: 'solarized light',
-      readOnly: 'nocursor'
+      readOnly: 'nocursor',
+      onScroll: function(cm) {
+        if($scope.cmRight === null) {
+          $scope.cmRight = cm;
+        }
+
+        var scrollRightInfo = cm.getScrollInfo();
+        if ($scope.cmLeft !== null) {
+          $scope.cmLeft.scrollTo(scrollRightInfo['left'], scrollRightInfo['top']);
+        }
+      },
+      onLoad: function(cm) {
+        $scope.cmRight = cm;
+      }
     };
 
     $scope.options3 = {
@@ -70,5 +102,32 @@ app.controller('CodeCtrl', function CodeCtrl($scope, $timeout, snippets, scalado
       theme: 'solarized light',
       readOnly: 'nocursor'
     };
+  })();
+  
+  (function() { /* Insight toggling */
+    $scope.insightToggler = function() {
+
+      $scope.showInsight = !$scope.showInsight;
+
+
+      var wrapCmRight = $scope.cmRight.getWrapperElement();
+      var codeEditor = document.getElementById('codeEditor');
+      var toggleIcon = document.getElementById('insight-expand-collapse');
+      var insightToggleIcon = document.getElementById('insightToggleIcon');
+      if (wrapCmRight.style.visibility == "") {
+        wrapCmRight.style.visibility = 'hidden'; 
+        codeEditor.setAttribute('style', 'width:100%;');
+        toggleIcon.setAttribute('class', 'anchorRight');
+        insightToggleIcon.setAttribute('class', 'icon-chevron-left icon-x');
+
+      } else {
+        var isCurrentlyVisible = wrapCmRight.style.visibility == 'visible';
+        wrapCmRight.style.visibility = isCurrentlyVisible ? 'hidden' : 'visible';
+        codeEditor.setAttribute('style', isCurrentlyVisible ? 'width:100%;' : '');
+        toggleIcon.setAttribute('class', isCurrentlyVisible ? 'anchorRight' : '');
+        insightToggleIcon.setAttribute('class', isCurrentlyVisible ? 'icon-chevron-left icon-x' : 'icon-chevron-right icon-x');
+      }
+
+    }
   })();
 });

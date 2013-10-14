@@ -27,11 +27,15 @@
     </header>
 
     <div class="app">
-        <div class="code">
+        <div id="codeEditor" class="code">
             <textarea ui-codemirror="options" ng-model="code"></textarea>
         <!-- display: inline-block is space dependent-->
-        </div><div class="insight" ng-class="insightState">
+        </div>
+        <div class="insight" ng-class="insightState">
             <textarea ui-codemirror="options2" ng-model="insightCode"></textarea>
+        </div>
+        <div id="insight-expand-collapse">
+            <i id="insightToggleIcon" class="icon-chevron-right icon-x" ng-show="true" ng-click="insightToggler()"></i>
         </div>
     </div>
 </div>
