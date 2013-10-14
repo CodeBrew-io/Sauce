@@ -39,5 +39,10 @@ object ApplicationBuild extends Build {
     "server", 
     Settings.appVersion, 
     frontEnd ++ test
-  ).settings(Settings.default: _*).dependsOn(evalApi, lookupApi)
+  ).settings((Settings.default ++ Seq(
+    libraryDependencies += securesocial,
+    resolvers += Resolver.url("sbt-plugin-snapshots", 
+      new URL("http://repo.scala-sbt.org/scalasbt/sbt-plugin-snapshots/"))(Resolver.ivyStylePatterns))
+  ): _*).
+  dependsOn(evalApi, lookupApi)
 }
