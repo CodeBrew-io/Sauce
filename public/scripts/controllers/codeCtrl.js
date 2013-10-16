@@ -32,6 +32,10 @@ app.controller('CodeCtrl', function CodeCtrl($scope, $timeout, snippets, scalado
     $scope.code = "";
     $scope.insightCode = "";
 
+    /* Defining the Left and Right CodeMirroir */
+    $scope.cmLeft = null;
+    $scope.cmRight = null;
+
     $scope.options = {
       fixedGutter: false,
       lineNumbers: true,
@@ -56,8 +60,20 @@ app.controller('CodeCtrl', function CodeCtrl($scope, $timeout, snippets, scalado
 
         // }, 1000);
 
-        $scope.insightCode = insight($scope.code);
+        //$scope.insightCode = insight($scope.code);
+      },
+      onScroll: function(cm) {
+        if ($scope.cmLeft === null) {
+          $scope.cmLeft = cm;
+        }
+
+        var scrollLeftInfo = cm.getScrollInfo();
+        if ($scope.cmRight !== null) {
           $scope.cmRight.scrollTo(null, scrollLeftInfo['top']);
+        }
+      },
+      onLoad: function(cm) {
+        $scope.cmLeft = cm;
       }
     };
     $scope.options2 = {
@@ -65,8 +81,20 @@ app.controller('CodeCtrl', function CodeCtrl($scope, $timeout, snippets, scalado
       lineNumbers: true,
       mode: 'text/x-scala',
       theme: 'solarized light',
-      readOnly: 'nocursor'
+      readOnly: 'nocursor',
+      onScroll: function(cm) {
+        if($scope.cmRight === null) {
+          $scope.cmRight = cm;
+        }
+
+        var scrollRightInfo = cm.getScrollInfo();
+        if ($scope.cmLeft !== null) {
           $scope.cmLeft.scrollTo(null, scrollRightInfo['top']);
+        }
+      },
+      onLoad: function(cm) {
+        $scope.cmRight = cm;
+      }
     };
 
     $scope.options3 = {
@@ -75,11 +103,11 @@ app.controller('CodeCtrl', function CodeCtrl($scope, $timeout, snippets, scalado
       readOnly: 'nocursor'
     };
   })();
-
+  
   (function() { /* Insight toggling */
+    $scope.insightShow = true;
     $scope.insightToggler = function() {
         $scope.insightShow = !$scope.insightShow;
-    $scope.userDropDownShow = !$scope.userDropDownShow;
     }
   })();
 
