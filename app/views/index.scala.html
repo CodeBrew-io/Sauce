@@ -61,15 +61,11 @@
     </header>
 
     <div class="app">
-        <div class="code" ng-class="{'expanded': insightShow==false}">
+        <div class="code">
             <textarea ui-codemirror="options" ng-model="code"></textarea>
         <!-- display: inline-block is space dependent-->
-        </div>
-        <div class="insight" ng-class="insightState" ng-show="insightShow">
+        </div><div class="insight" ng-class="insightState">
             <textarea ui-codemirror="options2" ng-model="insightCode"></textarea>
-        </div>
-        <div id="insight-expand-collapse" ng-class="{'anchorRight': insightShow==false}">
-            <i class="icon-x" ng-class="{'icon-chevron-right': insightShow==true, 'icon-chevron-left': insightShow==false}" ng-show="true" ng-click="insightToggler()"></i>
         </div>
 
         <!-- TODO: We put the Modal code here -->
