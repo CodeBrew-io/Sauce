@@ -103,6 +103,137 @@ app.controller('CodeCtrl', function CodeCtrl($scope, $timeout, snippets, scalado
       readOnly: 'nocursor'
     };
   })();
+
+  (function() {
+    $scope.code = hereDoc(function() {
+      /*a
+a---------------========================----------------------=========================------------------------
+a
+a
+a
+a
+a
+a
+a
+a
+a
+a
+a
+a
+a
+a
+a
+a
+a
+a
+a
+a
+a
+a
+a
+a
+a
+a
+a
+a
+a
+a
+a
+a
+a
+a
+a
+a
+a
+a
+a
+a
+a
+a
+a
+a
+a
+a
+a
+a
+a
+a
+a
+a
+a
+a
+a
+a
+a
+a
+a
+      */
+    });
+    $scope.insightCode = hereDoc(function() {
+      /*a
+a---------------========================----------------------=========================------------------------
+a
+a
+a
+a
+a
+a
+a
+a
+a
+a
+a
+a
+a
+a
+a
+a
+a
+a
+a
+a
+a
+a
+a
+a
+a
+a
+a
+a
+a
+a
+a
+a
+a
+a
+a
+a
+a
+a
+a
+a
+a
+a
+a
+a
+a
+a
+a
+a
+a
+a
+a
+a
+a
+a
+a
+a
+a
+a
+a
+      */
+    });
+  })();
   
   (function() { /* Insight toggling */
     $scope.insightShow = true;
@@ -124,4 +255,89 @@ app.controller('CodeCtrl', function CodeCtrl($scope, $timeout, snippets, scalado
       $scope.modalShow = !$scope.modalShow;
     }
   })();
+
+
+  (function() { /* For the fullscreen (Zen Mode) */
+    $scope.isFullScreen = false;
+    $scope.onZenMode = function() {
+      $scope.isFullScreen = !$scope.isFullScreen;
+      $scope.FullScreen.toggle();
+    }
+
+    function toggleFullScreenEvent(e, scope) {
+      var code = (e.keyCode ? e.keyCode : e.which);
+      if (code == 122) {
+        scope.onZenMode();
+      }
+    }
+
+    document.addEventListener("keyup", (function(e) {
+        $scope.$apply(function () {
+          toggleFullScreenEvent(e, $scope);
+          console.log('keyup');
+        });
+    }), false);
+
+    $scope.FullScreen = (function()
+    {
+            var version = "0.1";
+            var events = {};
+            
+            function FullScreen()
+            {
+
+            }
+            
+            FullScreen.toggle = function(element){
+                    if(FullScreen.isFullScreen())
+                            return FullScreen.cancelFullScreen();
+                    else
+                            return FullScreen.requestFullScreen(element);
+            };
+            
+            FullScreen.requestFullScreen = function(element)
+            {
+                    if(element == null)
+                            element = document.documentElement;
+                    
+                    if (element.requestFullScreen) {
+                              element.requestFullScreen();
+                    } else if (element.mozRequestFullScreen) {
+                              element.mozRequestFullScreen();
+                    } else if (element.webkitRequestFullScreen) {
+                              element.webkitRequestFullScreen();
+                    }else{
+                            return false;
+                    }
+                    return true;
+            };
+            
+            FullScreen.cancelFullScreen = function()
+            {
+                    if (document.cancelFullScreen) {
+                            document.cancelFullScreen();
+                    } else if (document.mozCancelFullScreen) {
+                              document.mozCancelFullScreen();
+                    } else if (document.webkitCancelFullScreen) {
+                              document.webkitCancelFullScreen();
+                    }else{
+                            return false;
+                    }
+                    return true;
+            };
+            
+            FullScreen.isFullScreen = function(){
+                    return ((document.fullScreenElement != undefined && document.fullScreenElement !== null) // HTML5 spec
+                            || (document.mozFullScreen != undefined && document.mozFullScreen === true) // Mozilla
+                            || (document.webkitIsFullScreen != undefined && document.webkitIsFullScreen === true)); // webkit
+            };
+            
+            return FullScreen;
+            
+    })();
+
+  })();
+
+
+
 });

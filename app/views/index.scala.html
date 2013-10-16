@@ -1,6 +1,6 @@
 @main("Hey") {
 <div class="escritoire" ng-controller="CodeCtrl">
-    <header>
+    <header ng-sjpw="isFullScreen==false">
         <nav>
             <div class="element" ng-click="onUserClick()" ng-class="{'open' : userDropDownShow==true, '' : userDropDownShow==false}">
                 <i class="icon-user icon-x"></i>
@@ -36,6 +36,10 @@
                 <i class="icon-question icon-x"></i>
                 <span>About</span>
             </div>
+            <div class="element" ng-click="onZenMode()">
+                <i class="icon-resize-full icon-x" ng-class="{'icon-resize-full': isFullScreen==false,'icon-resize-small': isFullScreen==true}"></i>
+                <span>Zen Mode</span>
+            </div>
             <typeahead class="search" items="all"
                 term="term" search="search(term)" select="select(item)">
                 <div class="doc">
@@ -59,6 +63,7 @@
             </typeahead>
         </nav>
     </header>
+
 
     <div class="app">
         <div class="code" ng-class="{'expanded': insightShow==false}">
