@@ -2,22 +2,28 @@
 <div class="escritoire" ng-controller="CodeCtrl">
     <header>
         <nav>
-            <div class="element" ng-click="onUserClick()">
+            <div class="element" ng-click="onUserClick()" ng-class="{'open' : userDropDownShow==true, '' : userDropDownShow==false}">
                 <i class="icon-user icon-x"></i>
                 <span>User</span>
-                <div class="userddl" ng-show="userDropDownShow" ng-class="userDropDown">
+                <div class="userddl" ng-show="userDropDownShow">
                     <ul>
                         <li>
-                            <i class="icon-cog icon-x"></i>
-                            <span>Settings</span>
+                            <div ng-click="showSettingsModal()">
+                                <i class="icon-cog icon-x"></i>
+                                <span>Settings</span>
+                            </div>
                         </li>
                         <li>
-                            <i class="icon-signin icon-x"></i>
-                            <span>Sign In</span>
+                            <div ng-click="showSettingsModal()">
+                                <i class="icon-signin icon-x"></i>
+                                <span>Sign In</span>
+                            </div>
                         </li>
                         <li>
-                            <i class="icon-signout icon-x"></i>
-                            <span>Sign Out</span>
+                            <div ng-click="showSettingsModal()">
+                                <i class="icon-signout icon-x"></i>
+                                <span>Sign Out</span>
+                            </div>
                         </li>
                     </ul>
                 </div>
@@ -55,12 +61,18 @@
     </header>
 
     <div class="app">
-        <div class="code">
+        <div class="code" ng-class="{'expanded': insightShow==false}">
             <textarea ui-codemirror="options" ng-model="code"></textarea>
         <!-- display: inline-block is space dependent-->
-        </div><div class="insight" ng-class="insightState">
+        </div>
+        <div class="insight" ng-class="insightState" ng-show="insightShow">
             <textarea ui-codemirror="options2" ng-model="insightCode"></textarea>
         </div>
+        <div id="insight-expand-collapse" ng-class="{'anchorRight': insightShow==false}">
+            <i class="icon-x" ng-class="{'icon-chevron-right': insightShow==true, 'icon-chevron-left': insightShow==false}" ng-show="true" ng-click="insightToggler()"></i>
+        </div>
+
+        <!-- TODO: We put the Modal code here -->
     </div>
 </div>
 }
