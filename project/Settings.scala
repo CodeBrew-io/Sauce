@@ -1,13 +1,13 @@
 import sbt._
 import Keys._
 
+import com.typesafe.sbt.SbtGit._
+
 object Settings {
-	val appVersion = "0.1.0-SNAPSHOT"
 	val default = Seq(
 		scalaVersion := "2.10.3",
-		organization := "ca.polymtl.log4900",
-		version := appVersion
-	)
+		organization := "ca.polymtl.log4900"
+	) ++ versionWithGit
 
 	// no play
 	import play.Keys._

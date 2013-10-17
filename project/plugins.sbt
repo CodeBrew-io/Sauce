@@ -14,4 +14,6 @@ addSbtPlugin("com.jamesward" %% "play-auto-refresh" % "0.0.5")
 
 addSbtPlugin("com.github.mumoshu" % "play2-typescript" % "0.2-RC10")
 
-addSbtPlugin("org.scala-sbt.plugins" % "sbt-onejar" % "0.8")
+addSbtPlugin("com.typesafe.sbt" % "sbt-native-packager" % "0.6.2")
+
+addSbtPlugin("com.typesafe.sbt" % "sbt-git" % "0.6.2")
