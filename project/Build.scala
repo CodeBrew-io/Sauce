@@ -1,7 +1,8 @@
 import sbt._
 import Keys._
 import play.Project._
-import com.github.retronym.SbtOneJar._
+
+import com.typesafe.sbt.SbtNativePackager.packageArchetype
 
 object ApplicationBuild extends Build {
 
@@ -27,17 +28,17 @@ object ApplicationBuild extends Build {
 
   val scalaEval = Project(
     id = "scalaEval",
-    base = file("eval"),
+    base = file("scalaEval"),
     settings = Project.defaultSettings ++ Settings.default ++ Settings.noplay ++ Seq(
-      name := "eval",
+      name := "scalaEval",
       resolvers := Seq("gui maven" at "http://masseguillaume.github.io/maven"),
       libraryDependencies += insight
-    ) ++ oneJarSettings
+    ) ++ packageArchetype.java_application
   ).dependsOn(evalApi, lookupApi)
  
   val main = play.Project(
     "server", 
-    Settings.appVersion, 
+    "",
     frontEnd ++ test
   ).settings((Settings.default ++ Seq(
     libraryDependencies += securesocial,
