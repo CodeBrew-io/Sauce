@@ -6,10 +6,23 @@ app.controller('CodeCtrl', function CodeCtrl($scope, $timeout, snippets, scalado
     $scope.docs = [];
     $scope.snippets = [];
 
+    function SetAllItems(scope) {
+      if (scope.docs.concat !== undefined && scope.docs.concat !== null) {
+        scope.all = scope.docs.concat(scope.snippets);
+      } else {
+        scope.all = scope.snippets;
+      }
+    }
+
     $scope.search = function(term){
-      $scope.docs = scaladoc.query(term);
+
+      // We make a promise with Scalex for the documentations.
+      scaladoc.query(term).then(function(data) {
+        $scope.docs = data;
+        SetAllItems($scope);
+      });
+
       $scope.snippets = snippets.query(term);
-      $scope.all = $scope.docs.concat($scope.snippets);
     };
 
     $scope.hasDocs = function(){
@@ -60,7 +73,7 @@ app.controller('CodeCtrl', function CodeCtrl($scope, $timeout, snippets, scalado
 
         // }, 1000);
 
-        //$scope.insightCode = insight($scope.code);
+        $scope.insightCode = insight($scope.code);
       },
       onScroll: function(cm) {
         if ($scope.cmLeft === null) {
@@ -125,12 +138,45 @@ app.controller('CodeCtrl', function CodeCtrl($scope, $timeout, snippets, scalado
     }
   })();
 
+  (function() { /* The Header's behavior of when the site is in ZenMode or not. */
+    $scope.isHeaderShowing = true;
+
+    $scope.onMouseEnterHeader = function() {
+      $scope.isHeaderShowing = true;
+      console.log('enter isHeaderShowing: ' + $scope.isHeaderShowing);
+    }
+
+    $scope.onMouseLeaveHeader = function() {
+      console.log('leave isHeaderShowing: ' + $scope.isHeaderShowing);
+      if ($scope.isZenMode && $scope.isHeaderShowing) {
+        $scope.isHeaderShowing = false;
+      }
+    }
+
+  })();
 
   (function() { /* For the fullscreen (Zen Mode) */
-    $scope.isFullScreen = false;
+    $scope.isZenMode = false;
     $scope.onZenMode = function() {
-      $scope.isFullScreen = !$scope.isFullScreen;
-      $scope.FullScreen.toggle();
+      $scope.isZenMode = !$scope.isZenMode;
+
+      if ($scope.isZenMode) {
+        $scope.FullScreen.requestFullScreen();
+
+        // we hide the header and the insight;
+        $scope.isHeaderShowing = false;
+        $scope.insightShow = false;
+
+
+      } else {
+        $scope.FullScreen.cancelFullScreen();
+
+        // we show the header and the insight;
+        $scope.isHeaderShowing = true;
+        $scope.insightShow = true;
+      }
+
+      $scope.code = $scope.isZenMode ? "FullScreen": "Is not FullScreen";
     }
 
     function toggleFullScreenEvent(e, scope) {
@@ -213,25 +259,21 @@ app.controller('CodeCtrl', function CodeCtrl($scope, $timeout, snippets, scalado
     $scope.editorPendingPromise = null;
 
     function sendDataToServer() {
-      console.log('Data have been sent to the server!');
       $scope.isEditorPending = false;
       $scope.editorPendingPromise = null;
     }
 
     $scope.onEditorCodeChange = function() {
-      console.log("changement dans l'éditeur de code.");
       if ($scope.isEditorPending && $scope.editorPendingPromise != null) {
         $timeout.cancel($scope.editorPendingPromise);
-        console.log('timeout canceled.');
 
         $scope.editorPendingPromise = $timeout(sendDataToServer, 2000);
       } else {
         $scope.isEditorPending = true;
         $scope.editorPendingPromise = $timeout(sendDataToServer, 2000);
-        console.log('starting the editor onchange timeout!');
       }
+      $scope.insightCode = "";
     }
   })();
-
 
 });
