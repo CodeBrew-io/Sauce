@@ -103,137 +103,6 @@ app.controller('CodeCtrl', function CodeCtrl($scope, $timeout, snippets, scalado
       readOnly: 'nocursor'
     };
   })();
-
-  (function() {
-    $scope.code = hereDoc(function() {
-      /*a
-a---------------========================----------------------=========================------------------------
-a
-a
-a
-a
-a
-a
-a
-a
-a
-a
-a
-a
-a
-a
-a
-a
-a
-a
-a
-a
-a
-a
-a
-a
-a
-a
-a
-a
-a
-a
-a
-a
-a
-a
-a
-a
-a
-a
-a
-a
-a
-a
-a
-a
-a
-a
-a
-a
-a
-a
-a
-a
-a
-a
-a
-a
-a
-a
-a
-      */
-    });
-    $scope.insightCode = hereDoc(function() {
-      /*a
-a---------------========================----------------------=========================------------------------
-a
-a
-a
-a
-a
-a
-a
-a
-a
-a
-a
-a
-a
-a
-a
-a
-a
-a
-a
-a
-a
-a
-a
-a
-a
-a
-a
-a
-a
-a
-a
-a
-a
-a
-a
-a
-a
-a
-a
-a
-a
-a
-a
-a
-a
-a
-a
-a
-a
-a
-a
-a
-a
-a
-a
-a
-a
-a
-a
-      */
-    });
-  })();
   
   (function() { /* Insight toggling */
     $scope.insightShow = true;
@@ -338,6 +207,31 @@ a
 
   })();
 
+
+  (function() { /* The pace of the keyboard before sending data to the server */
+    $scope.isEditorPending = false;
+    $scope.editorPendingPromise = null;
+
+    function sendDataToServer() {
+      console.log('Data have been sent to the server!');
+      $scope.isEditorPending = false;
+      $scope.editorPendingPromise = null;
+    }
+
+    $scope.onEditorCodeChange = function() {
+      console.log("changement dans l'éditeur de code.");
+      if ($scope.isEditorPending && $scope.editorPendingPromise != null) {
+        $timeout.cancel($scope.editorPendingPromise);
+        console.log('timeout canceled.');
+
+        $scope.editorPendingPromise = $timeout(sendDataToServer, 2000);
+      } else {
+        $scope.isEditorPending = true;
+        $scope.editorPendingPromise = $timeout(sendDataToServer, 2000);
+        console.log('starting the editor onchange timeout!');
+      }
+    }
+  })();
 
 
 });

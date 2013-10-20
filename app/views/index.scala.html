@@ -67,11 +67,12 @@
 
     <div class="app">
         <div class="code" ng-class="{'expanded': insightShow==false}">
-            <textarea ui-codemirror="options" ng-model="code"></textarea>
+            <textarea ui-codemirror="options" ng-model="code" ng-change="onEditorCodeChange()" ></textarea>
         <!-- display: inline-block is space dependent-->
         </div>
-        <div class="insight" ng-class="insightState" ng-show="insightShow">
+        <div class="insight" ng-class="{'' : isEditorPending==false, 'fetching': isEditorPending==true}" ng-show="insightShow">
             <textarea ui-codemirror="options2" ng-model="insightCode"></textarea>
+            <i class="icon-spinner icon-spin icon-4x" ng-show="isEditorPending"></i>
         </div>
         <div id="insight-expand-collapse" ng-class="{'anchorRight': insightShow==false}">
             <i class="icon-x" ng-class="{'icon-chevron-right': insightShow==true, 'icon-chevron-left': insightShow==false}" ng-show="true" ng-click="insightToggler()"></i>

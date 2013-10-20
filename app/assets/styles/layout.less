@@ -168,6 +168,24 @@ div#insight-expand-collapse.anchorRight {
 }
 
 
-.insight .CodeMirror-vscrollbar {
-	visibility: hidden;
+.insight {
+
+	.CodeMirror-vscrollbar {
+		visibility: hidden;
+	}
+
+	i.icon-4x {
+		position: fixed;
+		left: (100% * 3) / 4;
+		top: (100% / 2);
+		color: black;
+		z-index: 1500;
+	}
+}
+
+.insight.view-disabled {
+	display: block;
+	background-color: black;
+	opacity: 0.9;
+	z-index: 1000;
 }
