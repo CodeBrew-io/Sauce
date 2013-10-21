@@ -15,6 +15,7 @@ import builder.Server
 import org.apache.thrift.protocol.TBinaryProtocol
 import java.net.InetSocketAddress
 import java.io.{ File, FileOutputStream }
+import java.lang.management.ManagementFactory
 
 object InsightServer {
 	var server = Option.empty[Server]
@@ -39,10 +40,15 @@ object InsightServer {
 	}
 
 	private def createRunningPid() = {
-		java.lang.management.ManagementFactory.getRuntimeMXBean.getName.split('@').headOption.map { pid =>
-			val pidFile = new File(".", "RUNNING_PID")
+		for {
+			pid <- ManagementFactory.getRuntimeMXBean.getName.split('@').headOption
+			userDir <- Option(System.getProperty("user.dir")) } {
+
+			val pidFile = new File(userDir, "RUNNING_PID")
+			println(userDir)
 			if (pidFile.exists) {
-				println("This application is already running (Or delete " + pidFile.getAbsolutePath + " file).")
+				println("This application is already running (Or delete " + 
+					pidFile.getAbsolutePath + " file).")
 				System.exit(-1)
 			}
 

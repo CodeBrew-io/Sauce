@@ -2,7 +2,9 @@ import sbt._
 import Keys._
 import play.Project._
 
-import com.typesafe.sbt.SbtNativePackager.packageArchetype
+import com.typesafe.sbt._
+import SbtNativePackager._
+import packager.Keys._
 
 import com.jamesward.play.BrowserNotifierPlugin._
 
@@ -33,11 +35,12 @@ object ApplicationBuild extends Build {
   lazy val scalaEval = Project(
     id = "scalaEval",
     base = file("scalaEval"),
-    settings = Settings.default ++ Seq(
+    settings = Settings.default ++ packageArchetype.java_application ++ Seq(
       name := "scalaEval",
       resolvers := Seq("gui maven" at "http://masseguillaume.github.io/maven"),
-      libraryDependencies += insight
-    ) ++ packageArchetype.java_application
+      libraryDependencies += insight,
+      bashScriptExtraDefines += """addJava "-Duser.dir=$(cd "${app_home}/.."; pwd -P)"\n"""
+    ) 
   ) dependsOn(evalApi, lookupApi)
  
   lazy val web = Project(
