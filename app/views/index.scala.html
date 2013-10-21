@@ -1,28 +1,43 @@
+@(user: Option[securesocial.core.Identity])(implicit request: RequestHeader)
+@import securesocial.core.IdentityProvider
+
 @main("Hey") {
 <div class="escritoire" ng-controller="CodeCtrl">
     <header>
         <nav>
-            <typeahead class="search" items="all"
-                term="term" search="search(term)" select="select(item)">
-                <div class="doc">
-                    <h3 ng-show="hasDocs()">Doc</h3>
-                    <ul>
-                        <li typeahead-item="doc" ng-repeat="doc in docs" class="results">
-                            <span class="class">{{doc.qualifiedName}}</span>
-                            <span class="signature">{{doc.signature}}</span>
-                            <textarea ui-codemirror="options3" ng-model="doc.comment.example"></textarea>
-                        </li>
-                    </ul>
-                </div>
-                <div class="snippet">
-                    <h3 ng-show="hasSnippets()">Snippet</h3>
-                    <ul>
-                        <li typeahead-item="snippet" ng-repeat="snippet in snippets" class="results">
-                            <textarea ui-codemirror="options3" ng-model="snippet.code"></textarea>
-                        </li>
-                    </ul>
-                </div>
-            </typeahead>
+            <ul>
+                <li>
+                    @user.map{ u => 
+                        <h1>@u.email</h1> 
+                    }.getOrElse{
+                        <h1><a href="/login">Login</a></h1>
+                    }
+                </li>
+                <li>
+                    <typeahead class="search" items="all"
+                        term="term" search="search(term)" select="select(item)">
+                        <div class="doc">
+                            <h3 ng-show="hasDocs()">Doc</h3>
+                            <ul>
+                                <li typeahead-item="doc" ng-repeat="doc in docs" class="results">
+                                    <span class="class">{{doc.qualifiedName}}</span>
+                                    <span class="signature">{{doc.signature}}</span>
+                                    <textarea ui-codemirror="options3" ng-model="doc.comment.example"></textarea>
+                                </li>
+                            </ul>
+                        </div>
+                        <div class="snippet">
+                            <h3 ng-show="hasSnippets()">Snippet</h3>
+                            <ul>
+                                <li typeahead-item="snippet" ng-repeat="snippet in snippets" class="results">
+                                    <textarea ui-codemirror="options3" ng-model="snippet.code"></textarea>
+                                </li>
+                            </ul>
+                        </div>
+                    </typeahead>
+                </li>
+            </ul>
+            
         </nav>
     </header>
 
