@@ -14,10 +14,13 @@ import builder.Server
 
 import org.apache.thrift.protocol.TBinaryProtocol
 import java.net.InetSocketAddress
+import java.io.{ File, FileOutputStream }
 
 object InsightServer {
 	var server = Option.empty[Server]
 	def start() {
+		createRunningPid()
+
 		val protocol = new TBinaryProtocol.Factory()
 		val serverService = new Insight.FinagledService(new InsightImpl, protocol)
 		val address = new InetSocketAddress(Config.host, Config.port)
@@ -33,6 +36,23 @@ object InsightServer {
 
 	def stop(){
 		server.map(_.close())
+	}
+
+	private def createRunningPid() = {
+		java.lang.management.ManagementFactory.getRuntimeMXBean.getName.split('@').headOption.map { pid =>
+			val pidFile = new File(".", "RUNNING_PID")
+			if (pidFile.exists) {
+				println("This application is already running (Or delete " + pidFile.getAbsolutePath + " file).")
+				System.exit(-1)
+			}
+
+			new FileOutputStream(pidFile).write(pid.getBytes)
+			Runtime.getRuntime.addShutdownHook(new Thread {
+				override def run {
+					pidFile.delete()
+				}
+			})
+		}
 	}
 }
 
