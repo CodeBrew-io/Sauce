@@ -4,11 +4,15 @@ import play.Project._
 
 import com.typesafe.sbt.SbtNativePackager.packageArchetype
 
+import com.jamesward.play.BrowserNotifierPlugin._
+
+import com.github.mumoshu.play2.typescript.TypeScriptPlugin._
+
 object ApplicationBuild extends Build {
 
   import Dependencies._
 
-  val evalApi = Project(
+  lazy val evalApi = Project(
     id = "eval-api",
     base = file("eval-api"),
     settings = Settings.scrooge ++ Seq(
@@ -17,7 +21,7 @@ object ApplicationBuild extends Build {
     )
   )
 
-  val lookupApi = Project(
+  lazy val lookupApi = Project(
     id = "lookup-api",
     base = file("lookup-api"),
     settings = Settings.scrooge ++ Seq(
@@ -26,24 +30,24 @@ object ApplicationBuild extends Build {
     )
   )
 
-  val scalaEval = Project(
+  lazy val scalaEval = Project(
     id = "scalaEval",
     base = file("scalaEval"),
-    settings = Project.defaultSettings ++ Settings.default ++ Settings.noplay ++ Seq(
+    settings = Settings.default ++ Seq(
       name := "scalaEval",
       resolvers := Seq("gui maven" at "http://masseguillaume.github.io/maven"),
       libraryDependencies += insight
     ) ++ packageArchetype.java_application
-  ).dependsOn(evalApi, lookupApi)
+  ) dependsOn(evalApi, lookupApi)
  
-  val main = play.Project(
-    "server", 
-    "",
-    frontEnd ++ test
-  ).settings((Settings.default ++ Seq(
-    libraryDependencies += securesocial,
-    resolvers += Resolver.url("sbt-plugin-snapshots", 
-      new URL("http://repo.scala-sbt.org/scalasbt/sbt-plugin-snapshots/"))(Resolver.ivyStylePatterns))
-  ): _*).
-  dependsOn(evalApi, lookupApi)
+  lazy val web = Project(
+    id = "web",
+    base = file("web"),
+    settings = Settings.default ++ playScalaSettings ++ typescript ++ Seq(
+      libraryDependencies ++= Seq(securesocial) ++ frontEnd ++ test,
+      resolvers += Resolver.url("sbt-plugin-snapshots", 
+        new URL("http://repo.scala-sbt.org/scalasbt/sbt-plugin-snapshots/"))(Resolver.ivyStylePatterns),
+      tsOptions := Seq()
+    ) ++ livereload
+  ) dependsOn(evalApi, lookupApi)
 }
