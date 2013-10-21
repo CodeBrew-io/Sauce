@@ -57,22 +57,6 @@ app.controller('CodeCtrl', function CodeCtrl($scope, $timeout, snippets, scalado
       smartIndent: false,
       autofocus: true,
       onChange: function(cm,event) {
-
-        // $scope.insightState = 'fetching';
-        // if($scope.timer) {
-        //   $timeout.cancel($scope.timer);
-        // }
-        // $scope.timer = $timeout(function(){
-        //   $scope.insightState = '';
-
-        //   var res = [];
-        //   $scope.code.split('\n').forEach(function(line){
-        //     res.push(changes[line]);
-        //   })
-        //   $scope.insightCode = res.join('\n');
-
-        // }, 1000);
-
         $scope.insightCode = insight($scope.code);
       },
       onScroll: function(cm) {
@@ -175,8 +159,6 @@ app.controller('CodeCtrl', function CodeCtrl($scope, $timeout, snippets, scalado
         $scope.isHeaderShowing = true;
         $scope.insightShow = true;
       }
-
-      $scope.code = $scope.isZenMode ? "FullScreen": "Is not FullScreen";
     }
 
     function toggleFullScreenEvent(e, scope) {
