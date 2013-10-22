@@ -18,9 +18,10 @@ object Dependencies {
 	)
 
 	val frontEnd = Seq(
-		"org.webjars" % "angular-ui" % "0.4.0-1",
+		"org.webjars" % "angularjs" % "1.2.0-rc.2",
 		"org.webjars" % "bootstrap" % "3.0.0",
 		"org.webjars" % "codemirror" % "3.16",
+		"org.webjars" % "font-awesome" % "3.2.1",
 		"org.webjars" % "jquery" % "2.0.3",
 		"org.webjars" %% "webjars-play" % "2.2.0-RC1"
 	)

@@ -6,22 +6,20 @@ import play.api.libs.json._
 
 import play.api.libs.iteratee._
 import play.api.libs.iteratee.Concurrent
-
 import scala.concurrent._
-import ExecutionContext.Implicits.global
-
 import scala.concurrent.duration._
+import ExecutionContext.Implicits.global
 import akka.util.Timeout
 import akka.pattern.ask
 
 import model._
 import ca.polymtl.log4900.api._
 
-object Application extends Controller {
+object Application extends Controller with securesocial.core.SecureSocial {
   implicit val timeout = Timeout(5 seconds)
 
-  def index = Action { implicit request =>
-    Ok(views.html.index())
+  def index = UserAwareAction { implicit request =>
+    Ok(views.html.index(request.user))
   }
 
   def eval = WebSocket.using[JsValue] { implicit request =>

@@ -10,16 +10,18 @@
         <link rel='stylesheet' href='@routes.WebJarAssets.at(WebJarAssets.locate("3.0.0/css/bootstrap.min.css"))'>
         <link rel='stylesheet' href='@routes.WebJarAssets.at(WebJarAssets.locate("3.0.0/css/bootstrap-theme.min.css"))'>
         <link rel='stylesheet' href='@routes.WebJarAssets.at(WebJarAssets.locate("codemirror.css"))'>
+        <link rel='stylesheet' href='@routes.WebJarAssets.at(WebJarAssets.locate("3.2.1/css/font-awesome.css"))'>
         <link rel="stylesheet" href="@routes.Assets.at("styles/main.css")">
     </head>
     <body ng-app="protoApp">
         @content
         <script src='@routes.WebJarAssets.at(WebJarAssets.locate("2.0.3/jquery.min.js"))'></script>
         <script src='@routes.WebJarAssets.at(WebJarAssets.locate("angular.js"))'></script>
-        <script src='@routes.WebJarAssets.at(WebJarAssets.locate("angular-ui.js"))'></script>
-
+        
         <script src='@routes.WebJarAssets.at(WebJarAssets.locate("codemirror.js"))'></script>
         <script src='@routes.WebJarAssets.at(WebJarAssets.locate("clike.js"))'></script>
+
+        <script src='@routes.Assets.at("scripts/directives/ui-codemirror.js")'></script>
 
         <script src='@routes.Assets.at("scripts/app.js")'></script>
         <script src='@routes.Assets.at("scripts/services/scaladoc.js")'></script>

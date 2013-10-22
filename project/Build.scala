@@ -39,7 +39,7 @@ object ApplicationBuild extends Build {
       name := "scalaEval",
       resolvers := Seq("gui maven" at "http://masseguillaume.github.io/maven"),
       libraryDependencies += insight,
-      bashScriptExtraDefines += """addJava "-Duser.dir=$(cd "${app_home}/.."; pwd -P)"\n"""
+      bashScriptExtraDefines += """addJava "-Duser.dir=$(cd "${app_home}/.."; pwd -P)" """
     ) 
   ) dependsOn(evalApi, lookupApi)
  
