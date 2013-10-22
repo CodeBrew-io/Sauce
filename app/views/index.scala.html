@@ -7,7 +7,13 @@
         <nav>
             <div class="element" ng-click="onUserClick()" ng-class="{'open' : userDropDownShow==true, '' : userDropDownShow==false}">
                 <i class="icon-user icon-x"></i>
-                <span>User</span>
+                <span>
+                    @user.map{ u => 
+                        @u.fullName 
+                    }.getOrElse{
+                        User
+                    }
+                </span>
                 <div class="userddl" ng-show="userDropDownShow">
                     <ul>
                         <li>
@@ -19,13 +25,13 @@
                         <li>
                             <div ng-click="showSettingsModal()">
                                 <i class="icon-signin icon-x"></i>
-                                <span>Sign In</span>
+                                <a href="/login">Login</a>
                             </div>
                         </li>
-                        <li>
+                        <li style="color:grey;">
                             <div ng-click="showSettingsModal()">
                                 <i class="icon-signout icon-x"></i>
-                                <span>Sign Out</span>
+                                <span>Logout</span>
                             </div>
                         </li>
                     </ul>
@@ -79,7 +85,7 @@
         </div>
         <div class="insight" ng-class="{'' : isEditorPending==false, 'fetching': isEditorPending==true}" ng-show="insightShow">
             <textarea ui-codemirror="options2" ng-model="insightCode"></textarea>
-            <i class="icon-spinner icon-spin icon-4x" ng-show="isEditorPending"></i>
+            <i class="icon-spinner icon-spin icon-3x" ng-show="isEditorPending"></i>
         </div>
         <div id="insight-expand-collapse" ng-class="{'anchorRight': insightShow==false}">
             <i class="icon-x" ng-class="{'icon-chevron-right': insightShow==true, 'icon-chevron-left': insightShow==false}" ng-show="true" ng-click="insightToggler()"></i>

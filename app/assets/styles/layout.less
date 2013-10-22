@@ -95,6 +95,15 @@ header {
 		padding-left: 10px;
 		padding-right: 10px;
 
+		a {
+			text-decoration: none;
+			color: whitesmoke;
+		}
+
+		a:hover {
+			color: @sky;
+		}
+
 		div.userddl {
 			margin-top: 2px;
 			float: left;
@@ -112,7 +121,8 @@ header {
 				text-align: left;
 			}
 
-			ul li:hover {
+			ul li:hover,
+			ul li:hover a {
 				color: @sky;
 				background-color: @earth;
 			}
@@ -174,7 +184,7 @@ div#insight-expand-collapse.anchorRight {
 		visibility: hidden;
 	}
 
-	i.icon-4x {
+	i.icon-spin {
 		position: fixed;
 		left: (100% * 3) / 4;
 		top: (100% / 2);
