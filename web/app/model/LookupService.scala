@@ -18,17 +18,16 @@ import java.net.InetSocketAddress
 object LookupService {
 	var server = Option.empty[Server]
 	def start() {
-		val protocol = new TBinaryProtocol.Factory()
-		val serverService = new Lookup.FinagledService(new LookupImpl, protocol)
-		val address = new InetSocketAddress(Config.host, Config.port)
-
-		val s = ServerBuilder()
-			.codec(ThriftServerFramedCodec())
-			.name("lookup-service")
-			.bindTo(address)
-			.build(serverService)
-
-		server = Some(s)
+		server = Some(
+			ServerBuilder()
+				.codec(ThriftServerFramedCodec())
+				.name("lookup")
+				.bindTo(new InetSocketAddress("0.0.0.0", Config.port))
+				.build(new Lookup.FinagledService(
+					new LookupImpl, 
+					new TBinaryProtocol.Factory()
+				))
+		)
 	}
 
 	def stop(){
@@ -54,7 +53,7 @@ class LookupImpl extends Lookup.FutureIface {
 		    .build()
 
 		info.name match {
-			case "eval" => Registry.add(new Insight.FinagledClient(service))
+			case eval.Config.name => Registry.add(new Insight.FinagledClient(service))
 		}
 		Future.value(())
 	}

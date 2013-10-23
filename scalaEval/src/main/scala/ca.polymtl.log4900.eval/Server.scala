@@ -22,17 +22,16 @@ object InsightServer {
 	def start() {
 		createRunningPid()
 
-		val protocol = new TBinaryProtocol.Factory()
-		val serverService = new Insight.FinagledService(new InsightImpl, protocol)
-		val address = new InetSocketAddress(Config.host, Config.port)
-
-		val s = ServerBuilder()
-			.codec(ThriftServerFramedCodec())
-			.name("insight-service")
-			.bindTo(address)
-			.build(serverService)
-
-		server = Some(s)
+		server = Some(
+			ServerBuilder()
+				.codec(ThriftServerFramedCodec())
+				.name("scala-eval")
+				.bindTo(new InetSocketAddress("0.0.0.0", Config.port))
+				.build(new Insight.FinagledService(
+					new InsightImpl, 
+					new TBinaryProtocol.Factory()
+				))
+		)
 	}
 
 	def stop(){
