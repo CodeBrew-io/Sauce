@@ -1,0 +1,14 @@
+@(user: Option[securesocial.core.Identity])(implicit request: RequestHeader)
+@import securesocial.core.IdentityProvider
+
+@main("Hey") {
+<div class="escritoire" ng-controller="CodeCtrl">
+    <div class="app">
+        <div class="code">
+            <textarea ui-codemirror="options" ng-model="code"></textarea>
+        </div><div class="insight">
+            <textarea ui-codemirror="options2" ng-model="insightCode"></textarea>
+        </div>
+    </div>
+</div>
+}
