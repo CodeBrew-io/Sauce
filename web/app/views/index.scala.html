@@ -3,94 +3,12 @@
 
 @main("Hey") {
 <div class="escritoire" ng-controller="CodeCtrl">
-    <header ng-class="{'': isHeaderShowing==true, 'hidden': isHeaderShowing==false}" ng-mouseenter="onMouseEnterHeader()" ng-mouseleave="onMouseLeaveHeader()">
-        <nav>
-            <div class="element" ng-click="onUserClick()" ng-class="{'open' : userDropDownShow==true, '' : userDropDownShow==false}">
-                <i class="icon-user icon-x"></i>
-                <span>
-                    @user.map{ u => 
-                        @u.fullName 
-                    }.getOrElse{
-                        User
-                    }
-                </span>
-                <div class="userddl" ng-show="userDropDownShow">
-                    <ul>
-                        <li>
-                            <div ng-click="showSettingsModal()">
-                                <i class="icon-cog icon-x"></i>
-                                <span>Settings</span>
-                            </div>
-                        </li>
-                        <li>
-                            <div ng-click="showSettingsModal()">
-                                <i class="icon-signin icon-x"></i>
-                                <a href="/login">Login</a>
-                            </div>
-                        </li>
-                        <li style="color:grey;">
-                            <div ng-click="showSettingsModal()">
-                                <i class="icon-signout icon-x"></i>
-                                <span>Logout</span>
-                            </div>
-                        </li>
-                    </ul>
-                </div>
-            </div>
-            <div class="element">
-                <i class="icon-book icon-x"></i>
-                <span>Browse</span>
-            </div>
-            <div class="element">
-                <i class="icon-question icon-x"></i>
-                <span>About</span>
-            </div>
-            <div class="element" ng-click="onZenMode()">
-                <i class="icon-resize-full icon-x" ng-class="{'icon-resize-full': isFullScreen==false,'icon-resize-small': isFullScreen==true}"></i>
-                <span>Zen Mode</span>
-            </div>
-            
-                    <typeahead class="search" items="all"
-                        term="term" search="search(term)" select="select(item)">
-                        <div class="doc">
-                            <h3 ng-show="hasDocs()">Doc</h3>
-                            <ul>
-                                <li typeahead-item="doc" ng-repeat="doc in docs" class="results">
-                                    <span class="class">{{doc.qualifiedName}}</span>
-                                    <span class="signature">{{doc.signature}}</span>
-                                    <textarea ui-codemirror="options3" ng-model="doc.comment.example"></textarea>
-                                </li>
-                            </ul>
-                        </div>
-                        <div class="snippet">
-                            <h3 ng-show="hasSnippets()">Snippet</h3>
-                            <ul>
-                                <li typeahead-item="snippet" ng-repeat="snippet in snippets" class="results">
-                                    <textarea ui-codemirror="options3" ng-model="snippet.code"></textarea>
-                                </li>
-                            </ul>
-                        </div>
-                    </typeahead>
-                </li>
-            </ul>
-            
-        </nav>
-    </header>
-
-
     <div class="app">
-        <div class="code" ng-class="{'expanded': insightShow==false}">
-            <div class="expand-collapse" ng-class="{'anchorRight': insightShow==false}" ng-click="insightToggler()">
-                <i class="icon-x" ng-class="{'icon-chevron-right': insightShow==true, 'icon-chevron-left': insightShow==false}" ng-show="true"></i>
-            </div>
-            <textarea ui-codemirror="options" ng-model="code" ng-change="onEditorCodeChange()" ></textarea>
-        <!-- display: inline-block is space dependent-->
-        </div>
-        <div class="insight" ng-class="{'' : isEditorPending==false, 'fetching': isEditorPending==true}" ng-show="insightShow">
+        <div class="code">
+            <textarea ui-codemirror="options" ng-model="code"></textarea>
+        </div><div class="insight">
             <textarea ui-codemirror="options2" ng-model="insightCode"></textarea>
-            <i class="icon-spinner icon-spin icon-3x" ng-show="isEditorPending"></i>
         </div>
-        <!-- TODO: We put the Modal code here -->
     </div>
 </div>
 }

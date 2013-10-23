@@ -3,6 +3,7 @@ app.factory('insight', ['$q', '$rootScope', function($q, $rootScope) {
 	var socket = new WebSocket("ws://localhost:9000/eval");
 	var callbacks = {};
 	var currentCallbackId = 0;
+	var lastMessage = null;
 
 	function getCallbackId() {
 		currentCallbackId += 1;
@@ -25,6 +26,10 @@ app.factory('insight', ['$q', '$rootScope', function($q, $rootScope) {
 		listener(JSON.parse(message.data));
 	};
 
+	socket.onopen = function(){
+		socket.send(lastMessage);
+	};
+
 	return function(code){
 		var request = {};
 		var defer = $q.defer();
@@ -32,7 +37,13 @@ app.factory('insight', ['$q', '$rootScope', function($q, $rootScope) {
 		callbacks[callbackId] = defer;
 		request.callback_id = callbackId;
 		request.code = code;
-		socket.send(JSON.stringify(request));
+
+		if( socket.readyState === socket.CONNECTING ) {
+			lastMessage = JSON.stringify(request)
+		} else {
+			socket.send(JSON.stringify(request));
+		}
+		
 		return defer.promise;		  
 	}
 }]);

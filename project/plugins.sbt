@@ -3,7 +3,7 @@ logLevel := Level.Warn
 resolvers ++= Seq(
 	"Typesafe repository" at "http://repo.typesafe.com/typesafe/releases/",
 	"Sonatype OSS Snapshots Repository" at "http://oss.sonatype.org/content/groups/public",
-	"gui maven" at "http://masseguillaume.github.io/maven"
+	"codebrew's maven" at "http://http://codebrew-io.github.io/maven/"
 )
 
 addSbtPlugin("com.typesafe.play" % "sbt-plugin" % "2.2.0")

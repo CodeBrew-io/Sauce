@@ -37,9 +37,12 @@ object ApplicationBuild extends Build {
     base = file("scalaEval"),
     settings = Settings.default ++ packageArchetype.java_application ++ Seq(
       name := "scalaEval",
-      resolvers := Seq("gui maven" at "http://masseguillaume.github.io/maven"),
+      resolvers := Seq("codebrew's maven" at "http://codebrew-io.github.io/maven/"),
       libraryDependencies += insight,
-      bashScriptExtraDefines += """addJava "-Duser.dir=$(cd "${app_home}/.."; pwd -P)" """
+      bashScriptExtraDefines ++= Seq(
+        """addJava "-Duser.dir=$(cd "${app_home}/.."; pwd -P)" """,
+        """addJava "-Dio.codebrew.lookupHostname=codebrew.io" """
+      )
     ) 
   ) dependsOn(evalApi, lookupApi)
  
