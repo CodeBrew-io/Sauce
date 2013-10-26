@@ -258,4 +258,20 @@ app.controller('CodeCtrl', function CodeCtrl($scope, $timeout, snippets, scalado
     }
   })();
 
+  (function() {
+    $scope.code = hereDoc(function() {
+      /*abcdefghijklmnopqrstuvwxyz*/
+    });
+  })();
+
+  (function() { /* Make the squiggly line in the code editor for error message */
+    /*
+    var lineNumber = 0;
+    var positionInit = 0;
+    var rangeCharacters = 1;
+
+    $scope.cmLeft.addWidget("");*/
+  })();
+
+
 });
