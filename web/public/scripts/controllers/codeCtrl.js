@@ -264,16 +264,27 @@ app.controller('CodeCtrl', function CodeCtrl($scope, $timeout, snippets, scalado
   })();
 
   (function() { /* Make the squiggly line in the code editor for error message */    
-    var lineNumber = 0;
-    var positionInit = 0;
-    var rangeCharacters = 3;
+    function SetErrorSquigglyLines(lineNumber, positionInit, rangeCharacters) {
+      var squigglyElements = [];
+      var squigglyLines = ["curve-top", "curve-bottom"];
+      for (var i = 0; i < rangeCharacters; i++) {
+        var index = i%2;
 
-    var squigglyLines = ["curve-top", "curve-bottom"];
-    for (var i = 0; i < 9; i++) {
-      var index = i%2;
-      errormessage.appendSquigglyLine(squigglyLines[index]);
+        squigglyElements[i] = {
+          line: lineNumber,
+          character: i,
+          element: errormessage.createSquigglyLine(squigglyLines[index])
+        }
+
+        errormessage.waitingCodeMirror().then(function(codeMirror) {
+          var size = squigglyElements.length;
+          for (var i = 0; i < size; i++) {
+            var squigglyLine = squigglyElements[i];
+            codeMirror.addWidget({line: squigglyLine.line, ch: squigglyLine.character}, squigglyLine.element);
+          }
+        });
+      }
     }
-
   })();
 
 
