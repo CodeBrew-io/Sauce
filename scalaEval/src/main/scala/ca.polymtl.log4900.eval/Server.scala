@@ -17,6 +17,8 @@ import java.net.InetSocketAddress
 import java.io.{ File, FileOutputStream }
 import java.lang.management.ManagementFactory
 
+import scala.util.Try
+
 object InsightServer {
 	var server = Option.empty[Server]
 	def start(evalPort: Int) {
@@ -49,7 +51,7 @@ object Main extends App {
 	val evalPort = (for {
 		env <- Option(System.getProperty("io.codebrew.scalaEvalPort"))
 		port <- Try(env.toInt).toOption
-	} yield (port)).getOrElse(eval.Config.port)
+	} yield (port)).getOrElse(Config.port)
 
 	InsightServer.start(evalPort)
 	Register.ready(evalPort)
