@@ -137,7 +137,6 @@ app.controller('CodeCtrl', function CodeCtrl($scope, $timeout, snippets, scalado
         $scope.isHeaderShowing = false;
       }
     }
-
   })();
 
   (function() { /* For the fullscreen (Zen Mode) */
@@ -146,9 +145,10 @@ app.controller('CodeCtrl', function CodeCtrl($scope, $timeout, snippets, scalado
       $scope.isZenMode = !$scope.isZenMode;
 
       $scope.code = 'isZenMode: ' + $scope.isZenMode;
+      $scope.code += '\nisFullScreen: ' + $scope.FullScreen.isFullScreen();
 
       if ($scope.isZenMode) {
-        $scope.FullScreen.requestFullScreen();
+        $scope.FullScreen.requestFullScreen(null);
 
         // we hide the header and the insight;
         $scope.isHeaderShowing = false;
@@ -267,42 +267,16 @@ app.controller('CodeCtrl', function CodeCtrl($scope, $timeout, snippets, scalado
 
   (function() { /* Make the squiggly line in the code editor for error message */    
     //function SetErrorSquigglyLines(lineNumber, positionInit, rangeCharacters) {
-/*
-      var lineNumber = 0;
-      var positionInit = 0;
-      var rangeCharacters = 9;
 
-      var squigglyElements = [];
-      var squigglyLines = ["curve-top", "curve-bottom"];
-      for (var i = 0; i < rangeCharacters; i++) {
-        var index = i%2;
+var lineNumber = 0;
+var positionInit = 3;
+var rangeCharacters = 9;
 
-        squigglyElements[i] = {
-          line: lineNumber,
-          character: i + 1,
-          element: errormessage.createSquigglyLine(squigglyLines[index])
-        }
-
-        errormessage.waitingCodeMirror().then(function(codeMirror) {
-          var size = squigglyElements.length;
-          for (var i = 0; i < size; i++) {
-            var squigglyLine = squigglyElements[i];
-            codeMirror.addWidget({line: squigglyLine.line, ch: squigglyLine.character}, squigglyLine.element);
-          }
-        });
-      }
-      */
+      errormessage.waitingCodeMirror().then(function(codeMirror) {
+        var markedText = codeMirror.markText({line: lineNumber, ch: positionInit}, {line: lineNumber, ch: rangeCharacters + positionInit });
+        markedText.className = "error-underliner";
+      });
     //}
-    
-    var lineNumber = 0;
-    var positionInit = 3;
-    var rangeCharacters = 9;
-
-    errormessage.waitingCodeMirror().then(function(codeMirror) {
-      var markedText = codeMirror.markText({line: lineNumber, ch: positionInit}, {line: lineNumber, ch: rangeCharacters + positionInit });
-      markedText.className = "error-underliner";
-    });
-
   })();
 
 
