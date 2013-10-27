@@ -3,8 +3,8 @@
 
 @main("Hey") {
 <div class="escritoire" ng-controller="CodeCtrl">
-    <header ng-class="{'': isHeaderShowing==true, 'hidden': isHeaderShowing==false}" ng-mouseenter="onMouseEnterHeader()" ng-mouseleave="onMouseLeaveHeader()">
-        <nav>
+    <header ng-class="{'': isHeaderShowing==true, 'collapsed': isHeaderShowing==false}" ng-mouseenter="onMouseEnterHeader()" ng-mouseleave="onMouseLeaveHeader()">
+        <nav ng-show="isHeaderShowing">
             <div class="element" ng-click="onUserClick()" ng-class="{'open' : userDropDownShow==true, '' : userDropDownShow==false}">
                 <i class="icon-user icon-x"></i>
                 <span>
@@ -46,7 +46,7 @@
                 <span>About</span>
             </div>
             <div class="element" ng-click="onZenMode()">
-                <i class="icon-resize-full icon-x" ng-class="{'icon-resize-full': isFullScreen==false,'icon-resize-small': isFullScreen==true}"></i>
+                <i class="icon-resize-full icon-x" ng-class="{'icon-resize-full': isZenMode==false,'icon-resize-small': isZenMode==true}"></i>
                 <span>Zen Mode</span>
             </div>
             
@@ -78,7 +78,7 @@
     </header>
 
 
-    <div class="app">
+    <div class="app" ng-class="{'zen-mode': isZenMode==true}">
         <div class="code" ng-class="{'expanded': insightShow==false}">
             <div class="expand-collapse" ng-class="{'anchorRight': insightShow==false}" ng-click="insightToggler()">
                 <i class="icon-x" ng-class="{'icon-chevron-right': insightShow==true, 'icon-chevron-left': insightShow==false}" ng-show="true"></i>

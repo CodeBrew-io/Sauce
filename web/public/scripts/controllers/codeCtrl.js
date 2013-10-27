@@ -145,6 +145,8 @@ app.controller('CodeCtrl', function CodeCtrl($scope, $timeout, snippets, scalado
     $scope.onZenMode = function() {
       $scope.isZenMode = !$scope.isZenMode;
 
+      $scope.code = 'isZenMode: ' + $scope.isZenMode;
+
       if ($scope.isZenMode) {
         $scope.FullScreen.requestFullScreen();
 
@@ -164,7 +166,7 @@ app.controller('CodeCtrl', function CodeCtrl($scope, $timeout, snippets, scalado
 
     function toggleFullScreenEvent(e, scope) {
       var code = (e.keyCode ? e.keyCode : e.which);
-      if (code == 122) {
+      if (code == 122, 27) {
         scope.onZenMode();
       }
     }
@@ -264,7 +266,12 @@ app.controller('CodeCtrl', function CodeCtrl($scope, $timeout, snippets, scalado
   })();
 
   (function() { /* Make the squiggly line in the code editor for error message */    
-    function SetErrorSquigglyLines(lineNumber, positionInit, rangeCharacters) {
+    //function SetErrorSquigglyLines(lineNumber, positionInit, rangeCharacters) {
+/*
+      var lineNumber = 0;
+      var positionInit = 0;
+      var rangeCharacters = 9;
+
       var squigglyElements = [];
       var squigglyLines = ["curve-top", "curve-bottom"];
       for (var i = 0; i < rangeCharacters; i++) {
@@ -272,7 +279,7 @@ app.controller('CodeCtrl', function CodeCtrl($scope, $timeout, snippets, scalado
 
         squigglyElements[i] = {
           line: lineNumber,
-          character: i,
+          character: i + 1,
           element: errormessage.createSquigglyLine(squigglyLines[index])
         }
 
@@ -284,7 +291,18 @@ app.controller('CodeCtrl', function CodeCtrl($scope, $timeout, snippets, scalado
           }
         });
       }
-    }
+      */
+    //}
+    
+    var lineNumber = 0;
+    var positionInit = 3;
+    var rangeCharacters = 9;
+
+    errormessage.waitingCodeMirror().then(function(codeMirror) {
+      var markedText = codeMirror.markText({line: lineNumber, ch: positionInit}, {line: lineNumber, ch: rangeCharacters + positionInit });
+      markedText.className = "error-underliner";
+    });
+
   })();
 
 

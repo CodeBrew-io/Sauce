@@ -8,6 +8,10 @@ html, body, .escritoire {
 
 .app {
 	height: calc(~"100% -"@header-height);
+
+	&.zen-mode {
+		height: 100%;
+	}
 }
 
 header {
@@ -16,6 +20,10 @@ header {
 
 	height: @header-height;
 	@title-width: 40px;
+
+	&.collapsed {
+		height: 2px;
+	}
 
 	.search {
 		position: relative;
@@ -168,6 +176,10 @@ header {
 		}
 	}
 
+	.error-underliner {
+		display: inline-block;
+		border-bottom: 1px dashed red;
+	}
 
 	&.expanded {
 		width: 100%;
@@ -176,7 +188,7 @@ header {
 	.squiggly-line {
         display: inline-block;
 
-        border: solid 1px #f00;
+        border: solid 1px #5ccccc;
         border-radius: 50px;
 
         font-weight: bold;
