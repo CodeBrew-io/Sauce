@@ -18,11 +18,16 @@ import java.net.InetSocketAddress
 object LookupService {
 	var server = Option.empty[Server]
 	def start() {
+		val port = (for {
+			env <- Option(System.getProperty("io.codebrew.lookupPort"))
+			port <- Try(env.toInt).toOption
+		} yield port).getOrElse(Config.port)
+
 		server = Some(
 			ServerBuilder()
 				.codec(ThriftServerFramedCodec())
 				.name("lookup")
-				.bindTo(new InetSocketAddress("0.0.0.0", Config.port))
+				.bindTo(new InetSocketAddress(port))
 				.build(new Lookup.FinagledService(
 					new LookupImpl, 
 					new TBinaryProtocol.Factory()

@@ -39,10 +39,7 @@ object ApplicationBuild extends Build {
       name := "scalaEval",
       resolvers := Seq("codebrew's maven" at "http://codebrew-io.github.io/maven/"),
       libraryDependencies += insight,
-      bashScriptExtraDefines ++= Seq(
-        """addJava "-Duser.dir=$(cd "${app_home}/.."; pwd -P)" """,
-        """addJava "-Dio.codebrew.lookupHostname=codebrew.io" """
-      )
+      bashScriptExtraDefines += """addJava "-Duser.dir=$(cd "${app_home}/.."; pwd -P)" """
     ) 
   ) dependsOn(evalApi, lookupApi)
  
