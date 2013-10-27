@@ -1,6 +1,12 @@
 // based on http://clintberry.com/2013/angular-js-websocket-service/
-app.factory('insight', ['$q', '$rootScope', function($q, $rootScope) {
-	var socket = new WebSocket("ws://localhost:9000/eval");
+app.factory('insight', ['$q', '$rootScope', "$location", function($q, $rootScope, $location) {
+	var url;
+	if($location === "codebrew.io") {
+		url = "wss://codebrew.io/eval"
+	} else {
+		url = "ws://localhost:9000/eval"
+	}
+	var socket = new WebSocket(url);
 	var callbacks = {};
 	var currentCallbackId = 0;
 	var lastMessage = null;
