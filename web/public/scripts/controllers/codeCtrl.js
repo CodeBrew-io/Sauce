@@ -1,6 +1,6 @@
 'use strict';
 
-app.controller('CodeCtrl', function CodeCtrl($scope, $timeout, snippets, scaladoc, insight) {
+app.controller('CodeCtrl', function CodeCtrl($scope, $timeout, snippets, scaladoc, insight, errormessage) {
   (function(){ /* Doc */
 
     $scope.docs = [];
@@ -71,6 +71,7 @@ app.controller('CodeCtrl', function CodeCtrl($scope, $timeout, snippets, scalado
       },
       onLoad: function(cm) {
         $scope.cmLeft = cm;
+        errormessage.addCodeMirror(cm);
       }
     };
     $scope.options2 = {
@@ -259,18 +260,20 @@ app.controller('CodeCtrl', function CodeCtrl($scope, $timeout, snippets, scalado
   })();
 
   (function() {
-    $scope.code = hereDoc(function() {
-      /*abcdefghijklmnopqrstuvwxyz*/
-    });
+    $scope.code = hereDoc(function() {/*abcdefghijklmnopqrstuvwxyz*/});
   })();
 
-  (function() { /* Make the squiggly line in the code editor for error message */
-    /*
+  (function() { /* Make the squiggly line in the code editor for error message */    
     var lineNumber = 0;
     var positionInit = 0;
-    var rangeCharacters = 1;
+    var rangeCharacters = 3;
 
-    $scope.cmLeft.addWidget("");*/
+    var squigglyLines = ["curve-top", "curve-bottom"];
+    for (var i = 0; i < 9; i++) {
+      var index = i%2;
+      errormessage.appendSquigglyLine(squigglyLines[index]);
+    }
+
   })();
 
 

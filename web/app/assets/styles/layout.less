@@ -176,7 +176,7 @@ header {
 	.squiggly-line {
         display: inline-block;
 
-        border: solid 1px #f00;
+        border: solid 1px #5ccccc;
         border-radius: 50px;
 
         font-weight: bold;
@@ -184,13 +184,13 @@ header {
         width: 5px;
 	}
 
-	.squiggly-line curve-top {
+	.squiggly-line.curve-top {
         border-bottom: none;
         border-left: none;
         border-right: none;
 	}
 
-	.squiggly-line curve-bottom {{
+	.squiggly-line.curve-bottom {
         border-top: none;
         border-left: none;
         border-right: none;
@@ -210,11 +210,11 @@ header {
 		color: black;
 		z-index: 1500;
 	}
-}
 
-.insight.view-disabled {
-	display: block;
-	background-color: black;
-	opacity: 0.9;
-	z-index: 1000;
+	&.view-disabled {
+		display: block;
+		background-color: black;
+		opacity: 0.9;
+		z-index: 1000;
+	}
 }
