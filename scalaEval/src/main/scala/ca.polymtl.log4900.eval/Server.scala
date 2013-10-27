@@ -19,14 +19,12 @@ import java.lang.management.ManagementFactory
 
 object InsightServer {
 	var server = Option.empty[Server]
-	def start() {
-		createRunningPid()
-
+	def start(evalPort: Int) {
 		server = Some(
 			ServerBuilder()
 				.codec(ThriftServerFramedCodec())
 				.name("scala-eval")
-				.bindTo(new InetSocketAddress("0.0.0.0", Config.port))
+				.bindTo(new InetSocketAddress(evalPort))
 				.build(new Insight.FinagledService(
 					new InsightImpl, 
 					new TBinaryProtocol.Factory()
@@ -37,6 +35,24 @@ object InsightServer {
 	def stop(){
 		server.map(_.close())
 	}
+}
+
+class InsightImpl extends Insight.FutureIface {
+	def eval(code: String): Future[List[String]] = {
+		Future.value(ScalaCodeSheet.computeResults(code, false).userRepr.split('\n').toList)
+	}
+}
+
+object Main extends App {
+	createRunningPid()
+
+	val evalPort = (for {
+		env <- Option(System.getProperty("io.codebrew.scalaEvalPort"))
+		port <- Try(env.toInt).toOption
+	} yield (port)).getOrElse(eval.Config.port)
+
+	InsightServer.start(evalPort)
+	Register.ready(evalPort)
 
 	private def createRunningPid() = {
 		for {
@@ -59,15 +75,4 @@ object InsightServer {
 			})
 		}
 	}
-}
-
-class InsightImpl extends Insight.FutureIface {
-	def eval(code: String): Future[List[String]] = {
-		Future.value(ScalaCodeSheet.computeResults(code, false).userRepr.split('\n').toList)
-	}
-}
-
-object Main extends App {
-	InsightServer.start()
-	Register.ready()
 }

@@ -8,22 +8,23 @@ import builder.ClientBuilder
 import thrift.ThriftClientFramedCodec
 
 object Register {
-	def ready(): Unit = {
-		import scala.sys.process._
-		"hostname".!!.split('\n').headOption.map{ hostname =>
-			val lookupHostname = Option(System.getProperty("io.codebrew.lookupHostname")).getOrElse("localhost")
-			val service = ClientBuilder()
-				.hosts(s"${lookupHostname}:${lookup.Config.port}")
+	def ready(evalPort: Int): Unit = {
+		val lookupHostname = Option(System.getProperty("io.codebrew.lookupHostname")).getOrElse("localhost")
+		val lookupPort = (for {
+			env <- Option(System.getProperty("io.codebrew.lookupPort"))
+			port <- Try(env.toInt).toOption
+		} yield (port)).getOrElse(lookup.Config.port)
+
+		println(s"lookup is ${lookupHostname}:${lookupPort}")
+		val client = new lookup.Lookup.FinagledClient(
+			ClientBuilder()
+				.hosts(s"${lookupHostname}:${lookupPort}")
 				.codec(ThriftClientFramedCodec())
 				.hostConnectionLimit(1)
 				.build()
+		)
 
-			val client = new lookup.Lookup.FinagledClient(service)
-			client.register(lookup.ServiceInfo(
-				eval.Config.name,
-				hostname,
-				eval.Config.port
-			))
-		}
+		val evalHostname = Option(System.getProperty("io.codebrew.scalaEvalHostname")).getOrElse("localhost")
+		client.register(lookup.ServiceInfo(eval.Config.name, evalHostname, evalPort))
 	}
 }
