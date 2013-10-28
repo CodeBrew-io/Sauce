@@ -1,13 +1,20 @@
 import sbt._
 import Keys._
 import play.Project._
-import com.github.retronym.SbtOneJar._
+
+import com.typesafe.sbt._
+import SbtNativePackager._
+import packager.Keys._
+
+import com.jamesward.play.BrowserNotifierPlugin._
+
+import com.github.mumoshu.play2.typescript.TypeScriptPlugin._
 
 object ApplicationBuild extends Build {
 
   import Dependencies._
 
-  val evalApi = Project(
+  lazy val evalApi = Project(
     id = "eval-api",
     base = file("eval-api"),
     settings = Settings.scrooge ++ Seq(
@@ -16,7 +23,7 @@ object ApplicationBuild extends Build {
     )
   )
 
-  val lookupApi = Project(
+  lazy val lookupApi = Project(
     id = "lookup-api",
     base = file("lookup-api"),
     settings = Settings.scrooge ++ Seq(
@@ -25,24 +32,25 @@ object ApplicationBuild extends Build {
     )
   )
 
-  val scalaEval = Project(
+  lazy val scalaEval = Project(
     id = "scalaEval",
-    base = file("eval"),
-    settings = Project.defaultSettings ++ Settings.default ++ Settings.noplay ++ Seq(
-      name := "eval",
-      resolvers := Seq("gui maven" at "http://masseguillaume.github.io/maven"),
-      libraryDependencies += insight
-    ) ++ oneJarSettings
-  ).dependsOn(evalApi, lookupApi)
+    base = file("scalaEval"),
+    settings = Settings.default ++ packageArchetype.java_application ++ Seq(
+      name := "scalaEval",
+      resolvers := Seq("codebrew's maven" at "http://codebrew-io.github.io/maven/"),
+      libraryDependencies += insight,
+      bashScriptExtraDefines += """addJava "-Duser.dir=$(cd "${app_home}/.."; pwd -P)" """
+    ) 
+  ) dependsOn(evalApi, lookupApi)
  
-  val main = play.Project(
-    "server", 
-    Settings.appVersion, 
-    frontEnd ++ test
-  ).settings((Settings.default ++ Seq(
-    libraryDependencies ++= Seq(securesocial, akka.actor, scalastic),
-    resolvers += Resolver.url("sbt-plugin-snapshots", 
-      new URL("http://repo.scala-sbt.org/scalasbt/sbt-plugin-snapshots/"))(Resolver.ivyStylePatterns))
-  ): _*).
-  dependsOn(evalApi, lookupApi)
+  lazy val web = Project(
+    id = "web",
+    base = file("web"),
+    settings = Settings.default ++ playScalaSettings ++ typescript ++ Seq(
+      libraryDependencies ++= Seq(securesocial, scalastic) ++ frontEnd ++ test,
+      resolvers += Resolver.url("sbt-plugin-snapshots", 
+        new URL("http://repo.scala-sbt.org/scalasbt/sbt-plugin-snapshots/"))(Resolver.ivyStylePatterns),
+      tsOptions := Seq()
+    ) ++ livereload
+  ) dependsOn(evalApi, lookupApi)
 }
