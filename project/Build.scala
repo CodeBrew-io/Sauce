@@ -40,7 +40,7 @@ object ApplicationBuild extends Build {
     Settings.appVersion, 
     frontEnd ++ test
   ).settings((Settings.default ++ Seq(
-    libraryDependencies += securesocial,
+    libraryDependencies ++= Seq(securesocial, akka.actor, scalastic),
     resolvers += Resolver.url("sbt-plugin-snapshots", 
       new URL("http://repo.scala-sbt.org/scalasbt/sbt-plugin-snapshots/"))(Resolver.ivyStylePatterns))
   ): _*).
