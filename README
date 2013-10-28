@@ -5,9 +5,5 @@
 
 # auth
 
-<<<<<<< HEAD
 * add auth from https://bitbucket.org/log4900/secret/raw/db63b881a3bed303ae7d32d57163ea9c382f2846/securesocial.conf (private repo)
-=======
-* add auth from https://bitbucket.org/log4900/socialsecureproto/raw/329bc40a6eb6cdbcd70e92c92d08ded94acb5b7f/conf/securesocial.conf (private repo)
 * to logout: https://accounts.google.com/b/0/IssuedAuthSubTokens
->>>>>>> f89ab695278c61e692001f6b66a5e57b2a680835
