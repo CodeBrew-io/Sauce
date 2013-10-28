@@ -47,7 +47,7 @@ object ApplicationBuild extends Build {
     id = "web",
     base = file("web"),
     settings = Settings.default ++ playScalaSettings ++ typescript ++ Seq(
-      libraryDependencies ++= Seq(securesocial) ++ frontEnd ++ test,
+      libraryDependencies ++= Seq(securesocial, jdbc, anorm) ++ frontEnd ++ test,
       resolvers += Resolver.url("sbt-plugin-snapshots", 
         new URL("http://repo.scala-sbt.org/scalasbt/sbt-plugin-snapshots/"))(Resolver.ivyStylePatterns),
       tsOptions := Seq()
