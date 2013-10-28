@@ -22,18 +22,13 @@ object Dependencies {
 		"org.webjars" % "bootstrap" % "3.0.0",
 		"org.webjars" % "codemirror" % "3.16",
 		"org.webjars" % "jquery" % "2.0.3",
-		"org.webjars" %% "webjars-play" % "2.2.0-RC1",
-    "org.webjars" % "font-awesome" % "4.0.0"
+    	"org.webjars" % "font-awesome" % "4.0.0",
+		"org.webjars" %% "webjars-play" % "2.2.0-RC1"
 	)
 
 	val specs2 = "org.specs2" %% "specs2" % "2.2.2" % "test"
 	val test = Seq(specs2)
-
 	val scalastic = "org.scalastic" %% "scalastic" % "0.90.2"
-	
-	object akka {
-	    val version = "2.1.4"
-	    val actor = "com.typesafe.akka" %% "akka-actor" % version
-  	}
 	val securesocial = ("securesocial" %% "securesocial" % "master-SNAPSHOT") exclude("org.scala-stm", "scala-stm_2.10.0")
+	val gravatar = "com.andersen-gott" %% "scravatar" % "1.0.2"
 }

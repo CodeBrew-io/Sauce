@@ -2,13 +2,17 @@
 
 set ignorecase true;
 
-create table Accounts (
-  providerID                        int not null,
-  providerName                      varchar(255) not null,
-  email								varchar(255),
-  constraint accountID primary key (id))
+create table account (
+  userName								varchar(1023) not null,
+  firstName								varchar(1023) not null,
+  lastName								varchar(1023) not null,
+  userId                  	    		varchar(1023) not null,
+  providerId                    		varchar(255) not null,
+  email									varchar(1023),
+  avatarUrl								varchar(1023),
+  constraint pk_account primary key (userName))
 ;
 
 # --- !Downs
 
-drop table if exists Accounts;
+drop table if exists accounts;

@@ -1,7 +1,7 @@
-@(user: Option[securesocial.core.Identity])(implicit request: RequestHeader)
-@import securesocial.core.IdentityProvider
+@(user: Option[model.Account])(implicit request: RequestHeader)
 
 @main("Hey") {
+
 <div class="escritoire" ng-controller="CodeCtrl">
     <div class="app">
         <div class="code">
