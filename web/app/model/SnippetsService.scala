@@ -37,17 +37,17 @@ object SnippetsService {
                          |  }
                          |}""".stripMargin
 
-  indexer.createIndex(indexName, settings = Map("number_of_shards" -> "1"))
+  //indexer.createIndex(indexName, settings = Map("number_of_shards" -> "1"))
  // indexer.waitTillActive()
 
-  //indexer.putMapping(indexName, indexType, mapping)
 
   def addSnippet(snippet: Snippet): String = {
 
     val jsonSnippet = Json.obj (
       "title" -> snippet.title,
       "code" -> snippet.code,
-      "user" -> snippet.user
+      "user.field" -> snippet.user,
+      "user.raw" -> snippet.user
     )
     indexer.putMapping(indexName, indexType, snippetMapping)
     indexer.index(indexName, indexType, null, Json.stringify(jsonSnippet))
@@ -58,13 +58,15 @@ object SnippetsService {
 
   def querySnippets(pQuery: QueryBuilder): Array[Snippet] = {
 
+    indexer.putMapping(indexName, indexType, snippetMapping)
+
     val responses = indexer.search( indices = List(indexName), query = pQuery)
 
     responses.getHits().hits().map(
       x => Snippet(
         x.field("title").getValue(),
         x.field("code").getValue(),
-        x.field("user").getValue()
+        x.field("user.field").getValue()
       )
     )
   }

@@ -10,12 +10,13 @@
             <p>@code</p>
 
 
-            <form method="get" action="/Snippets/search" >
-                search : <input type="text" name="term" />
+            <form method="get" action="/snippets/search" >
+                search : <input type="text" name="q" />
+                user: <input type="text" name="u"/>
                 <input type="submit" />
             </form>
             <br />
-            <form method="post" action="/Snippets">
+            <form method="post" action="/snippets/add">
 
                 Titre : <input type="text" name="title" />
                 <br />User : <input type="text" name="user" />

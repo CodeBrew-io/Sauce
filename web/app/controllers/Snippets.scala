@@ -32,7 +32,7 @@ object Snippets extends Controller {
     Ok(views.html.elasticsearchtest("", "", "",  Array()))
   }
 
-  def handleNewSnippet = Action { implicit request =>
+  def add = Action { implicit request =>
 
     val (title, code, user) = snippetForm.bindFromRequest.get
 
