@@ -1,0 +1,38 @@
+@(title: String, code: String, user: String, snippets: Array[model.SnippetsService.Snippet])
+<!DOCTYPE html>
+<html>
+    <head>
+    </head>
+    <body>
+        <div style="float:left:width:50%;">
+            <h1>@title</h1>
+            <h2>@user</h2>
+            <p>@code</p>
+
+
+            <form method="get" action="/snippets/search" >
+                search : <input type="text" name="q" />
+                user: <input type="text" name="u"/>
+                <input type="submit" />
+            </form>
+            <br />
+            <form method="post" action="/snippets/add">
+
+                Titre : <input type="text" name="title" />
+                <br />User : <input type="text" name="user" />
+                <br />Code <textarea name="code"></textarea>
+
+                <br /><input type="submit" />
+            </form>
+
+
+        </div>
+    <div style="float:right:width:50%;">
+     @snippets.map{ snippet =>
+        <h3>@snippet.title</h3>
+        <h4>by: @snippet.title</h4>
+        <p>@snippet.title</p>
+     }
+    </div>
+    </body>
+</html>

@@ -11,3 +11,7 @@ GET     /logout                     securesocial.controllers.LoginPage.logout
 GET     /authenticate/:provider     securesocial.controllers.ProviderController.authenticate(provider)
 POST    /authenticate/:provider     securesocial.controllers.ProviderController.authenticateByPost(provider)
 GET     /not-authorized             securesocial.controllers.ProviderController.notAuthorized
+
+# Elastic search entry points
+GET     /snippets/search            controllers.Snippets.search(q: Option[String], u: Option[String])
+POST    /snippets/add               controllers.Snippets.add

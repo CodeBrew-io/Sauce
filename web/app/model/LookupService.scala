@@ -11,6 +11,7 @@ import thrift.ThriftClientFramedCodec
 import builder.ClientBuilder
 import builder.ServerBuilder
 import builder.Server
+import scala.util.Try
 
 import scala.util.Try
 

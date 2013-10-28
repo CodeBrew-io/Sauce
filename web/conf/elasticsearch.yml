@@ -1,0 +1,2 @@
+cluster.name : snippets_service_cluster
+node.name : snippets_service_node
