@@ -7,6 +7,8 @@ import com.twitter.finagle._
 import builder.ClientBuilder
 import thrift.ThriftClientFramedCodec
 
+import scala.util.Try
+
 object Register {
 	def ready(evalPort: Int): Unit = {
 		val lookupHostname = Option(System.getProperty("io.codebrew.lookupHostname")).getOrElse("localhost")
