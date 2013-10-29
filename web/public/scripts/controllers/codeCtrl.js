@@ -1,6 +1,6 @@
 'use strict';
 
-app.controller('CodeCtrl', function CodeCtrl($scope, $timeout, snippets, scaladoc, insight, errormessage) {
+app.controller('CodeCtrl', function CodeCtrl($scope, $timeout, $http, snippets, scaladoc, insight, errormessage, snippetmanagement) {
   (function(){ /* Doc */
 
     $scope.docs = [];
@@ -265,14 +265,23 @@ app.controller('CodeCtrl', function CodeCtrl($scope, $timeout, snippets, scalado
   (function() { /* Make the squiggly line in the code editor for error message */    
     //function SetErrorSquigglyLines(lineNumber, positionInit, rangeCharacters) {
 
-var lineNumber = 0;
-var positionInit = 3;
-var rangeCharacters = 9;
+      var lineNumber = 0;
+      var positionInit = 3;
+      var rangeCharacters = 9;
 
       errormessage.waitingCodeMirror().then(function(codeMirror) {
         var markedText = codeMirror.markText({line: lineNumber, ch: positionInit}, {line: lineNumber, ch: rangeCharacters + positionInit });
         markedText.className = "error-underliner";
       });
     //}
+  })();
+
+  (function() { /* My snippets behaviors */
+
+      $scope.mySnippetsClicked = function() {
+        snippetmanagement.getUserSnippetJsonData().then(function(snippetJsonUserData) {
+          console.log(snippetJsonUserData);
+        });
+      }
   })();
 });

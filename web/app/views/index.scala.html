@@ -44,6 +44,14 @@
                 <i class="icon-question icon-x"></i>
                 <span>About</span>
             </div>
+            @user.map{ _ =>
+              <div class="element">
+                <input type="button" value="my snippets" ng-click="mySnippetsClicked()" />
+              </div>
+            }.getOrElse {
+
+            }
+            
             <div class="element" ng-click="onZenMode()">
                 <i class="icon-resize-full icon-x" ng-class="{'icon-resize-full': isZenMode==false,'icon-resize-small': isZenMode==true}"></i>
                 <span>Zen Mode</span>
