@@ -6,4 +6,4 @@ function hereDoc(f) {
           replace(/\*\/[^\/]+$/, '');
 }
 
-var app = angular.module('protoApp', ['ui.codemirror']);
+var app = angular.module('CodeBrew', ['ui.codemirror']);
