@@ -32,14 +32,22 @@ object ApplicationBuild extends Build {
     )
   )
 
+  val setupReplClassPath = TaskKey[Unit]("setup-repl-classpath", "Set up the repl server's classpath based on our dependencies.")
+
   lazy val scalaEval = Project(
     id = "scalaEval",
     base = file("scalaEval"),
     settings = Settings.default ++ packageArchetype.java_application ++ Seq(
       name := "scalaEval",
       resolvers := Seq("codebrew's maven" at "http://codebrew-io.github.io/maven/"),
-      libraryDependencies += insight,
-      bashScriptExtraDefines += """addJava "-Duser.dir=$(cd "${app_home}/.."; pwd -P)" """
+      libraryDependencies ++= Seq(insight) ++ test,
+      bashScriptExtraDefines += """addJava "-Duser.dir=$(cd "${app_home}/.."; pwd -P)" """,
+      setupReplClassPath <<= (dependencyClasspath in Compile) map {cp =>
+        val cpStr = cp map { case Attributed(str) => str} mkString(System.getProperty("path.separator"))
+        println("Repl will use classpath "+ cpStr)
+        System.setProperty("replhtml.class.path", cpStr)
+      },
+      run in Compile <<= (run in Compile).dependsOn(setupReplClassPath)
     ) 
   ) dependsOn(evalApi, lookupApi)
  

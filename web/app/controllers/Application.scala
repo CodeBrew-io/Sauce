@@ -29,9 +29,9 @@ object Application extends Controller with securesocial.core.SecureSocial {
       val callback = (content \ "callback_id").as[Int]
 
       Registry.getEval.map(service => {
-        service.eval(code).map(result =>{
+        service.eval(code).map(result => {
           channel.push(JsObject(Seq(
-            "response" -> JsArray(result.map(s => JsString(s))),
+            "response" -> JsString(result),
             "callback_id" -> JsNumber(callback)
           )))
         })

@@ -22,7 +22,7 @@ app.factory('insight', ['$q', '$rootScope', "$location", function($q, $rootScope
 
 	function listener(data) {
 		if(callbacks.hasOwnProperty(data.callback_id)) {
-			var insight = data.response.join('\n');
+			var insight = data.response;
 			$rootScope.$apply(callbacks[data.callback_id].resolve(insight));
 			delete callbacks[data.callback_id];
 		}

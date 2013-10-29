@@ -1,5 +1,6 @@
 namespace scala ca.polymtl.log4900.api.eval
 
 service Insight {
-	list<string> eval(1: string code)
+	string eval(1: string code)
+	list<string> codeComplete(1: string code, 2: i32 pos)
 }

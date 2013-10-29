@@ -40,8 +40,35 @@ object InsightServer {
 }
 
 class InsightImpl extends Insight.FutureIface {
-	def eval(code: String): Future[List[String]] = {
-		Future.value(ScalaCodeSheet.computeResults(code, false).userRepr.split('\n').toList)
+
+	def eval(code: String): Future[String] = {
+		Future.value(ScalaCodeSheet.computeResults(code, false).userRepr)
+	}
+
+	import scala.tools.nsc.interactive.Global
+	import scala.tools.nsc.Settings
+	import scala.tools.nsc.reporters.StoreReporter
+	import scala.reflect.internal.util._
+	import scala.tools.nsc.interactive.Response
+
+	val reporter = new StoreReporter()
+	val settings = new Settings()
+	settings.classpath.value = System.getProperty("replhtml.class.path")
+	val compiler = new Global(settings, reporter)
+
+	def codeComplete(code: String, pos: Int): Future[List[String]] = {
+		val file = new BatchSourceFile("default", code)
+		val response = new Response[Unit]()
+		compiler.askReload(List(file), response)
+		response.get
+		val position = new OffsetPosition(file, pos)
+		val response1 = new Response[List[compiler.Member]]()
+		compiler.askTypeCompletion(position, response1)
+		val members = response1.get match {
+			case Left(members) => members
+			case _ => Nil
+		}
+		Future.value(members.map(_.sym.name.toString))
 	}
 }
 
