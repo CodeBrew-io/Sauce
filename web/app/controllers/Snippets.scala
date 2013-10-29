@@ -22,40 +22,48 @@ object Snippets extends Controller {
 
   val snippetForm = Form(
     tuple(
-      "title" -> text,
-      "code" -> text,
-      "user" -> text
+      "title"       -> text,
+      "description" -> text,
+      "codeOrigin"  -> text,
+      "codeParsed"  -> text,
+      "tags"        -> text,
+      "scalaVer"    -> text,
+      "user"        -> text
     )
   )
 
   def page = Action { implicit request =>
-    Ok(views.html.elasticsearchtest("", "", "",  Array()))
+    Ok(views.html.elasticsearchtest(Array()))
   }
 
   def add = Action { implicit request =>
 
-    val (title, code, user) = snippetForm.bindFromRequest.get
+    val (title, description, codeOrigin, codeParsed, tags, scalaVar, user) = snippetForm.bindFromRequest.get
 
-    val snippet = Snippet(title, code, user )
+    val snippet = Snippet(title, description, codeOrigin, codeParsed, tags, scalaVar, user )
 
-    val returnJson = SnippetsService.addSnippet(snippet);
+    // val returnJson = SnippetsService.addSnippet(snippet)
 
-    Ok(views.html.elasticsearchtest(title, returnJson, user, Array()))
+    Ok(views.html.elasticsearchtest(Array()))
   }
 
-  def search(q: Option[String], u: Option[String]) = Action { implicit request =>
+  def search(q: Option[String], u: Option[String]) = Action  { implicit request =>
 
-    val response = SnippetsService.search(q, u);
+    val response = SnippetsService.search(q.filter(_ != ""), u.filter(_ != ""))
 
-    Ok(views.html.elasticsearchtest("", "", "", response))
+    val jsonArrayResponse = response.map(snippet => snippet.toJson())
+
+    Ok(Json.toJson(jsonArrayResponse))
+    /*Ok(
+      Json.toJson(JsObject (
+        "snippets" -> JsArray(
+        response.map {
+        s => s.toJson()
+      })
+      )
+    )
+    )*/
+
   }
 
-  /*
-  def search(u: String) = Action { implicit request =>
-
-    val response = SnippetsService.searchSnippetsUser(q);
-
-    Ok(views.html.elasticsearchtest("", "", "", response))
-  }
-*/
 }
