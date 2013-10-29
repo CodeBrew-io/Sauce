@@ -1,0 +1,46 @@
+@(user: Option[model.Account])
+<header ng-controller="header">
+    <div class="brand">CodeBrew</div>
+    <div class="search-area">
+        @user.map{ u =>
+            <div class="btn-group profile" ng-class="{ 'open': profileOpen }">
+                <button type="button" class="btn btn-default btn-sm dropdown-toggle" data-toggle="dropdown" ng-click="toogleProfile()">
+                    @u.avatarUrl.map { url =>
+                        <img class="img-rounded" src="@url">
+                    }.getOrElse{
+
+                    }
+                     @u.userName <span class="caret"></span>
+                </button>
+                <ul class="dropdown-menu" role="menu">
+                    <li><a href="/settings">Settings</a></li>
+                    <li><a href="/logout">Logout</a></li>
+                </ul>
+            </div>
+        }.getOrElse {
+            <a class="btn btn-primary" href="/login">Login</a>
+        }            
+
+        <typeahead class="search" items="all"
+            term="term" search="search(term)" select="select(item)">
+            <div class="doc">
+                <h3 ng-show="hasDocs()">Doc</h3>
+                <ul>
+                    <li typeahead-item="doc" ng-repeat="doc in docs" class="results">
+                        <span class="class">{{doc.qualifiedName}}</span>
+                        <span class="signature">{{doc.signature}}</span>
+                        <textarea ui-codemirror="codemirrorOptions" ng-model="doc.comment.example"></textarea>
+                    </li>
+                </ul>
+            </div>
+            <div class="snippet">
+                <h3 ng-show="hasSnippets()">Snippet</h3>
+                <ul>
+                    <li typeahead-item="snippet" ng-repeat="snippet in snippets" class="results">
+                        <textarea ui-codemirror="codemirrorOptions" ng-model="snippet.code"></textarea>
+                    </li>
+                </ul>
+            </div>
+        </typeahead>
+    </div>
+</header>
