@@ -1,16 +1,11 @@
-@(title: String, code: String, user: String, snippets: Array[model.SnippetsService.Snippet])
+@(snippets: Array[model.SnippetsService.Snippet])
 <!DOCTYPE html>
 <html>
     <head>
     </head>
     <body>
         <div style="float:left:width:50%;">
-            <h1>@title</h1>
-            <h2>@user</h2>
-            <p>@code</p>
-
-
-            <form method="get" action="/snippets/search" >
+            <form method="get" action="/snippets/search" accept="text/json">
                 search : <input type="text" name="q" />
                 user: <input type="text" name="u"/>
                 <input type="submit" />
@@ -19,8 +14,13 @@
             <form method="post" action="/snippets/add">
 
                 Titre : <input type="text" name="title" />
-                <br />User : <input type="text" name="user" />
-                <br />Code <textarea name="code"></textarea>
+                <br />Description : <input type="text" name="description" />
+                <br />Code (origine) <textarea name="codeOrigin"></textarea>
+                <br />Code (parsed) <textarea name="codeParsed"></textarea>
+                <br />Tags : <input type="text" name="tags" />
+                <br />ScalaVer : <input type="text" name="scalaVer" value="2.10"/>
+                <br />User : <input type="text" name="user" value="shmed"/>
+
 
                 <br /><input type="submit" />
             </form>
@@ -30,8 +30,8 @@
     <div style="float:right:width:50%;">
      @snippets.map{ snippet =>
         <h3>@snippet.title</h3>
-        <h4>by: @snippet.title</h4>
-        <p>@snippet.title</p>
+        <h4>by: @snippet.user</h4>
+        <p>@snippet.codeOrigin</p>
      }
     </div>
     </body>

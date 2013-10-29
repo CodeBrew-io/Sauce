@@ -1,15 +1,41 @@
 package model
 
 import scalastic.elasticsearch.Indexer
+import org.elasticsearch.index.query._, FilterBuilders._, QueryBuilders._
 
-import org.elasticsearch.index.query.QueryBuilders._
-import org.elasticsearch.index.query._
+import play.api.libs.json._
 
-import play.api.libs.json.{ Json, JsObject }
 import play.api.Play
 import play.api.Play.current
 
 object SnippetsService {
+
+  case class Snippet(title: String, description: String, codeOrigin: String, codeParsed: String, tags: String, scalaVar: String, user: String)
+  {
+    def toJson() : JsValue = {
+      Json.toJson(
+        Map(
+          "snippet" -> toElasticSearchJson()
+        )
+      )
+    }
+
+    def toElasticSearchJson(): JsObject = {
+      Json.obj (
+        "title" -> title,
+        "description" -> description,
+        "code.origin" -> codeOrigin,
+        "code.parsed" -> codeParsed,
+        "tags" -> tags,
+        "scalaVer" -> scalaVar,
+        "user.field" -> user,
+        "user.raw" -> user
+      )
+    }
+  }
+
+
+
 
   val clusterName = Play.application.configuration.getString("elasticsearch.cluster").getOrElse("")
   val host = Play.application.configuration.getString("elasticsearch.host").getOrElse("")
@@ -24,77 +50,97 @@ object SnippetsService {
                          |{
                          |  "$indexType":{
                          |    "properties" : {
-                         |       "title" : {"type" : "string"},
-                         |       "code" : {"type" : "string"},
+                         |       "title" : {"type" : "string", "analyzer" : "snowball"},
+                         |       "description" : {"type" : "string", "analyzer" : "snowball"},
+                         |       "code" : {
+                         |           "type" : "multi_field",
+                         |           "fields" : {
+                         |              "origin" : {"type" : "string", "index" : "analyzed"},
+                         |              "parsed" : {"type" : "string", "index" : "analyzed"}
+                         |           }
+                         |        },
+                         |       "tags" : {"type" : "string", "analyzer" : "keyword"},
+                         |       "scalaVer": {"type" : "string"},
                          |       "user ": {
                          |           "type" : "multi_field",
                          |           "fields" : {
                          |              "field" : {"type" : "string", "index" : "analyzed"},
                          |              "raw" : {"type" : "string", "index" : "not_analyzed"}
-                         |           }
-                         |       }
+                         |        }
+                         |      }
                          |    }
                          |  }
                          |}""".stripMargin
 
-  //indexer.createIndex(indexName, settings = Map("number_of_shards" -> "1"))
- // indexer.waitTillActive()
+
+  if (!indexer.exists(indexName).isExists())
+  {
+    indexer.createIndex(indexName, settings = Map("number_of_shards" -> "1"))
+    indexer.waitTillActive()
+  }
 
 
   def addSnippet(snippet: Snippet): String = {
 
+    // elastic search format
     val jsonSnippet = Json.obj (
       "title" -> snippet.title,
-      "code" -> snippet.code,
+      "description" -> snippet.description,
+      "code.origin" -> snippet.codeOrigin,
+      "code.parsed" -> snippet.codeParsed,
+      "tags" -> snippet.tags,
+      "scalaVer" -> snippet.scalaVar,
       "user.field" -> snippet.user,
       "user.raw" -> snippet.user
     )
+
     indexer.putMapping(indexName, indexType, snippetMapping)
     indexer.index(indexName, indexType, null, Json.stringify(jsonSnippet))
-    //indexer.refresh()
 
     Json.stringify(jsonSnippet)
   }
 
-  def querySnippets(pQuery: QueryBuilder): Array[Snippet] = {
 
-    indexer.putMapping(indexName, indexType, snippetMapping)
+    def querySnippets(pQuery: QueryBuilder): Array[Snippet] = {
 
-    val responses = indexer.search( indices = List(indexName), query = pQuery)
+      indexer.putMapping(indexName, indexType, snippetMapping)
 
-    responses.getHits().hits().map(
-      x => Snippet(
-        x.field("title").getValue(),
-        x.field("code").getValue(),
-        x.field("user.field").getValue()
+      val responses = indexer.search( indices = List(indexName),
+        query = pQuery,
+        fields = Seq("title", "description", "code.origin", "code.parsed", "tags", "scalaVer", "user.field")
+        )
+
+      responses.getHits().hits().map(
+        x => Snippet(
+          x.field("title").getValue(),
+          x.field("description").getValue(),
+          x.field("code.origin").getValue(),
+          x.field("code.parsed").getValue(),
+          x.field("tags").getValue(),
+          x.field("scalaVer").getValue(),
+          x.field("user.field").getValue()
+        )
       )
-    )
-  }
+    }
 
-  /*  def searchSnippetsByCode(term: String): Array[Snippet] = {
+    def search(q: Option[String], u: Option[String]): Array[Snippet] = {
 
-  }
+      //If pTerm == None, then we don't search for a particular term, instead we return everything (matchAll)
+      val codeTermQuery = q.map (
+        q => multiMatchQuery( q, "code.parsed","title", "description", "tags")
+      ).getOrElse(
+        matchAllQuery()
+      )
 
-  def searchSnippetsUser(user: String): Array[Snippet] = {
+      //If pUser !== None, we return every snippets, no matter the user, else we filter for this exact user only
+      val codeTermQueryWithUserFilter = u.map (
+        u => filteredQuery(codeTermQuery, termFilter("user.raw", u))
+       ).getOrElse(
+        filteredQuery(codeTermQuery, null)
+      )
 
-    querySnippets(matchQuery("user.raw", user))
+      querySnippets(codeTermQueryWithUserFilter)
+    }
 
-  }
-  */
-
-  def search(term: Option[String], user: Option[String]): Array[Snippet] = {
-
-    val userMatchQuery = matchQuery("user.raw", user)
-    val codeTermQuery = matchQuery("code", term)
-
-    querySnippets(codeTermQuery)
-
-  }
-
-
-
-  case class Snippet(title: String, code: String, user: String)
-
-  // implicit val Snippet = Json.writes[Snippet]
 
 }
