@@ -26,7 +26,7 @@ object Dependencies {
 		"org.webjars" %% "webjars-play" % "2.2.0-RC1"
 	)
 
-	val specs2 = "org.specs2" %% "specs2" % "2.2.2" % "test"
+	val specs2 = "org.specs2" %% "specs2" % "2.2.3" % "test"
 	val test = Seq(specs2)
 	val scalastic = "org.scalastic" %% "scalastic" % "0.90.2"
 	val securesocial = ("securesocial" %% "securesocial" % "master-SNAPSHOT") exclude("org.scala-stm", "scala-stm_2.10.0")
