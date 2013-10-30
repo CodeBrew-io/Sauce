@@ -47,7 +47,7 @@ app.directive('typeahead', ["$timeout", function($timeout) {
             };
 
             $scope.query = function() {
-                $scope.hide = false;
+                $scope.hide = true;
                 $scope.search({term:$scope.term});
             }
         }],

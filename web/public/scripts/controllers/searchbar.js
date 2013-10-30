@@ -19,12 +19,15 @@ app.controller('searchbar', function code($scope, $timeout, snippets, scaladoc, 
 
 	$scope.search = function(term){
 		// We make a promise with Scalex for the documentations.
-		scaladoc.query(term).then(function(data) {
+		/*scaladoc.query(term).then(function(data) {
 			$scope.docs = data;
 			SetAllItems($scope);
+		});*/
+
+		snippets.query(term, function(data, status, headers, config) {
+			$scope.snippets = data;
 		});
 
-		$scope.snippets = snippets.query(term);
 	};
 
 	$scope.hasDocs = function(){

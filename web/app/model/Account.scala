@@ -19,6 +19,9 @@ case class Account(
 )
 
 object Account {
+
+  def username(firstName: String, lastName: String) = s"${lastName}${firstName}"
+
   val simple = {
     get[String]("account.firstName") ~
     get[String]("account.lastName") ~

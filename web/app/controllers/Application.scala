@@ -20,7 +20,7 @@ object Application extends Controller with securesocial.core.SecureSocial {
 
   def index = UserAwareAction { implicit request =>
     val account = request.user.map( u => {
-      Account.find(s"${u.lastName}${u.firstName}") match {
+      Account.find(Account.username(u.lastName, u.firstName)) match {
         case Some(account) => account
         case None => {
           val account = Account(
