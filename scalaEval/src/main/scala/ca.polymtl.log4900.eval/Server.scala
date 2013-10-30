@@ -53,8 +53,8 @@ class InsightImpl extends Insight.FutureIface {
 	val compiler = new Global(settings, reporter)
 
 	def eval(code: String, pos: Int): Future[Result] = {
-		val insightResult = new FutureTask(ScalaCodeSheet.computeResults(code, false))
-		val errorAndCompletionResult = new FutureTask(compileAndCompletion(code, pos))
+		val insightResult = Future(ScalaCodeSheet.computeResults(code, false))
+		val errorAndCompletionResult = Future(compileAndCompletion(code, pos))
 		insightResult join errorAndCompletionResult map { case (insightResult, (infos, completions)) =>
 			Result(
 				insight = insightResult.userRepr,
@@ -63,6 +63,7 @@ class InsightImpl extends Insight.FutureIface {
 				completions = completions
 			)
 		}
+
 	}
 
 	def compileAndCompletion(code: String, pos: Int): (List[CompilationInfo], List[String]) = {
