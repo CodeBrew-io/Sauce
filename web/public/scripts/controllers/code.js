@@ -57,7 +57,7 @@ app.controller('code', function code($scope, $timeout, insight, snippets, fullsc
 	}
 
 	$scope.publish = function(){
-		snippets.save($scope.code);
+		snippets.save({code: $scope.code});
 	}
 
 	// (function() { /* The pace of the keyboard before sending data to the server */
