@@ -46,7 +46,7 @@ object ApplicationBuild extends Build {
       bashScriptExtraDefines += (dependencyClasspath in Compile) map {cp =>
         val cpStr = cp map { case Attributed(str) => str} mkString(System.getProperty("path.separator"))
         """addJava "-Dreplhtml.class.path=$cpStr" """
-      }
+      },
       bashScriptExtraDefines += """addJava "-Duser.dir=$(cd "${app_home}/.."; pwd -P)" """,
       setupReplClassPath <<= (dependencyClasspath in Compile) map {cp =>
         val cpStr = cp map { case Attributed(str) => str} mkString(System.getProperty("path.separator"))
