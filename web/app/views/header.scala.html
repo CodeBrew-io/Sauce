@@ -21,23 +21,23 @@
             <a class="btn btn-primary" href="/login">Login</a>
         }            
 
-        <typeahead class="search" items="all"
-            term="term" search="search(term)" select="select(item)">
-            <div class="doc">
-                <h3 ng-show="hasDocs()">Doc</h3>
+        <typeahead class="search" items="all" term="term" search="search(term)" select="select(item)">
+            <div ng-show="hasDocs()" class="doc">
+                <h3>Doc</h3>
                 <ul>
                     <li typeahead-item="doc" ng-repeat="doc in docs" class="results">
-                        <span class="class">{{doc.qualifiedName}}</span>
+                        <span class="class">{{doc.class}}</span>
+                        <span class="fun">{{doc.fun}}</span>
                         <span class="signature">{{doc.signature}}</span>
-                        <textarea ui-codemirror="codemirrorOptions" ng-model="doc.comment.example"></textarea>
+                        <textarea ui-codemirror="options3" ng-model="doc.code"></textarea>
                     </li>
                 </ul>
             </div>
-            <div class="snippet">
-                <h3 ng-show="hasSnippets()">Snippet</h3>
+            <div ng-show="hasSnippets()" class="snippet">
+                <h3>Snippet</h3>
                 <ul>
-                    <li typeahead-item="snippet" ng-repeat="snippet in snippets" class="results">
-                        <textarea ui-codemirror="codemirrorOptions" ng-model="snippet.snippet['code.origin']"></textarea>
+                    <li typeahead-item="snippet" ng-repeat="s in snippets" class="results">
+                        <textarea ui-codemirror="codemirrorOptions" ng-model="s.snippet['code.origin']"></textarea>
                     </li>
                 </ul>
             </div>

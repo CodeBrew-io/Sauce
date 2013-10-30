@@ -24,7 +24,7 @@ object Application extends Controller with securesocial.core.SecureSocial {
       user <- request.user
       email <- user.email
     } yield {
-      Account.find(email) match {
+      Account.find(Account.username(email)) match {
         case Some(account) => account
         case None => {
           val account = Account(

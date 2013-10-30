@@ -1,7 +1,7 @@
-app.factory('snippets', function($http) {
-  return {
-    query: function(term){
-    	return $http.get('/snippets/search?q=' + term);
-    }
-  };
+app.factory('snippets', function($resource) {
+  return $resource('/snippets',{},{
+  	"queryUser": { method: 'GET', url: '/snippets/' },
+  	"query": { method: 'GET', isArray: true },
+  	"": { method: 'POST' }
+  })
 });
