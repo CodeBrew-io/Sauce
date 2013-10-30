@@ -6,7 +6,7 @@ import api.eval._
 import com.github.jedesah.codesheet.api.ScalaCodeSheet
 
 import com.twitter._
-import util.Future
+import util.{Future, FutureTask}
 import finagle._
 import thrift.ThriftServerFramedCodec
 import builder.ServerBuilder
@@ -41,10 +41,6 @@ object InsightServer {
 
 class InsightImpl extends Insight.FutureIface {
 
-	def eval(code: String): Future[String] = {
-		Future.value(ScalaCodeSheet.computeResults(code, false).userRepr)
-	}
-
 	import scala.tools.nsc.interactive.Global
 	import scala.tools.nsc.Settings
 	import scala.tools.nsc.reporters.StoreReporter
@@ -56,7 +52,20 @@ class InsightImpl extends Insight.FutureIface {
 	settings.classpath.value = System.getProperty("replhtml.class.path")
 	val compiler = new Global(settings, reporter)
 
-	def codeComplete(code: String, pos: Int): Future[List[String]] = {
+	def eval(code: String, pos: Int): Future[Result] = {
+		val insightResult = new FutureTask(ScalaCodeSheet.computeResults(code, false))
+		val errorAndCompletionResult = new FutureTask(compileAndCompletion(code, pos))
+		insightResult join errorAndCompletionResult map { case (insightResult, (infos, completions)) =>
+			Result(
+				insight = insightResult.userRepr,
+				output = insightResult.output,
+				infos = infos,
+				completions = completions
+			)
+		}
+	}
+
+	def compileAndCompletion(code: String, pos: Int): (List[CompilationInfo], List[String]) = {
 		val file = new BatchSourceFile("default", code)
 		val response = new Response[Unit]()
 		compiler.askReload(List(file), response)
@@ -68,7 +77,16 @@ class InsightImpl extends Insight.FutureIface {
 			case Left(members) => members
 			case _ => Nil
 		}
-		Future.value(members.map(_.sym.name.toString))
+		val infos = reporter.infos.map {
+			info => CompilationInfo(message = info.msg, pos = info.pos.point, severity = convert(info.severity))
+		}.toList
+		(infos, members.map(_.sym.name.toString))
+	}
+
+	def convert(severity: reporter.Severity): Severity = severity match {
+		case reporter.INFO => Severity.Info
+		case reporter.WARNING => Severity.Warning
+		case reporter.ERROR => Severity.Error
 	}
 }
 
