@@ -22,7 +22,8 @@ app.factory('insight', ['$q', '$rootScope', "$location", function($q, $rootScope
 
 	function listener(data) {
 		if(callbacks.hasOwnProperty(data.callback_id)) {
-			var insight = data.response;
+			var insight = data;
+
 			$rootScope.$apply(callbacks[data.callback_id].resolve(insight));
 			delete callbacks[data.callback_id];
 		}
@@ -36,13 +37,14 @@ app.factory('insight', ['$q', '$rootScope', "$location", function($q, $rootScope
 		socket.send(lastMessage);
 	};
 
-	return function(code){
+	return function(code, position){
 		var request = {};
 		var defer = $q.defer();
 		var callbackId = getCallbackId();
 		callbacks[callbackId] = defer;
 		request.callback_id = callbackId;
 		request.code = code;
+		request.position = position;
 
 		if( socket.readyState === socket.CONNECTING ) {
 			lastMessage = JSON.stringify(request)
@@ -53,3 +55,4 @@ app.factory('insight', ['$q', '$rootScope', "$location", function($q, $rootScope
 		return defer.promise;		  
 	}
 }]);
+

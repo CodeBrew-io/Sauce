@@ -45,14 +45,30 @@ object Application extends Controller with securesocial.core.SecureSocial {
     val (enumerator, channel) = Concurrent.broadcast[JsValue]
     val in = Iteratee.foreach[JsValue](content => {
       val code = (content \ "code").as[String]
+      val position = (content \ "position").as[Int]
       val callback = (content \ "callback_id").as[Int]
 
       Registry.getEval.map(service => {
-        service.eval(code, 0).map(result => {
-          channel.push(JsObject(Seq(
-            "response" -> JsString(result.insight),
+
+        service.eval(code, position).map(result => {
+
+          val jsonValue = JsObject(Seq(
+            "insight" -> JsString(result.insight),
+            "output" -> JsString(result.output),
+            "CompilationInfo" -> JsArray(result.infos.map(c => 
+              JsObject(Seq(
+                "message" ->  JsString(c.message),
+                "pos" ->  JsNumber(c.pos),
+                "severity" -> JsNumber(c.severity.value)))
+              )
+            ),
+            "completions" -> JsArray(result.completions.map(c => JsString(c))),
             "callback_id" -> JsNumber(callback)
-          )))
+          ))
+
+          
+
+          channel.push(jsonValue)
         })
       })
     }) 

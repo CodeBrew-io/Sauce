@@ -9,7 +9,7 @@
                     ng-click="toogleInsight()"></i>
                 <i class="fa fa-resize-full" ng-click="fullscreen()"></i>
             </div>
-            <textarea ui-codemirror="optionsCode" ng-model="code"></textarea>
+            <textarea ui-codemirror="optionsCode" ng-model="code" ui-keydown="{'enter':'handleKeypress($event)'}"></textarea>
         </div><div class="insight" ng-class="{'' : !isEditorPending, 'fetching': isEditorPending}" ng-show="withInsight">
             <textarea ui-codemirror="optionsInsight" ng-model="insight"></textarea>
         </div>
