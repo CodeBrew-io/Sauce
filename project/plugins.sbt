@@ -1,10 +1,16 @@
-logLevel := Level.Warn
-
 resolvers ++= Seq(
 	"Typesafe repository" at "http://repo.typesafe.com/typesafe/releases/",
 	"Sonatype OSS Snapshots Repository" at "http://oss.sonatype.org/content/groups/public",
 	"codebrew's maven" at "http://codebrew-io.github.io/maven/"
 )
+
+resolvers += Resolver.url(
+  "bintray-sbt-plugin-releases",
+    url("http://dl.bintray.com/content/sbt/sbt-plugin-releases"))(
+        Resolver.ivyStylePatterns)
+
+
+addSbtPlugin("me.lessis" % "bintray-sbt" % "0.1.1")
 
 addSbtPlugin("com.typesafe.play" % "sbt-plugin" % "2.2.0")
 

@@ -6,7 +6,7 @@ import api.eval._
 import com.github.jedesah.codesheet.api.ScalaCodeSheet
 
 import com.twitter._
-import util.Future
+import util.{Future, FutureTask}
 import finagle._
 import thrift.ThriftServerFramedCodec
 import builder.ServerBuilder
@@ -41,10 +41,6 @@ object InsightServer {
 
 class InsightImpl extends Insight.FutureIface {
 
-	def eval(code: String): Future[String] = {
-		Future.value(ScalaCodeSheet.computeResults(code, false).userRepr)
-	}
-
 	import scala.tools.nsc.interactive.Global
 	import scala.tools.nsc.Settings
 	import scala.tools.nsc.reporters.StoreReporter
@@ -56,19 +52,48 @@ class InsightImpl extends Insight.FutureIface {
 	settings.classpath.value = System.getProperty("replhtml.class.path")
 	val compiler = new Global(settings, reporter)
 
-	def codeComplete(code: String, pos: Int): Future[List[String]] = {
-		val file = new BatchSourceFile("default", code)
-		val response = new Response[Unit]()
-		compiler.askReload(List(file), response)
-		response.get
-		val position = new OffsetPosition(file, pos)
-		val response1 = new Response[List[compiler.Member]]()
-		compiler.askTypeCompletion(position, response1)
-		val members = response1.get match {
-			case Left(members) => members
-			case _ => Nil
+	def eval(code: String, pos: Int): Future[Result] = {
+		val insightResult = Future(ScalaCodeSheet.computeResults(code, false))
+		val errorAndCompletionResult = Future(compileAndCompletion(code, pos))
+		insightResult join errorAndCompletionResult map { case (insightResult, (infos, completions)) =>
+			Result(
+				insight = insightResult.userRepr,
+				output = insightResult.output,
+				infos = infos,
+				completions = completions
+			)
 		}
-		Future.value(members.map(_.sym.name.toString))
+
+	}
+
+	def compileAndCompletion(code: String, pos: Int): (List[CompilationInfo], List[String]) = {
+		if (code == "") (Nil, Nil)
+		else {
+			val beginWrap = "package object Codebrew {\n"
+			val endWrap = "}"
+			val ajustedPos = pos + beginWrap.length
+			val file = new BatchSourceFile("default", beginWrap + code + endWrap)
+			val response = new Response[Unit]()
+			compiler.askReload(List(file), response)
+			response.get
+			val position = new OffsetPosition(file, ajustedPos)
+			val response1 = new Response[List[compiler.Member]]()
+			compiler.askTypeCompletion(position, response1)
+			val members = response1.get match {
+				case Left(members) => members
+				case _ => Nil
+			}
+			val infos = reporter.infos.map {
+				info => CompilationInfo(message = info.msg, pos = info.pos.point - beginWrap.length, severity = convert(info.severity))
+			}.toList
+			(infos, members.map(_.sym.name.toString))
+		}
+	}
+
+	def convert(severity: reporter.Severity): Severity = severity match {
+		case reporter.INFO => Severity.Info
+		case reporter.WARNING => Severity.Warning
+		case reporter.ERROR => Severity.Error
 	}
 }
 
