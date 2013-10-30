@@ -10,6 +10,8 @@ import com.jamesward.play.BrowserNotifierPlugin._
 
 import com.github.mumoshu.play2.typescript.TypeScriptPlugin._
 
+import bintray.Plugin.bintrayResolverSettings
+
 object ApplicationBuild extends Build {
 
   import Dependencies._
@@ -37,7 +39,7 @@ object ApplicationBuild extends Build {
   lazy val scalaEval = Project(
     id = "scalaEval",
     base = file("scalaEval"),
-    settings = Settings.default ++ packageArchetype.java_application ++ Seq(
+    settings = Settings.default ++ packageArchetype.java_application ++ bintrayResolverSettings ++ Seq(
       name := "scalaEval",
       resolvers += bintray.Opts.resolver.repo("jedesah", "maven"),
       libraryDependencies ++= Seq(insight) ++ test,
