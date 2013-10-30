@@ -15,4 +15,4 @@ GET     /not-authorized             securesocial.controllers.ProviderController.
 # Elastic search entry points
 GET     /snippets/search            controllers.Snippets.search(q: Option[String], u: Option[String])
 POST    /snippets/add               controllers.Snippets.add
-GET    /snippets/page               controllers.Snippets.page
+GET     /snippets/add               controllers.Snippets.page

@@ -9,19 +9,6 @@ object Settings {
 		organization := "ca.polymtl.log4900"
 	) ++ versionWithGit
 
-	// no play
-	// import play.Keys._
- //    val noplay = Seq(
- //    	// no typescript
-	// 	requireJs := Seq(),
-	// 	requireJsFolder := "",
-	// 	requireJsShim := "",
-	// 	requireNativePath := None,
-
-	// 	// no livereload
-	// 	playAssetsDirectories := Seq() 
- //    )
-
 	// scrooge
 	import com.twitter.scrooge._
 	import ScroogeSBT._
