@@ -78,7 +78,7 @@ object Snippets {
     indexer.waitTillActive()
   }
 
-  def add(snippet: Snippet): String = {
+  def add(snippet: Snippet): Unit = {
     val jsonSnippet = Json.obj (
       "title" -> snippet.title,
       "description" -> snippet.description,
@@ -92,23 +92,22 @@ object Snippets {
 
     indexer.putMapping(indexName, indexType, snippetMapping)
     indexer.index(indexName, indexType, null, Json.stringify(jsonSnippet))
-
-    Json.stringify(jsonSnippet)
+    println(Json.stringify(jsonSnippet))
   }
 
-  def querySnippets(pQuery: QueryBuilder, offset: Int): Array[Snippet] = {
+  def querySnippets(pQuery: QueryBuilder, offset: Option[Int]): Array[Snippet] = {
 
     indexer.putMapping(indexName, indexType, snippetMapping)
 
     val responses = indexer.search( indices = List(indexName),
       query = pQuery,
       fields = Seq("title", "description", "code.origin", "code.parsed", "tags", "scalaVersion", "user.field"),
-      from = Some(offset),
+      from = offset,
       size = Some(size)
     )
 
-    responses.getHits().hits().map(
-      x => Snippet(
+    responses.getHits().hits().map( x => {
+      Snippet(
         x.field("title").getValue(),
         x.field("description").getValue(),
         x.field("code.origin").getValue(),
@@ -117,14 +116,14 @@ object Snippets {
         x.field("scalaVersion").getValue(),
         x.field("user.field").getValue()
       )
-    )
+    })
   }
 
-  def query(terms: Option[String] = None, userName: Option[String] = None, offset: Int = 0): Array[Snippet] = {
+  def query(terms: Option[String] = None, userName: Option[String] = None, offset: Option[Int] = None): Array[Snippet] = {
 
     //If pTerm == None, then we don't search for a particular term, instead we return everything (matchAll)
     val codeTermQuery = terms.map (
-      q => multiMatchQuery( q, "code.parsed","title", "description", "tags")
+      q => multiMatchQuery( q, "code.origin")
     ).getOrElse(
       matchAllQuery()
     )
@@ -135,6 +134,8 @@ object Snippets {
      ).getOrElse(
       filteredQuery(codeTermQuery, null)
     )
+
+    println(codeTermQueryWithUserFilter)
 
     querySnippets(codeTermQueryWithUserFilter, offset)
   }

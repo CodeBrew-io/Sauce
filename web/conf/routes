@@ -13,5 +13,5 @@ POST    /authenticate/:provider     securesocial.controllers.ProviderController.
 GET     /not-authorized             securesocial.controllers.ProviderController.notAuthorized
 
 GET		/snippets/queryUser 		controllers.Snippets.queryUser
-GET     /snippets/query				controllers.Snippets.query(terms: Option[String], userName: Option[String], offset: Int)
+GET     /snippets/query				controllers.Snippets.query(terms: Option[String], userName: Option[String], offset: Option[Int])
 POST	/snippets 					controllers.Snippets.add
