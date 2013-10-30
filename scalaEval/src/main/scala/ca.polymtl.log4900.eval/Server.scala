@@ -66,21 +66,27 @@ class InsightImpl extends Insight.FutureIface {
 	}
 
 	def compileAndCompletion(code: String, pos: Int): (List[CompilationInfo], List[String]) = {
-		val file = new BatchSourceFile("default", code)
-		val response = new Response[Unit]()
-		compiler.askReload(List(file), response)
-		response.get
-		val position = new OffsetPosition(file, pos)
-		val response1 = new Response[List[compiler.Member]]()
-		compiler.askTypeCompletion(position, response1)
-		val members = response1.get match {
-			case Left(members) => members
-			case _ => Nil
+		if (code == "") (Nil, Nil)
+		else {
+			val beginWrap = "package object Codebrew {\n"
+			val endWrap = "}"
+			val ajustedPos = pos + beginWrap.length
+			val file = new BatchSourceFile("default", beginWrap + code + endWrap)
+			val response = new Response[Unit]()
+			compiler.askReload(List(file), response)
+			response.get
+			val position = new OffsetPosition(file, ajustedPos)
+			val response1 = new Response[List[compiler.Member]]()
+			compiler.askTypeCompletion(position, response1)
+			val members = response1.get match {
+				case Left(members) => members
+				case _ => Nil
+			}
+			val infos = reporter.infos.map {
+				info => CompilationInfo(message = info.msg, pos = info.pos.point - beginWrap.length, severity = convert(info.severity))
+			}.toList
+			(infos, members.map(_.sym.name.toString))
 		}
-		val infos = reporter.infos.map {
-			info => CompilationInfo(message = info.msg, pos = info.pos.point, severity = convert(info.severity))
-		}.toList
-		(infos, members.map(_.sym.name.toString))
 	}
 
 	def convert(severity: reporter.Severity): Severity = severity match {

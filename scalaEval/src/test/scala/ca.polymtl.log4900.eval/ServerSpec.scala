@@ -14,7 +14,7 @@ class ServerSpec extends Specification {
 						 |}""".stripMargin
 			server.compileAndCompletion(code, 32) must beLike { case (compilationInfos, completions) =>
 				println(compilationInfos)
-				compilationInfos must not be empty
+				compilationInfos must be empty;
 				completions must contain("substring")
 			}
 		}
@@ -26,7 +26,7 @@ class ServerSpec extends Specification {
 						 |}""".stripMargin
 			server.compileAndCompletion(code, 37) must beLike { case (compilationInfos, completions) =>
 				println(compilationInfos)
-				compilationInfos must not be empty
+				compilationInfos must not be empty;
 				completions must contain("substring")
 			}
 		}
@@ -35,14 +35,14 @@ class ServerSpec extends Specification {
 			val code = """val aabb = "cat"
 						 |aabb.subS""".stripMargin
 			server.compileAndCompletion(code, 19) must beLike { case (compilationInfos, completions) =>
-				compilationInfos must not be empty
+				compilationInfos must be empty;
 				completions must contain("substring")
 			}
 		}
 		"fail gracefully when there is nothing to complete" in {
 			val server = new InsightImpl()
 			val code = ""
-			server.compileAndCompletion(code, 1) must beLike { case (compilationInfos, completions) =>
+			server.compileAndCompletion(code, 0) must beLike { case (compilationInfos, completions) =>
 				compilationInfos must be empty;
 				completions must be empty
 			}
