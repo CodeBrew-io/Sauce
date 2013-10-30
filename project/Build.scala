@@ -39,7 +39,7 @@ object ApplicationBuild extends Build {
     base = file("scalaEval"),
     settings = Settings.default ++ packageArchetype.java_application ++ Seq(
       name := "scalaEval",
-      resolvers := Seq("codebrew's maven" at "http://codebrew-io.github.io/maven/"),
+      resolvers += bintray.Opts.resolver.repo("jedesah", "maven"),
       libraryDependencies ++= Seq(insight) ++ test,
       bashScriptExtraDefines += """addJava "-Duser.dir=$(cd "${app_home}/.."; pwd -P)" """,
       setupReplClassPath <<= (dependencyClasspath in Compile) map {cp =>

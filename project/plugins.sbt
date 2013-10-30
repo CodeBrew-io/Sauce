@@ -6,6 +6,8 @@ resolvers ++= Seq(
 	"codebrew's maven" at "http://codebrew-io.github.io/maven/"
 )
 
+addSbtPlugin("me.lessis" % "bintray-sbt" % "0.1.1")
+
 addSbtPlugin("com.typesafe.play" % "sbt-plugin" % "2.2.0")
 
 addSbtPlugin("com.twitter" %% "scrooge-sbt-plugin" % "3.9.0")

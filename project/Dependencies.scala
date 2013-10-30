@@ -1,7 +1,7 @@
 import sbt._
 
 object Dependencies {
-	val insight = "com.github.jedesah" %% "codesheet-api" % "0.3.0"
+	val insight = "com.github.jedesah" %% "codesheet-api" % "0.4.0"
 
 	private val finagleVer = "6.5.0"
 	lazy val thrift = "org.apache.thrift" % "libthrift" % "0.8.0"
