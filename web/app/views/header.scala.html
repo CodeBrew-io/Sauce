@@ -26,10 +26,8 @@
                 <h3>Doc</h3>
                 <ul>
                     <li typeahead-item="doc" ng-repeat="doc in docs" class="results">
-                        <span class="class">{{doc.class}}</span>
-                        <span class="fun">{{doc.fun}}</span>
-                        <span class="signature">{{doc.signature}}</span>
-                        <textarea ui-codemirror="options3" ng-model="doc.code"></textarea>
+                        <div class="fun">{{doc.qualifiedName}}</div>
+                        <div class="signature">{{doc.signature}}</div>
                     </li>
                 </ul>
             </div>

@@ -1,4 +1,4 @@
-app.controller('code', function code($scope, $timeout, insight, fullscreen) {
+app.controller('code', function code($scope, $timeout, insight, snippets, fullscreen) {
 	'use strict';
 	
 	var cmLeft, cmRight = null;
@@ -54,6 +54,10 @@ app.controller('code', function code($scope, $timeout, insight, fullscreen) {
 	$scope.withInsight = true;
 	$scope.toogleInsight = function() {
 		$scope.withInsight = !$scope.withInsight;
+	}
+
+	$scope.publish = function(){
+		snippets.save($scope.code);
 	}
 
 	// (function() { /* The pace of the keyboard before sending data to the server */

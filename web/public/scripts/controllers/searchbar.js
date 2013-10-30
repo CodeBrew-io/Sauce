@@ -14,14 +14,11 @@ app.controller('searchbar', function code($scope, $timeout, snippets, scaladoc, 
 	$scope.search = function(term){
 		snippets.query({terms: term}, function(data){
 			$scope.snippets = data;
-			$scope.all = data;
+			scaladoc.query(term).then(function(data){
+				$scope.docs = data;
+				$scope.all = $scope.snippets.concat($scope.docs);
+			})
 		})
-		// $scope.snippets = [{
-		// 	snippet: {
-		// 		code: "1+1"
-		// 	}
-		// }];
-		// $scope.all = $scope.snippets;
 	};
 
 	$scope.hasDocs = function(){

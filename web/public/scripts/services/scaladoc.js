@@ -20,7 +20,6 @@ app.factory('scaladoc', ['$q', '$rootScope', function($q, $rootScope) {
                 success: function (data) {
                     if (data.error) console.log(data.error)
                     else {
-                        console.log(data.results);
                         $rootScope.$apply(defer.resolve(data.results));
                     }
                 }
