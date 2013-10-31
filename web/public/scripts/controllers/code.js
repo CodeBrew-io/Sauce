@@ -5,6 +5,14 @@ app.controller('code', function code($scope, $timeout, insight, fullscreen, keyb
 	var compilationInfo = [];
 	var cmLeft, cmRight = null;
 
+	keyboardManager.bind('ctrl+space',function(){
+		var allText = "";
+		for (var i = 0; i < autoComplete.length; i++)
+			allText += autoComplete[0] + "\n";
+				
+		console.log(allText);
+	});
+
 	$scope.fullscreen = function(){
 		fullscreen.apply(true);
 	}
@@ -72,9 +80,7 @@ app.controller('code', function code($scope, $timeout, insight, fullscreen, keyb
 	    console.log("aaa");
 	}
 
-	return {
-		
-	}
+
 	// (function() { /* The pace of the keyboard before sending data to the server */
 	// 	$scope.isEditorPending = false;
 	// 	$scope.editorPendingPromise = null;
@@ -97,6 +103,3 @@ app.controller('code', function code($scope, $timeout, insight, fullscreen, keyb
 	// })();
 });
 
-app.run(function(code){
-	code.bindKeyboard();
-})
