@@ -5,19 +5,12 @@ app.controller('code', function code($scope, $timeout, insight, fullscreen, keyb
 	var compilationInfo = [];
 	var cmLeft, cmRight = null;
 
-	keyboardManager.bind('ctrl+space',function(){
-		var allText = "";
-		for (var i = 0; i < autoComplete.length; i++)
-			allText += autoComplete[0] + "\n";
-				
-		console.log(allText);
-	});
-
 	$scope.fullscreen = function(){
 		fullscreen.apply(true);
 	}
 
 	$scope.optionsCode = {
+		extraKeys: {"Ctrl-Space": "autocomplete"},
 		fixedGutter: false,
 		lineNumbers: true,
 		mode: 'text/x-scala',
@@ -25,17 +18,11 @@ app.controller('code', function code($scope, $timeout, insight, fullscreen, keyb
 		smartIndent: false,
 		autofocus: true,
 		onChange: function(cm,event) {			
-			var cur = cm.getCursor();
-			var lines = $scope.code.split("\n");
-			var pos = cur.ch;
-			for (var i = 0; i < cur.line; i++){
-				pos += lines[i].length + 1;
-			}
-			insight($scope.code, pos).then (function(data){
+			updateInsight(cm, function(data){
 					$scope.insight = data.insight;
 					autoComplete = data.completions;
 					compilationInfo = data.CompilationInfo;
-			});	
+			});
 		},
 		onScroll: function(cm) {
 			if ($scope.cmLeft === null) {
@@ -100,5 +87,30 @@ app.controller('code', function code($scope, $timeout, insight, fullscreen, keyb
 	// 		$scope.insightCode = "";
 	// 	}
 	// })();
+
+
+	CodeMirror.commands.autocomplete = function(cm) {
+		updateInsight(cm, function(data){
+			$scope.insight = data.insight;
+			autoComplete = data.completions;
+			compilationInfo = data.CompilationInfo;
+			CodeMirror.showHint(cm, function(cm, options){
+	        	var inner = {from: cm.getCursor(), to: cm.getCursor(), list: autoComplete};
+				return inner;
+	        });		
+		});
+        
+      };
+
+      function updateInsight(cm, functionToCall){
+			var cur = cm.getCursor();
+			var lines = $scope.code.split("\n");
+			var pos = cur.ch;
+			for (var i = 0; i < cur.line; i++){
+				pos += lines[i].length + 1;
+			}
+			insight($scope.code, pos).then (functionToCall);	
+	}
+ 	
 });
 
