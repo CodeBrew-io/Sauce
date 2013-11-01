@@ -3,67 +3,39 @@ package controllers
 import play.api._
 import play.api.mvc._
 import play.api.libs.json._
+import play.api.libs.functional.syntax._
 
-import play.api.data._
-import play.api.data.Forms._
+import model.{Account, Snippet}
 
-import model._
-import model.SnippetsService._
+object Snippets extends Controller with securesocial.core.SecureSocial {
 
-
-/**
- * Created with IntelliJ IDEA.
- * User: shmed
- * Date: 10/15/13
- * Time: 6:09 PM
- * To change this template use File | Settings | File Templates.
- */
-object Snippets extends Controller {
-
-  val snippetForm = Form(
-    tuple(
-      "title"       -> text,
-      "description" -> text,
-      "codeOrigin"  -> text,
-      "codeParsed"  -> text,
-      "tags"        -> text,
-      "scalaVer"    -> text,
-      "user"        -> text
-    )
-  )
-
-  def page = Action { implicit request =>
-    Ok(views.html.elasticsearchtest(Array()))
+  def add = UserAwareAction { implicit request =>
+    (for {
+      user <- request.user
+      email <- user.email
+      JsObject(Seq(("code", JsString(code)))) <- request.body.asJson  
+    } yield {
+      model.Snippets.add(Snippet("", "", code, "", "", "2.10.3", Account.username(email)))
+      Ok("")
+    }).getOrElse(BadRequest(""))
   }
 
-  def add = Action { implicit request =>
+  def queryUser = UserAwareAction { implicit request =>
+    val email = for {
+      user <- request.user
+      email <- user.email
+    } yield(Account.username(email))
 
-    val (title, description, codeOrigin, codeParsed, tags, scalaVar, user) = snippetForm.bindFromRequest.get
-
-    val snippet = Snippet(title, description, codeOrigin, codeParsed, tags, scalaVar, user )
-
-    // val returnJson = SnippetsService.addSnippet(snippet)
-
-    Ok(views.html.elasticsearchtest(Array()))
+    Ok(Json.toJson(
+      model.Snippets.query(terms = None, userName = email).
+        map(_.toJson())
+    ))
   }
 
-  def search(q: Option[String], u: Option[String]) = Action  { implicit request =>
-
-    val response = SnippetsService.search(q.filter(_ != ""), u.filter(_ != ""))
-
-    val jsonArrayResponse = response.map(snippet => snippet.toJson())
-
-    Ok(Json.toJson(jsonArrayResponse))
-    /*Ok(
-      Json.toJson(JsObject (
-        "snippets" -> JsArray(
-        response.map {
-        s => s.toJson()
-      })
-      )
-    )
-    )*/
-
+  def query(terms: Option[String], userName:Option[String], offset: Option[Int]) = Action  { implicit request =>
+    Ok(Json.toJson(
+      model.Snippets.query(terms.filter(_ != ""), userName.filter(_ != ""), offset).
+        map(_.toJson())
+    ))
   }
-
 }

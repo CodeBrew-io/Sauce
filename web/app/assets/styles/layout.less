@@ -47,11 +47,13 @@ header {
 	position: relative;
 
 	height: @header-height;
-	@title-width: 40px;
 
 	* {
 		vertical-align: middle;
 		display: inline-block;
+	}
+
+	.brand, a {
 		color: white;
 	}
 
@@ -86,10 +88,16 @@ header {
 
 			.dropdown {
 				z-index: 10;
+
+				width: 100%;
 			}
 
 			input[type=text] {
 			    font-size: 22px;
+			}
+
+			.doc, .snippet {
+				with: 100%;
 			}
 
 			.doc {
@@ -108,8 +116,10 @@ header {
 				}
 			}
 
+			@title-size: 40px;
+
 			 h3 {
-			    width: @title-width;
+			    width: @title-size;
 			    font-size: 32px;
 			    font-weight: 300;
 			    color: white;
@@ -120,79 +130,37 @@ header {
 			 ul {
 			    background-color: #FFF;
 			    margin: 0;
-			    margin-left: @title-width;
 			    padding: 0;
 			    list-style: none;
-			}
+			    width: calc(~"100% -"@title-size);;
 
-			.results {
-			    min-height: 64px;
-			    opacity: 0.35;
-			    border-bottom: 1px solid black;
-			}
+			    .results {
+			    	color: black;
 
-			.results.active {
-			    opacity: 1;
-			}
+					.CodeMirror {
+						height: 70px;
+						width: 100%;
+					}
 
-			 .results.active .name {
-			    color: black;
-			}
+				    min-height: 64px;
+				    width: 100%;
+				    opacity: 0.35;
+				    border-bottom: 1px solid black;
+				}
 
-			.results .name {
-			    font-size: 20px;
-			    line-height: 30px;
-			}
+				.results.active {
+				    opacity: 1;
+				}
 
-			.results p {
-			    margin-bottom: 5px;
+				.results .name {
+				    font-size: 20px;
+				    line-height: 30px;
+				}
+
+				.results p {
+				    margin-bottom: 5px;
+				}
 			}
 		}
 	}
-
-	// .element {
-	// 	color: @metal-blue;
-	// 	display: inline-block;
-	// 	cursor: pointer;
-	// 	text-align: center;
-	// 	padding-left: 10px;
-	// 	padding-right: 10px;
-
-	// 	a {
-	// 		text-decoration: none;
-	// 		// color: @metal-blue;
-	// 	}
-
-	// 	a:hover {
-	// 		color: @sky;
-	// 	}
-
-	// 	.userddl {
-	// 		margin-top: 2px;
-	// 		float: left;
-	// 		position: absolute;
-	// 		background-color: @light-earth;
-	// 		// border: 1px solid @metal-blue;
-	// 		z-index: 200;
-
-
-	// 		ul {
-	// 			// color: @metal-blue;
-	// 			margin: 0;
-	// 			padding: 0;
-	// 			list-style: none;
-	// 			text-align: left;
-	// 		}
-
-	// 		ul li:hover,
-	// 		ul li:hover a {
-	// 			// color: @sky;
-	// 			// background-color: @earth;
-	// 		}
-
-	// 		ul li div {
-	// 			padding: 1px 10px 1px 10px;
-	// 		}
-	// 	}
-	// }
 }

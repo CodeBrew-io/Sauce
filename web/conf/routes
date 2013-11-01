@@ -1,18 +1,17 @@
-GET     /                           	controllers.Application.index
-GET		/eval							controllers.Application.eval
-GET     /assets/*file               	controllers.Assets.at(path="/public", file)
-GET     /webjars/*file              	controllers.WebJarAssets.at(file)
+GET     /                           controllers.Application.index
+GET     /assets/*file               controllers.Assets.at(path="/public", file)
+GET     /webjars/*file              controllers.WebJarAssets.at(file)
 
-# Login page
+# Eval websocket
+GET		/eval						controllers.Application.eval
+
+# Secure social
 GET     /login                      securesocial.controllers.LoginPage.login
-GET     /logout                     securesocial.controllers.LoginPage.logout
-
-# Providers entry points
+GET     /logout						securesocial.controllers.LoginPage.logout
 GET     /authenticate/:provider     securesocial.controllers.ProviderController.authenticate(provider)
 POST    /authenticate/:provider     securesocial.controllers.ProviderController.authenticateByPost(provider)
 GET     /not-authorized             securesocial.controllers.ProviderController.notAuthorized
 
-# Elastic search entry points
-GET     /snippets/search            controllers.Snippets.search(q: Option[String], u: Option[String])
-POST    /snippets/add               controllers.Snippets.add
-GET     /snippets/add               controllers.Snippets.page
+GET		/snippets/queryUser 		controllers.Snippets.queryUser
+GET     /snippets					controllers.Snippets.query(terms: Option[String], userName: Option[String], offset: Option[Int])
+POST	/snippets 					controllers.Snippets.add

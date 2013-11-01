@@ -19,24 +19,27 @@ object Application extends Controller with securesocial.core.SecureSocial {
   implicit val timeout = Timeout(5 seconds)
 
   def index = UserAwareAction { implicit request =>
-    val account = request.user.map( u => {
-      Account.find(s"${u.lastName}${u.firstName}") match {
+
+    val account = for {
+      user <- request.user
+      email <- user.email
+    } yield {
+      Account.find(Account.username(email)) match {
         case Some(account) => account
         case None => {
           val account = Account(
-            firstName = u.firstName,
-            lastName = u.lastName,
-            userId = u.identityId.userId,
-            providerId = u.identityId.providerId,
-            email = u.email,
-            avatarUrl = u.avatarUrl
+            firstName = user.firstName,
+            lastName = user.lastName,
+            userId = user.identityId.userId,
+            providerId = user.identityId.providerId,
+            email = Some(Account.username(email)),
+            avatarUrl = user.avatarUrl
           )
           Account.insert(account)
           account
         }
       }
-    })
-
+    }
 
     Ok(views.html.index(account))
   }

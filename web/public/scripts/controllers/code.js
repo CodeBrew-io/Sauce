@@ -75,11 +75,10 @@ app.controller('code', function code($scope, $timeout, insight, fullscreen, keyb
 	$scope.toogleInsight = function() {
 		$scope.withInsight = !$scope.withInsight;
 	}
-	$scope.handleKeypress = function(ev) {
-	  //if (ev.which==13)
-	    console.log("aaa");
+	
+	$scope.publish = function(){
+		snippets.save({code: $scope.code});
 	}
-
 
 	// (function() { /* The pace of the keyboard before sending data to the server */
 	// 	$scope.isEditorPending = false;

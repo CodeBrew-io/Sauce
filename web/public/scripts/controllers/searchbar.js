@@ -6,25 +6,25 @@ app.controller('searchbar', function code($scope, $timeout, snippets, scaladoc, 
 		theme: 'solarized light',
 		readOnly: 'nocursor'
 	};
+
 	$scope.docs = [];
 	$scope.snippets = [];
-
-	function SetAllItems(scope) {
-		if (scope.docs.concat !== undefined && scope.docs.concat !== null) {
-			scope.all = scope.docs.concat(scope.snippets);
-		} else {
-			scope.all = scope.snippets;
-		}
-	}
+	$scope.all = [];
 
 	$scope.search = function(term){
-		// We make a promise with Scalex for the documentations.
-		scaladoc.query(term).then(function(data) {
-			$scope.docs = data;
-			SetAllItems($scope);
-		});
-
-		$scope.snippets = snippets.query(term);
+		if(term == '') {
+			$scope.docs = [];
+			$scope.snippets = [];
+			$scope.all = [];
+		} else {
+			snippets.query({terms: term}, function(data){
+				$scope.snippets = data;
+				scaladoc.query(term).then(function(data){
+					$scope.docs = data;
+					$scope.all = $scope.snippets.concat($scope.docs);
+				});
+			});
+		}
 	};
 
 	$scope.hasDocs = function(){

@@ -19,6 +19,9 @@ case class Account(
 )
 
 object Account {
+
+  def username(email: String) = email.takeWhile(_!='@')
+
   val simple = {
     get[String]("account.firstName") ~
     get[String]("account.lastName") ~
@@ -47,6 +50,7 @@ object Account {
   }
 
   def insert(account: Account) = {
+    println(account)
     DB.withConnection { implicit connection =>
       SQL(
         """
@@ -61,7 +65,7 @@ object Account {
           )
         """
       ).on(
-        'userName -> s"${account.lastName}${account.firstName}",
+        'userName -> account.email,
         'firstName -> account.firstName,
         'lastName -> account.lastName,
         'userId -> account.userId,
