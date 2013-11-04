@@ -9,10 +9,9 @@ import model.{Account, Snippet}
 
 object Snippets extends Controller with securesocial.core.SecureSocial {
 
-  def add = UserAwareAction { implicit request =>
+  def add = SecuredAction { implicit request =>
     (for {
-      user <- request.user
-      email <- user.email
+      email <- request.user.email
       JsObject(Seq(("code", JsString(code)))) <- request.body.asJson  
     } yield {
       model.Snippets.add(Snippet("", "", code, "", "", "2.10.3", Account.username(email)))
@@ -20,15 +19,10 @@ object Snippets extends Controller with securesocial.core.SecureSocial {
     }).getOrElse(BadRequest(""))
   }
 
-  def queryUser = UserAwareAction { implicit request =>
-    val email = for {
-      user <- request.user
-      email <- user.email
-    } yield(Account.username(email))
-
+  def queryUser = SecuredAction { implicit request =>
+    val email = request.user.email.map(e => Account.username(e))
     Ok(Json.toJson(
-      model.Snippets.query(terms = None, userName = email).
-        map(_.toJson())
+      model.Snippets.query(terms = None, userName = email).map(_.toJson())
     ))
   }
 

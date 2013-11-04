@@ -18,32 +18,6 @@ import ca.polymtl.log4900.api._
 object Application extends Controller with securesocial.core.SecureSocial {
   implicit val timeout = Timeout(5 seconds)
 
-  def index = UserAwareAction { implicit request =>
-
-    val account = for {
-      user <- request.user
-      email <- user.email
-    } yield {
-      Account.find(Account.username(email)) match {
-        case Some(account) => account
-        case None => {
-          val account = Account(
-            firstName = user.firstName,
-            lastName = user.lastName,
-            userId = user.identityId.userId,
-            providerId = user.identityId.providerId,
-            email = Some(Account.username(email)),
-            avatarUrl = user.avatarUrl
-          )
-          Account.insert(account)
-          account
-        }
-      }
-    }
-
-    Ok(views.html.index(account))
-  }
-
   def eval = WebSocket.using[JsValue] { implicit request =>
     val (enumerator, channel) = Concurrent.broadcast[JsValue]
     val in = Iteratee.foreach[JsValue](content => {
@@ -60,5 +34,17 @@ object Application extends Controller with securesocial.core.SecureSocial {
       })
     }) 
     (in, enumerator)
+  }
+
+  def userInfo = UserAwareAction { implicit request =>
+    val user =  for {
+      user <- request.user
+      email <- user.email
+    } yield Json.obj(
+      "name" -> Account.username(email), 
+      "gravatar" -> user.avatarUrl
+    )
+
+    Ok(user.getOrElse(Json.obj()))
   }
 }
