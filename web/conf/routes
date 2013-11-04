@@ -1,7 +1,3 @@
-GET     /                           controllers.Application.index
-GET     /assets/*file               controllers.Assets.at(path="/public", file)
-GET     /webjars/*file              controllers.WebJarAssets.at(file)
-
 # Eval websocket
 GET		/eval						controllers.Application.eval
 
@@ -11,7 +7,12 @@ GET     /logout						securesocial.controllers.LoginPage.logout
 GET     /authenticate/:provider     securesocial.controllers.ProviderController.authenticate(provider)
 POST    /authenticate/:provider     securesocial.controllers.ProviderController.authenticateByPost(provider)
 GET     /not-authorized             securesocial.controllers.ProviderController.notAuthorized
+GET		/user   					controllers.Application.userInfo
 
 GET		/snippets/queryUser 		controllers.Snippets.queryUser
 GET     /snippets					controllers.Snippets.query(terms: Option[String], userName: Option[String], offset: Option[Int])
 POST	/snippets 					controllers.Snippets.add
+
+# Static assets for oauth
+GET     /webjars/*file              controllers.WebJarAssets.at(file)
+GET     /assets/*file               controllers.Assets.at(path="/public", file)
