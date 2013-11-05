@@ -44,8 +44,11 @@ object ApplicationBuild extends Build {
       resolvers += bintray.Opts.resolver.repo("jedesah", "maven"),
       libraryDependencies ++= Seq(insight) ++ test,
       bashScriptExtraDefines += {
-        val cpStr = (dependencyClasspath in Compile).value map { case Attributed(str) => str} mkString(System.getProperty("path.separator"))
-        """addJava "-Dreplhtml.class.path=$cpStr" """
+        def relativeClassPath(cp: Seq[String]): String = {
+          cp map (n => "$lib_dir/"+n) mkString ":"
+        }
+        val cpStr = relativeClassPath(scriptClasspath.value)
+        s"""addJava "-Dreplhtml.class.path=$cpStr" """
       },
       bashScriptExtraDefines += """addJava "-Duser.dir=$(cd "${app_home}/.."; pwd -P)" """,
       setupReplClassPath <<= (dependencyClasspath in Compile) map {cp =>
