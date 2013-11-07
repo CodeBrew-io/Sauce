@@ -14,7 +14,7 @@ object Snippets extends Controller with securesocial.core.SecureSocial {
       email <- request.user.email
       JsObject(Seq(("code", JsString(code)))) <- request.body.asJson  
     } yield {
-      model.Snippets.add(Snippet("", "", code, "", "", "2.10.3", Account.username(email)))
+      model.Snippets.add(Snippet("","", "", code, "", "", "2.10.3", Account.username(email)))
       Ok("")
     }).getOrElse(BadRequest(""))
   }

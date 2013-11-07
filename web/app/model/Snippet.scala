@@ -9,14 +9,11 @@ import play.api.Play
 import play.api.Play.current
 
 case class Snippet( 
+  id: String,
   title: String, description: String, codeOrigin: String, codeParsed: String,
   tags: String, scalaVersion: String, user: String){
   def toJson() : JsValue = {
-    Json.toJson(
-      Map(
-        "snippet" -> toElasticSearchJson()
-      )
-    )
+    Json.obj("id" -> id, "code" -> codeOrigin)
   }
 
   def toElasticSearchJson(): JsObject = {
@@ -108,6 +105,7 @@ object Snippets {
 
     responses.getHits().hits().map( x => {
       Snippet(
+        x.getId,
         x.field("title").getValue(),
         x.field("description").getValue(),
         x.field("code.origin").getValue(),
