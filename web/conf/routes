@@ -12,6 +12,7 @@ GET		/user   					controllers.Application.userInfo
 GET		/snippets/queryUser 		controllers.Snippets.queryUser
 GET     /snippets					controllers.Snippets.query(terms: Option[String], userName: Option[String], offset: Option[Int])
 POST	/snippets 					controllers.Snippets.add
+DELETE  /snippets					controllers.Snippets.delete(id: String)
 
 # Static assets for oauth
 GET     /webjars/*file              controllers.WebJarAssets.at(file)

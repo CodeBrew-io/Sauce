@@ -137,4 +137,15 @@ object Snippets {
 
     querySnippets(codeTermQueryWithUserFilter, offset)
   }
+
+  def delete(id:String, username:String): Boolean = {
+    val query = boolQuery.
+      must(termQuery("user.raw", username)).
+      must(idsQuery().ids(id))
+
+    indexer.deleteByQuery( 
+      indices = List(indexName),
+      query = query
+    ).getIndices().size == 1
+  }
 }
