@@ -16,20 +16,11 @@ object ApplicationBuild extends Build {
 
   import Dependencies._
 
-  lazy val evalApi = Project(
-    id = "eval-api",
-    base = file("eval-api"),
+  lazy val api = Project(
+    id = "api",
+    base = file("api"),
     settings = Settings.scrooge ++ Seq(
-      name := "eval-api",
-      exportJars := true
-    )
-  )
-
-  lazy val lookupApi = Project(
-    id = "lookup-api",
-    base = file("lookup-api"),
-    settings = Settings.scrooge ++ Seq(
-      name := "lookup-api",
+      name := "api",
       exportJars := true
     )
   )
@@ -58,7 +49,7 @@ object ApplicationBuild extends Build {
       },
       run in Compile <<= (run in Compile).dependsOn(setupReplClassPath)
     ) 
-  ) dependsOn(evalApi, lookupApi)
+  ) dependsOn(api)
  
   lazy val web = Project(
     id = "web",
@@ -69,5 +60,5 @@ object ApplicationBuild extends Build {
         new URL("http://repo.scala-sbt.org/scalasbt/sbt-plugin-snapshots/"))(Resolver.ivyStylePatterns),
       tsOptions := Seq()
     ) ++ livereload
-  ) dependsOn(evalApi, lookupApi)
+  ) dependsOn(api)
 }
