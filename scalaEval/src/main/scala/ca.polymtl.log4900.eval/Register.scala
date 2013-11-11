@@ -4,10 +4,13 @@ package eval
 import api._
 
 import com.twitter.finagle._
+import service.SimpleRetryPolicy
 import builder.ClientBuilder
 import thrift.ThriftClientFramedCodec
 
-import scala.util.Try
+import com.twitter.conversions.time._
+
+import com.twitter.util.Try
 
 object Register {
 	def ready(evalPort: Int): Unit = {
@@ -17,12 +20,17 @@ object Register {
 			port <- Try(env.toInt).toOption
 		} yield (port)).getOrElse(lookup.Config.port)
 
-		println(s"lookup is ${lookupHostname}:${lookupPort}")
+		val forever = new SimpleRetryPolicy[Try[Nothing]]{
+			def shouldRetry(why: Try[Nothing]) = true
+			def backoffAt(retry: Int) = 1.second
+		}
+
 		val client = new lookup.Lookup.FinagledClient(
 			ClientBuilder()
 				.hosts(s"${lookupHostname}:${lookupPort}")
 				.codec(ThriftClientFramedCodec())
 				.hostConnectionLimit(1)
+				.retryPolicy(forever)
 				.build()
 		)
 
