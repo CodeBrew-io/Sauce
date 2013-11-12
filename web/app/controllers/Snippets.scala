@@ -26,6 +26,13 @@ object Snippets extends Controller with securesocial.core.SecureSocial {
     ))
   }
 
+  def delete(id: String) = SecuredAction { implicit request =>
+    request.user.email.map( email =>
+      if(model.Snippets.delete(id, Account.username(email))) Ok("")
+      else BadRequest("")
+    ).getOrElse(BadRequest(""))
+  }
+
   def query(terms: Option[String], userName:Option[String], offset: Option[Int]) = Action  { implicit request =>
     Ok(Json.toJson(
       model.Snippets.query(terms.filter(_ != ""), userName.filter(_ != ""), offset).
