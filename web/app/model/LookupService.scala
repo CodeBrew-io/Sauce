@@ -1,8 +1,8 @@
 package model
 
-import ca.polymtl.log4900.api._
+import io.codebrew.api._
 import lookup._
-import eval.Insight
+import eval.Eval
 
 import com.twitter.util.Future
 import com.twitter.finagle._
@@ -44,11 +44,11 @@ object LookupService {
 }
 
 object Registry {
-	def getEval: Option[Insight.FinagledClient] = evals.headOption
-	def add(eval: Insight.FinagledClient): Unit = {
+	def getEval: Option[Eval.FinagledClient] = evals.headOption
+	def add(eval: Eval.FinagledClient): Unit = {
 		evals = eval :: evals
 	}
-	private var evals = List.empty[Insight.FinagledClient]	
+	private var evals = List.empty[Eval.FinagledClient]	
 }
 
 class LookupImpl extends Lookup.FutureIface {
@@ -61,7 +61,7 @@ class LookupImpl extends Lookup.FutureIface {
 		    .build()
 
 		info.name match {
-			case eval.Config.name => Registry.add(new Insight.FinagledClient(service))
+			case eval.Config.name => Registry.add(new Eval.FinagledClient(service))
 		}
 		Future.value(())
 	}

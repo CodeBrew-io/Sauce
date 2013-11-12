@@ -13,12 +13,55 @@ import akka.util.Timeout
 import akka.pattern.ask
 
 import model._
-import ca.polymtl.log4900.api._
+import io.codebrew.api._
 
 object Application extends Controller with securesocial.core.SecureSocial {
   implicit val timeout = Timeout(5 seconds)
 
-  def eval = WebSocket.using[JsValue] { implicit request =>
+  def keepalive = WebSocket.using[String] { implicit request =>
+    val (enumerator, channel) = Concurrent.broadcast[String]
+    val in = Iteratee.foreach[String](content => {
+      channel.push("pong")
+    }) 
+    (in, enumerator)
+  }
+
+  def insight = WebSocket.using[JsValue] { implicit request =>
+    val (enumerator, channel) = Concurrent.broadcast[JsValue]
+    val in = Iteratee.foreach[JsValue](content => {
+      val code = (content \ "code").as[String]
+      val cid = (content \ "callback_id").as[Int]
+
+      Registry.getEval.map(service => {
+        service.insight(code).map(result => {
+
+          val insight = result.insight.map( r => Seq(
+            "insight" -> JsString(r.insight),
+            "output" -> JsString(r.output)
+          )).getOrElse(Seq())
+
+          val errors = 
+            if(result.infos.isEmpty) Seq()
+            else Seq(
+              "CompilationInfo" -> JsArray(result.infos.map(c => 
+                JsObject(Seq(
+                  "message" ->  JsString(c.message),
+                  "pos" ->  JsNumber(c.pos),
+                  "severity" -> JsNumber(c.severity.value)))
+                )
+              )
+            )
+
+          val callback = Seq("callback_id" -> JsNumber(cid))
+
+          channel.push(JsObject(insight ++ errors ++ callback))
+        })
+      })
+    }) 
+    (in, enumerator)
+  }
+
+  def autocomplete = WebSocket.using[JsValue] { implicit request =>
     val (enumerator, channel) = Concurrent.broadcast[JsValue]
     val in = Iteratee.foreach[JsValue](content => {
       val code = (content \ "code").as[String]
@@ -26,18 +69,9 @@ object Application extends Controller with securesocial.core.SecureSocial {
       val callback = (content \ "callback_id").as[Int]
 
       Registry.getEval.map(service => {
-        service.eval(code, position).map(result => {
+        service.autocomplete(code, position).map(completions => {
           channel.push(JsObject(Seq(
-            "insight" -> JsString(result.insight),
-            "output" -> JsString(result.output),
-            "CompilationInfo" -> JsArray(result.infos.map(c => 
-              JsObject(Seq(
-                "message" ->  JsString(c.message),
-                "pos" ->  JsNumber(c.pos),
-                "severity" -> JsNumber(c.severity.value)))
-              )
-            ),
-            "completions" -> JsArray(result.completions.map(c => JsString(c))),
+            "completions" -> JsArray(completions.map(s => JsString(s))),
             "callback_id" -> JsNumber(callback)
           )))
         })

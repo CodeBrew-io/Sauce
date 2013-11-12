@@ -1,4 +1,4 @@
-package ca.polymtl.log4900
+package io.codebrew
 package eval
 
 import api.eval._
@@ -19,7 +19,7 @@ import java.lang.management.ManagementFactory
 
 import scala.util.Try
 
-object InsightServer {
+object EvalServer {
 	var server = Option.empty[Server]
 	def start(evalPort: Int) {
 		server = Some(
@@ -27,8 +27,8 @@ object InsightServer {
 				.codec(ThriftServerFramedCodec())
 				.name("scala-eval")
 				.bindTo(new InetSocketAddress(evalPort))
-				.build(new Insight.FinagledService(
-					new InsightImpl, 
+				.build(new Eval.FinagledService(
+					new EvalImpl, 
 					new TBinaryProtocol.Factory()
 				))
 		)
@@ -39,7 +39,7 @@ object InsightServer {
 	}
 }
 
-class InsightImpl extends Insight.FutureIface {
+class EvalImpl extends Eval.FutureIface {
 
 	import scala.tools.nsc.interactive.Global
 	import scala.tools.nsc.Settings
@@ -52,45 +52,61 @@ class InsightImpl extends Insight.FutureIface {
 	settings.classpath.value = System.getProperty("replhtml.class.path")
 	val compiler = new Global(settings, reporter)
 
-	def eval(code: String, pos: Int): Future[Result] = {
-		val insightResult = Future(ScalaCodeSheet.computeResults(code, false))
-		val errorAndCompletionResult = Future(compileAndCompletion(code, pos))
-		insightResult join errorAndCompletionResult map { case (insightResult, (infos, completions)) =>
-			Result(
-				insight = insightResult.userRepr,
-				output = insightResult.output,
-				infos = infos,
-				completions = completions
-			)
+	def insight(code: String): Future[Result] = Future {
+		if (code == "") Result(None, Nil)
+		else {
+			val result = ScalaCodeSheet.computeResults(code, false)
+			if(result.subResults.exists(_.isInstanceOf[ScalaCodeSheet.CompileErrorResult])) {
+				Result(None, check(code))
+			} else {
+				Result(Some(InsightResult(result.userRepr, result.output)), Nil)
+			}
 		}
-
 	}
 
-	def compileAndCompletion(code: String, pos: Int): (List[CompilationInfo], List[String]) = {
-		if (code == "") (Nil, Nil)
+	private val beginWrap = "package object Codebrew {\n"
+	private val endWrap = "}"
+
+	def autocomplete(code: String, pos: Int): Future[List[String]] = Future {
+		if(code == "") Nil
 		else {
-			val beginWrap = "package object Codebrew {\n"
-			val endWrap = "}"
+			val file = wrap(code)
+
 			val ajustedPos = pos + beginWrap.length
-			val file = new BatchSourceFile("default", beginWrap + code + endWrap)
-			val response = new Response[Unit]()
-			compiler.askReload(List(file), response)
-			response.get
 			val position = new OffsetPosition(file, ajustedPos)
-			val response1 = new Response[List[compiler.Member]]()
-			compiler.askTypeCompletion(position, response1)
-			val members = response1.get match {
-				case Left(members) => members
+			val response = new Response[List[compiler.Member]]()
+			compiler.askTypeCompletion(position, response)
+			response.get match {
+				case Left(members) => members.map(_.toString)
 				case _ => Nil
 			}
-			val infos = reporter.infos.map {
-				info => CompilationInfo(message = info.msg, pos = info.pos.point - beginWrap.length, severity = convert(info.severity))
-			}.toList
-			(infos, members.map(_.sym.name.toString))
 		}
 	}
 
-	def convert(severity: reporter.Severity): Severity = severity match {
+	private def check(code: String): List[CompilationInfo] = {
+		if (code == "") (Nil)
+		else {
+			wrap(code)
+
+			reporter.infos.map {
+				info => CompilationInfo(
+					message = info.msg,
+					pos = info.pos.point - beginWrap.length, 
+					severity = convert(info.severity)
+				)
+			}.toList
+		}
+	}
+
+	private def wrap(code: String): BatchSourceFile = {
+		val file = new BatchSourceFile("default", beginWrap + code + endWrap)
+		val response = new Response[Unit]()
+		compiler.askReload(List(file), response)
+		response.get
+		file
+	}
+
+	private def convert(severity: reporter.Severity): Severity = severity match {
 		case reporter.INFO => Severity.Info
 		case reporter.WARNING => Severity.Warning
 		case reporter.ERROR => Severity.Error
@@ -105,7 +121,7 @@ object Main extends App {
 		port <- Try(env.toInt).toOption
 	} yield (port)).getOrElse(Config.port)
 
-	InsightServer.start(evalPort)
+	EvalServer.start(evalPort)
 	Register.ready(evalPort)
 
 	private def createRunningPid() = {
