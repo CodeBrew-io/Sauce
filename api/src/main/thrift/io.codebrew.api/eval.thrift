@@ -18,7 +18,12 @@ struct Result {
 	2: list<CompilationInfo> infos
 }
 
+struct Completion {
+    1: string name,
+    2: string signature
+}
+
 service Eval {
 	Result insight(1: string code),
-	list<string> autocomplete(1: string code, 2: i32 pos)
+	list<Completion> autocomplete(1: string code, 2: i32 pos)
 }

@@ -67,19 +67,20 @@ class EvalImpl extends Eval.FutureIface {
 	private val beginWrap = "package object Codebrew {\n"
 	private val endWrap = "}"
 
-	def autocomplete(code: String, pos: Int): Future[List[String]] = Future {
+	def autocomplete(code: String, pos: Int): Future[List[Completion]] = Future {
 		if(code == "") Nil
 		else {
 			val file = wrap(code)
-
 			val ajustedPos = pos + beginWrap.length
 			val position = new OffsetPosition(file, ajustedPos)
 			val response = new Response[List[compiler.Member]]()
 			compiler.askTypeCompletion(position, response)
 			response.get match {
-				case Left(members) => members.map(_.toString)
-				case _ => Nil
-			}
+        		case Left(members) => compiler.ask( () =>
+          			members.map(member => Completion(member.sym.decodedName, member.sym.defString))
+        		)
+        		case Right(e) => throw e
+      		}
 		}
 	}
 
@@ -102,7 +103,7 @@ class EvalImpl extends Eval.FutureIface {
 		val file = new BatchSourceFile("default", beginWrap + code + endWrap)
 		val response = new Response[Unit]()
 		compiler.askReload(List(file), response)
-		response.get
+		response.get // block until the presentation reloaded the code
 		file
 	}
 

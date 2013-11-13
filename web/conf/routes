@@ -1,6 +1,5 @@
 # Eval websocket
-GET		/insight						controllers.Application.insight
-GET		/autocomplete					controllers.Application.autocomplete
+GET		/eval						controllers.Application.eval
 
 # Secure social
 GET     /login                      securesocial.controllers.LoginPage.login
