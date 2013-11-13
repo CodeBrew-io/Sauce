@@ -75,7 +75,7 @@ object Snippets {
     indexer.waitTillActive()
   }
 
-  def add(snippet: Snippet): Unit = {
+  def add(snippet: Snippet): String = {
     val jsonSnippet = Json.obj (
       "title" -> snippet.title,
       "description" -> snippet.description,
@@ -88,8 +88,7 @@ object Snippets {
     )
 
     indexer.putMapping(indexName, indexType, snippetMapping)
-    indexer.index(indexName, indexType, null, Json.stringify(jsonSnippet))
-    println(Json.stringify(jsonSnippet))
+    indexer.index(indexName, indexType, null, Json.stringify(jsonSnippet)).getId
   }
 
   def querySnippets(pQuery: QueryBuilder, offset: Option[Int]): Array[Snippet] = {
