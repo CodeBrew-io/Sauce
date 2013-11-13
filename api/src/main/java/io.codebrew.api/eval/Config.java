@@ -1,4 +1,4 @@
-package ca.polymtl.log4900.api.eval;
+package io.codebrew.api.eval;
 
 public class Config {
 	public static final int port = 8001;
