@@ -70,7 +70,7 @@ class EvalImpl extends Eval.FutureIface {
 	def autocomplete(code: String, pos: Int): Future[List[Completion]] = Future {
 		if(code == "") Nil
 		else {
-			val file = wrap(code)
+			val file = reload(code)
 			val ajustedPos = pos + beginWrap.length
 			val position = new OffsetPosition(file, ajustedPos)
 			val response = new Response[List[compiler.Member]]()
@@ -87,8 +87,7 @@ class EvalImpl extends Eval.FutureIface {
 	private def check(code: String): List[CompilationInfo] = {
 		if (code == "") (Nil)
 		else {
-			wrap(code)
-
+			parse(code)
 			reporter.infos.map {
 				info => CompilationInfo(
 					message = info.msg,
@@ -100,11 +99,19 @@ class EvalImpl extends Eval.FutureIface {
 	}
 
 	private def wrap(code: String): BatchSourceFile = {
-		val file = new BatchSourceFile("default", beginWrap + code + endWrap)
+		new BatchSourceFile("default", beginWrap + code + endWrap)
+	}
+
+	private def reload(code: String): BatchSourceFile = {
+		val file = wrap(code)
 		val response = new Response[Unit]()
 		compiler.askReload(List(file), response)
-		response.get // block until the presentation reloaded the code
+		response.get // block
 		file
+	}
+
+	private def parse(code: String): Unit = {
+		autocomplete(code,0) // fixme
 	}
 
 	private def convert(severity: reporter.Severity): Severity = severity match {

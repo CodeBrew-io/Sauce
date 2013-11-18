@@ -9,42 +9,39 @@ import model.Api
 
 class HelloWorldSpec extends Specification { def is = s2"""
 
-    Api scpecification
+    Api specification
 
     The Api json reader
-    	must parse ping											$ping
-    	must parse insight										$insight
-    	must parse autocompletion								$autocomplete
-    	must parse all in order: ping, insight, autocomplete	$all
+    	must read insight              $insight
+    	must read autocompletion       $autocomplete
+    	must read all in order: 
+            insight                    $allInsight
+            autocomplete               $allAutocomplete
+            detect invalid             $allInvalid
+
+    The Api json writer
+        must write the insight result       $insightResult
+        must write the error result         $errorResult
+        must write the completion result    $completionResult
 """
 
-	val pingJson = Json.obj(
-		"ping" -> Json.obj(
-			"callback_id" -> 1
-		)
-	)
+    val insightJson = Json.obj(
+        "insight" -> Json.obj(
+            "code" -> "1+1",
+            "callback_id" -> 1
+        )
+    )
 
-	val insightJson = Json.obj(
-		"insight" -> Json.obj(
-			"code" -> "1+1",
-			"callback_id" -> 1
-		)
-	)
+    val autocompleteJson = Json.obj(
+        "autocomplete" -> Json.obj(
+            "code" -> "1+1",
+            "position" -> 12,
+            "callback_id" -> 1
+        )
+    )
 
-	val autocompleteJson = Json.obj(
-		"autocomplete" -> Json.obj(
-			"code" -> "1+1",
-			"position" -> 12,
-			"callback_id" -> 1
-		)
-	)
-
-    def ping = {
-    	Api.ping.reads(pingJson) must beLike { 
-    		case JsSuccess(1, _) => ok
-    		case JsError(_) => ko
-    	}
-    }
+    import _root_.io.codebrew.api._
+    import eval._
 
     def insight = {
     	Api.insight.reads(insightJson) must beLike { 
@@ -60,10 +57,60 @@ class HelloWorldSpec extends Specification { def is = s2"""
     	}
     }
 
-    def all = {
-    	Api.all(pingJson, (cid) => true, (code, cid) => false, (code, pos, cid) => false, () => false ) ==== true
-    	Api.all(insightJson, (cid) => false, (code, cid) => true, (code, pos, cid) => false, () => false ) ==== true
-    	Api.all(autocompleteJson, (cid) => false, (code, cid) => false, (code, pos, cid) => true, () => false ) ==== true
-    	Api.all(Json.obj("a" -> "1"), (cid) => false, (code, cid) => false, (code, pos, cid) => false, () => true ) ==== true
+    def allInsight = {
+    	Api.all(insightJson, (code, cid) => true, (code, pos, cid) => false, () => false ) ==== true
+    }
+
+    def allAutocomplete = {
+    	Api.all(autocompleteJson, (code, cid) => false, (code, pos, cid) => true, () => false ) ==== true
+    }
+
+    def allInvalid = {
+    	Api.all(Json.obj("a" -> "1"), (code, cid) => false, (code, pos, cid) => false, () => true ) ==== true
+    }
+
+    def insightResult = {
+        Api.insightResult(Result(
+            Some(InsightResult("a = 1", "1")),
+            Nil
+        ), 1) ==== Json.obj(
+            "insight" -> JsString("a = 1"),
+            "output" -> JsString("1"),
+            "errors" -> JsArray(),
+            "warnings" -> JsArray(),
+            "infos" -> JsArray(),
+            "callback_id" -> 1
+        )
+    }
+
+    def errorResult = {
+        Api.insightResult(Result(
+            None,
+            List(
+                CompilationInfo("e1", 1, Severity.Error),
+                CompilationInfo("w1", 1, Severity.Warning),
+                CompilationInfo("i1", 1, Severity.Info)
+            )
+        ), 1) ==== Json.obj(
+            "insight" -> JsString(""),
+            "output" -> JsString(""),
+            "errors" -> JsArray(Seq( Json.obj("message"-> "e1", "position" -> 1))),
+            "warnings" -> JsArray(Seq( Json.obj("message"-> "w1", "position" -> 1))),
+            "infos" -> JsArray(Seq( Json.obj("message"-> "i1", "position" -> 1))),
+            "callback_id" -> 1
+        )
+    }
+
+    def completionResult = {
+        Api.autocompleteResult(List(
+            Completion("a", "a"),
+            Completion("b", "b")
+        ), 1) ==== Json.obj(
+            "completions" -> JsArray(Seq(
+                Json.obj("name" -> "a", "signature" -> "a"),
+                Json.obj("name" -> "b", "signature" -> "b")
+            )),
+            "callback_id" -> 1
+        )
     }
 }
