@@ -14,8 +14,8 @@ object Snippets extends Controller with securesocial.core.SecureSocial {
       email <- request.user.email
       JsObject(Seq(("code", JsString(code)))) <- request.body.asJson  
     } yield {
-      model.Snippets.add(Snippet("","", "", code, "", "", "2.10.3", Account.username(email)))
-      Ok("")
+      val id = model.Snippets.add(Snippet("","", "", code, "", "", "2.10.3", Account.username(email)))
+      Ok(Json.obj("id" -> id))
     }).getOrElse(BadRequest(""))
   }
 
@@ -24,6 +24,13 @@ object Snippets extends Controller with securesocial.core.SecureSocial {
     Ok(Json.toJson(
       model.Snippets.query(terms = None, userName = email).map(_.toJson())
     ))
+  }
+
+  def delete(id: String) = SecuredAction { implicit request =>
+    request.user.email.map( email =>
+      if(model.Snippets.delete(id, Account.username(email))) Ok("")
+      else BadRequest("")
+    ).getOrElse(BadRequest(""))
   }
 
   def query(terms: Option[String], userName:Option[String], offset: Option[Int]) = Action  { implicit request =>
