@@ -9,7 +9,7 @@ import model.Api
 
 class HelloWorldSpec extends Specification { def is = s2"""
 
-    Api scpecification
+    Api specification
 
     The Api json reader
     	must read insight              $insight

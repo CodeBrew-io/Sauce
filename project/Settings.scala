@@ -31,6 +31,8 @@ object Settings {
 			System.setProperty("replhtml.class.path", cpStr)
 		},
 		run in Compile <<= (run in Compile).dependsOn(Settings.setupReplClassPath),
+		test in Test <<= (test in Test).dependsOn(Settings.setupReplClassPath),
+		testOnly in Test <<= (testOnly in Test).dependsOn(Settings.setupReplClassPath),
 	    bashScriptExtraDefines += {
 			def relativeClassPath(cp: Seq[String]): String = {
 				cp map (n => "$lib_dir/"+n) mkString ":"
