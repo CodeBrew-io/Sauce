@@ -8,6 +8,9 @@ import anorm.SqlParser._
 
 import scala.language.postfixOps
 
+import play.api.libs.json._
+import play.api.libs.functional.syntax._
+
 case class Account(
   firstName: String, 
   lastName: String, 
@@ -35,10 +38,19 @@ object Account {
     }
   }
 
-  def find(userName: String): Option[Account] = {
+  def findUsername(userName: String): Option[Account] = {
     DB.withConnection { implicit connection =>
       SQL("select * from account where userName = {userName} limit 1;").
         on('userName -> userName).
+        as(simple.singleOpt)
+    }
+  }
+
+  def findProvider(userId: String, providerId: String ): Option[Account] = {
+    DB.withConnection { implicit connection =>
+      SQL("select * from account where userId = {userId} AND providerId = {providerId} limit 1;").
+        on('userId -> userId,
+            'providerId -> providerId).
         as(simple.singleOpt)
     }
   }
