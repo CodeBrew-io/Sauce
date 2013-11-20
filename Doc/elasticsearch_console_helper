@@ -1,0 +1,103 @@
+ 
+import scalastic.elasticsearch.Indexer
+import org.elasticsearch.index.query._, FilterBuilders._, QueryBuilders._
+
+import scala.collection.JavaConversions._
+
+import play.api.libs.json._
+import org.elasticsearch.search.facet.terms._
+import org.elasticsearch.search.facet.FacetBuilders._
+import play.api.Play
+import play.api.Play.current
+
+ val size = 10
+
+  val clusterName = "snippets_service_cluster"
+  val host = "localhost"
+  val port = 9300
+
+  val indexer = Indexer.transport(settings = Map("cluster.name" -> clusterName), host = host, ports=Seq(port))
+
+  val indexName = "snippets_service_index"
+  val indexType = "user_snippets"
+
+  val snippetMapping = s"""
+   |{
+   |  "$indexType":{
+   |    "properties" : {
+   |       "title" : {"type" : "string", "analyzer" : "snowball"},
+   |       "description" : {"type" : "string", "analyzer" : "snowball"},
+   |       "code" : {
+   |           "type" : "multi_field",
+   |           "fields" : {
+   |              "origin" : {"type" : "string", "index" : "analyzed"},
+   |              "raw" : {"type" : "string", "index" : "not_analyzed"}
+   |           }
+   |        },
+   |       "tags" : {"type" : "string", "analyzer" : "keyword"},
+   |       "scalaVersion": {"type" : "string"},
+   |       "user ": {
+   |           "type" : "multi_field",
+   |           "fields" : {
+   |              "origin" : {"type" : "string", "index" : "analyzed"},
+   |              "raw" : {"type" : "string", "index" : "not_analyzed"}
+   |        }
+   |      }
+   |    }
+   |  }
+   |}""".stripMargin
+
+   indexer.putMapping(indexName, indexType, snippetMapping)
+
+case class Snippet( 
+  id: String,
+  title: String, description: String, codeOrigin: String, codeRaw: String,
+  tags: String, scalaVersion: String, user: String){
+  def toJson() : JsValue = {
+    Json.obj("id" -> id, "code" -> codeOrigin)
+  }
+
+  def toElasticSearchJson(): JsObject = {
+    Json.obj (
+      "title" -> title,
+      "description" -> description,
+      "code.origin" -> codeOrigin,
+      "code.raw" -> codeOrigin,
+      "tags" -> tags,
+      "scalaVersion" -> scalaVersion,
+      "user.origin" -> user,
+      "user.raw" -> user
+    )
+  }
+}
+
+  def querySnippets(pQuery: QueryBuilder, offset: Option[Int]): Array[Snippet] = {
+
+    indexer.putMapping(indexName, indexType, snippetMapping)
+
+    val responses = indexer.search( indices = List(indexName),
+      query = pQuery,
+      fields = Seq("title", "description", "code.origin", "code.raw", "tags", "scalaVersion", "user.origin"),
+      from = offset,
+      size = Some(size)
+    )
+
+    responses.getHits().hits().map( x => {
+      Snippet(
+        x.getId,
+        x.field("title").getValue(),
+        x.field("description").getValue(),
+        x.field("code.origin").getValue(),
+        x.field("code.raw").getValue(),
+        x.field("tags").getValue(),
+        x.field("scalaVersion").getValue(),
+        x.field("user.origin").getValue()
+      )
+    })
+  }
+
+
+
+var response = indexer.search(query=matchAllQuery(), facets=Seq(termsFacet("facetDistinctCode").field("code.raw").size(10)))
+val facet: TermsFacet = response.getFacets.facet("facetDistinctCode")
+facet.getEntries().foreach(x=>println(x.getTerm))

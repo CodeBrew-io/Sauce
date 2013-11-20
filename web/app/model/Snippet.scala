@@ -10,7 +10,7 @@ import play.api.Play.current
 
 case class Snippet( 
   id: String,
-  title: String, description: String, codeOrigin: String, codeParsed: String,
+  title: String, description: String, codeOrigin: String, codeRaw: String,
   tags: String, scalaVersion: String, user: String){
   def toJson() : JsValue = {
     Json.obj("id" -> id, "code" -> codeOrigin)
@@ -21,10 +21,10 @@ case class Snippet(
       "title" -> title,
       "description" -> description,
       "code.origin" -> codeOrigin,
-      "code.parsed" -> codeParsed,
+      "code.raw" -> codeRaw,
       "tags" -> tags,
       "scalaVersion" -> scalaVersion,
-      "user.field" -> user,
+      "user.origin" -> user,
       "user.raw" -> user
     )
   }
@@ -53,7 +53,7 @@ object Snippets {
    |           "type" : "multi_field",
    |           "fields" : {
    |              "origin" : {"type" : "string", "index" : "analyzed"},
-   |              "parsed" : {"type" : "string", "index" : "analyzed"}
+   |              "raw" : {"type" : "string", "index" : "not_analyzed"}
    |           }
    |        },
    |       "tags" : {"type" : "string", "analyzer" : "keyword"},
@@ -61,7 +61,7 @@ object Snippets {
    |       "user ": {
    |           "type" : "multi_field",
    |           "fields" : {
-   |              "field" : {"type" : "string", "index" : "analyzed"},
+   |              "origin" : {"type" : "string", "index" : "analyzed"},
    |              "raw" : {"type" : "string", "index" : "not_analyzed"}
    |        }
    |      }
@@ -80,10 +80,10 @@ object Snippets {
       "title" -> snippet.title,
       "description" -> snippet.description,
       "code.origin" -> snippet.codeOrigin,
-      "code.parsed" -> snippet.codeParsed,
+      "code.raw" -> snippet.codeOrigin,
       "tags" -> snippet.tags,
       "scalaVersion" -> snippet.scalaVersion,
-      "user.field" -> snippet.user,
+      "user.origin" -> snippet.user,
       "user.raw" -> snippet.user
     )
 
@@ -97,7 +97,7 @@ object Snippets {
 
     val responses = indexer.search( indices = List(indexName),
       query = pQuery,
-      fields = Seq("title", "description", "code.origin", "code.parsed", "tags", "scalaVersion", "user.field"),
+      fields = Seq("title", "description", "code.origin", "code.raw", "tags", "scalaVersion", "user.origin"),
       from = offset,
       size = Some(size)
     )
@@ -108,10 +108,10 @@ object Snippets {
         x.field("title").getValue(),
         x.field("description").getValue(),
         x.field("code.origin").getValue(),
-        x.field("code.parsed").getValue(),
+        x.field("code.raw").getValue(),
         x.field("tags").getValue(),
         x.field("scalaVersion").getValue(),
-        x.field("user.field").getValue()
+        x.field("user.origin").getValue()
       )
     })
   }
