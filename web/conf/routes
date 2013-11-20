@@ -1,5 +1,5 @@
 # Eval websocket
-GET		/eval						controllers.Application.eval
+GET		/eval						controllers.Eval.eval
 
 # Secure social
 GET     /login                      securesocial.controllers.LoginPage.login
@@ -7,7 +7,10 @@ GET     /logout						securesocial.controllers.LoginPage.logout
 GET     /authenticate/:provider     securesocial.controllers.ProviderController.authenticate(provider)
 POST    /authenticate/:provider     securesocial.controllers.ProviderController.authenticateByPost(provider)
 GET     /not-authorized             securesocial.controllers.ProviderController.notAuthorized
-GET		/user   					controllers.Application.userInfo
+
+GET		/user   					controllers.Users.info
+GET		/user/exists				controllers.Users.exists
+POST 	/user 						controllers.Users.add
 
 GET		/snippets/queryUser 		controllers.Snippets.queryUser
 GET     /snippets					controllers.Snippets.query(terms: Option[String], userName: Option[String], offset: Option[Int])

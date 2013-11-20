@@ -21,7 +21,18 @@ case class Account(
   userName: Pk[String] = NotAssigned
 )
 
+case class SignIn(userName: String, email: Option[String])
+
 object Account {
+  implicit object PkFormat extends Format[Pk[String]] {
+      def reads(json: JsValue): JsResult[Pk[String]] = JsSuccess (
+          json.asOpt[String].map(id => Id(id)).getOrElse(NotAssigned)
+      )
+      def writes(username: Pk[String]): JsValue = username.map(JsString(_)).getOrElse(JsNull)
+  }
+  implicit val writer = Json.writes[Account]
+
+  implicit val signUpReader = Json.reads[SignIn]
 
   def username(email: String) = email.takeWhile(_!='@')
 
@@ -37,6 +48,8 @@ object Account {
         Account(firstName,  lastName,  userId,  providerId,  email,  avatarUrl,  userName)
     }
   }
+
+  def exists(userName: String) = findUsername(userName).isEmpty
 
   def findUsername(userName: String): Option[Account] = {
     DB.withConnection { implicit connection =>
