@@ -15,7 +15,7 @@ import akka.pattern.ask
 
 import model._
 
-object Application extends Controller with securesocial.core.SecureSocial {
+object Eval extends Controller {
 	implicit val timeout = Timeout(5 seconds)
 
 	def eval = WebSocket.using[JsValue] { implicit request =>
@@ -24,17 +24,5 @@ object Application extends Controller with securesocial.core.SecureSocial {
 			EvalService(content).map(out => channel.push(out))
 		}) 
 		(in, enumerator)
-	}
-
-	def userInfo = UserAwareAction { implicit request =>
-		val user =  for {
-			user <- request.user
-			email <- user.email
-		} yield Json.obj(
-			"name" -> Account.username(email), 
-			"gravatar" -> user.avatarUrl
-		)
-
-		Ok(user.getOrElse(Json.obj()))
 	}
 }
