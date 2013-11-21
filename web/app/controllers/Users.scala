@@ -20,7 +20,6 @@ object Users extends Controller with securesocial.core.SecureSocial {
 		import Account.writer
 
 		val user = request.user.map{ secureSocialUser =>
-			val id = secureSocialUser.identityId
 			val securesocialJson = Json.obj(
 				"secureSocialUser" -> Json.obj(
 					"firstname" -> secureSocialUser.firstName,
@@ -29,7 +28,7 @@ object Users extends Controller with securesocial.core.SecureSocial {
 					"gravatar" -> secureSocialUser.avatarUrl
 				)
 			)
-		 	Account.findProvider(id.userId, id.providerId).map{ codeBrewUser =>
+		 	Account.find(secureSocialUser).map{ codeBrewUser =>
 				Json.obj("codeBrewUser" -> Json.toJson(codeBrewUser))
 			}.getOrElse(securesocialJson)
 		}	
@@ -57,7 +56,7 @@ object Users extends Controller with securesocial.core.SecureSocial {
 				user.avatarUrl,
 				Id(signin.userName)
 			)
-			// Account.insert(newUser)
+			Account.insert(newUser)
 			Ok(Json.obj("codeBrewUser" -> Json.toJson(newUser)))
 		}).getOrElse(BadRequest(""))
 	}

@@ -11,6 +11,8 @@ import scala.language.postfixOps
 import play.api.libs.json._
 import play.api.libs.functional.syntax._
 
+import securesocial.core.Identity
+
 case class Account(
   firstName: String, 
   lastName: String, 
@@ -59,7 +61,12 @@ object Account {
     }
   }
 
-  def findProvider(userId: String, providerId: String ): Option[Account] = {
+  def find(su: Identity): Option[Account] = {
+    val id = su.identityId
+    Account.findProvider(id.userId, id.providerId)
+  }
+
+  private def findProvider(userId: String, providerId: String ): Option[Account] = {
     DB.withConnection { implicit connection =>
       SQL("select * from account where userId = {userId} AND providerId = {providerId} limit 1;").
         on('userId -> userId,
