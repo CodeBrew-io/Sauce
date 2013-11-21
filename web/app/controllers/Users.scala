@@ -37,12 +37,8 @@ object Users extends Controller with securesocial.core.SecureSocial {
 		Ok(user.getOrElse(Json.obj()))
 	}
 
-	def exists = Action { implicit request =>
-	    (for {
-	      JsObject(Seq(("username", JsString(username)))) <- request.body.asJson
-	    } yield {
-	           Ok(Json.obj("result" -> Account.exists(username)))
-	    }).getOrElse(BadRequest(""))
+	def exists(username: String) = Action { implicit request =>
+		Ok(Json.obj("result" -> Account.exists(username)))
 	}
 
 	def add = SecuredAction { implicit request =>

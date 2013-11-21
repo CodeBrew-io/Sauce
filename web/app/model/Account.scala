@@ -49,7 +49,7 @@ object Account {
     }
   }
 
-  def exists(userName: String) = findUsername(userName).isEmpty
+  def exists(userName: String) = !findUsername(userName).isEmpty
 
   def findUsername(userName: String): Option[Account] = {
     DB.withConnection { implicit connection =>

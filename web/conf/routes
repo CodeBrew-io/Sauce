@@ -9,7 +9,7 @@ POST    /authenticate/:provider     securesocial.controllers.ProviderController.
 GET     /not-authorized             securesocial.controllers.ProviderController.notAuthorized
 
 GET		/user   					controllers.Users.info
-GET		/user/exists				controllers.Users.exists
+GET		/user/exists/:userName		controllers.Users.exists(userName)
 POST 	/user 						controllers.Users.add
 
 GET		/snippets/queryUser 		controllers.Snippets.queryUser
