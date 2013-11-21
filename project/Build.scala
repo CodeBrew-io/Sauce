@@ -24,7 +24,7 @@ object ApplicationBuild extends Build {
     base = file("eval"),
     settings = default ++ service ++ bintrayResolverSettings ++ repl ++ Seq(
       name := "eval",
-      resolvers += bintray.Opts.resolver.repo("jedesah", "maven"),
+      resolvers += bintray.Opts.resolver.repo("codebrew-io", "maven"),
       libraryDependencies ++= Seq(insight, specs2)
     ) 
   ) dependsOn(api)
