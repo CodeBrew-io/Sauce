@@ -19,11 +19,11 @@ object ApplicationBuild extends Build {
     )
   )
 
-  lazy val eval = Project(
-    id = "eval",
-    base = file("eval"),
+  lazy val scalaEval = Project(
+    id = "scalaEval",
+    base = file("scalaEval"),
     settings = default ++ service ++ bintrayResolverSettings ++ repl ++ Seq(
-      name := "eval",
+      name := "scalaEval",
       resolvers += bintray.Opts.resolver.repo("codebrew-io", "maven"),
       libraryDependencies ++= Seq(insight, specs2)
     ) 
