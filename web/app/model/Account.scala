@@ -75,7 +75,6 @@ object Account {
   }
 
   def insert(account: Account) = {
-    println(account)
     DB.withConnection { implicit connection =>
       SQL(
         """
@@ -90,7 +89,7 @@ object Account {
           )
         """
       ).on(
-        'userName -> account.email,
+        'userName -> account.userName,
         'firstName -> account.firstName,
         'lastName -> account.lastName,
         'userId -> account.userId,

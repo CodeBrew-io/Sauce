@@ -48,7 +48,7 @@ object Users extends Controller with securesocial.core.SecureSocial {
 			signin <- json.asOpt[SignIn]
 		} yield {
 			val user = request.user
-			Account.insert(Account(
+			val newUser = Account(
 				user.firstName,
 				user.lastName,
 				user.identityId.userId,
@@ -56,8 +56,9 @@ object Users extends Controller with securesocial.core.SecureSocial {
 				signin.email,
 				user.avatarUrl,
 				Id(signin.userName)
-			))
-			Ok("")
+			)
+			// Account.insert(newUser)
+			Ok(Json.obj("codeBrewUser" -> Json.toJson(newUser)))
 		}).getOrElse(BadRequest(""))
 	}
 }
