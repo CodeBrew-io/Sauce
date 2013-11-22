@@ -6,7 +6,10 @@ import api.eval._
 import com.github.jedesah.codesheet.api.ScalaCodeSheet
 
 import com.twitter._
-import util.{Future, FutureTask}
+import util.Future
+
+import scala.concurrent.duration._
+import java.util.concurrent.{TimeoutException, Callable, FutureTask, TimeUnit}
 
 class EvalImpl extends Eval.FutureIface {
 
@@ -22,13 +25,35 @@ class EvalImpl extends Eval.FutureIface {
 	val compiler = new Global(settings, reporter)
 
 	def insight(code: String): Future[Result] = Future {
-		if (code == "") Result(None, Nil)
+		if (code == "") Result(insight = None, infos = Nil, timeout = false)
 		else {
-			val result = ScalaCodeSheet.computeResults(code, false)
-			if(result.subResults.exists(_.isInstanceOf[ScalaCodeSheet.CompileErrorResult])) {
-				Result(None, check(code))
+			val compilerInfos = check(code)
+			if(compilerInfos.exists(_.severity == Severity.Error)) {
+				Result(insight = None, infos = compilerInfos, timeout = false)
 			} else {
-				Result(Some(InsightResult(result.userRepr, result.output)), Nil)
+				// val insight = withTimeout(5.seconds){ ScalaCodeSheet.computeResults(code, false) }.map( r =>
+				// 	InsightResult(r.userRepr, r.output)
+				// )
+				val insight = None
+				Result(insight, compilerInfos, timeout = insight.isEmpty)
+			}
+		}
+	}
+
+	// TODO: avoid creating another thread for each comp. result
+	def withTimeout[T](timeout: Duration)(f: => T): Option[T]= {
+		val task = new FutureTask(new Callable[T]() {
+			def call = f
+		})
+		val thread = new Thread( task )
+		try {
+			thread.start()
+			Some(task.get(timeout.toMillis, TimeUnit.MILLISECONDS))
+		} catch {
+			case e: TimeoutException => None
+		} finally { 
+			if( thread.isAlive ){
+				thread.interrupt()
 			}
 		}
 	}
