@@ -72,13 +72,15 @@ class HelloWorldSpec extends Specification { def is = s2"""
     def insightResult = {
         Api.insightResult(Result(
             Some(InsightResult("a = 1", "1")),
-            Nil
+            Nil,
+            false
         ), 1) ==== Json.obj(
             "insight" -> JsString("a = 1"),
             "output" -> JsString("1"),
             "errors" -> JsArray(),
             "warnings" -> JsArray(),
             "infos" -> JsArray(),
+            "timeout" -> false,
             "callback_id" -> 1
         )
     }
@@ -90,13 +92,14 @@ class HelloWorldSpec extends Specification { def is = s2"""
                 CompilationInfo("e1", 1, Severity.Error),
                 CompilationInfo("w1", 1, Severity.Warning),
                 CompilationInfo("i1", 1, Severity.Info)
-            )
+            ), false
         ), 1) ==== Json.obj(
             "insight" -> JsString(""),
             "output" -> JsString(""),
             "errors" -> JsArray(Seq( Json.obj("message"-> "e1", "position" -> 1))),
             "warnings" -> JsArray(Seq( Json.obj("message"-> "w1", "position" -> 1))),
             "infos" -> JsArray(Seq( Json.obj("message"-> "i1", "position" -> 1))),
+            "timeout" -> false,
             "callback_id" -> 1
         )
     }

@@ -1,7 +1,7 @@
 import sbt._
 
 object Dependencies {
-	val insight = "com.github.jedesah" %% "codesheet-api" % "0.5"
+	val insight = "com.github.jedesah" %% "scala-insight" % "0.6.0"
 
 	private val finagleVer = "6.5.0"
 	lazy val thrift = "org.apache.thrift" % "libthrift" % "0.8.0"
@@ -19,6 +19,7 @@ object Dependencies {
 
 	val frontEnd = Seq(
 		"org.webjars" % "bootstrap" % "3.0.0",
+		"org.webjars" % "font-awesome" % "4.0.3",
 		"org.webjars" %% "webjars-play" % "2.2.0-RC1"
 	)
 

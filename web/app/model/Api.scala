@@ -81,6 +81,7 @@ object Api {
 			Seq(
 				"insight" -> JsString(insight),
 				"output" -> JsString(output),
+				"timeout" -> JsBoolean(r.timeout),
 				callback_id -> JsNumber(cid)
 			)
 		)

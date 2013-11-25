@@ -1,0 +1,49 @@
+.login {
+	@metal: #3d495f;
+
+	position: absolute;
+	top: 50%;
+	left: 50%;
+	transform: translate(-50%, -50%);
+	-webkit-transform: translate(-50%, -50%);
+	-moz-transform: translate(-50%, -50%);
+
+	z-index: 100;
+	background-color: @metal;
+	color: white;
+	padding: 5px;
+	
+	border: 1px solid black;
+
+	label, input {
+		width: 100%;
+	}
+
+	&.oauth {
+		padding: 0;
+
+		ul {
+			margin: 0;
+			padding: 0;
+		}
+
+		.provider {
+			display: inline-block;
+			width: 200px;
+			height: 200px;
+			font-size: 180px;
+
+			a {
+				vertical-align: top;
+				color: @metal;
+			}
+
+			a:hover {
+				color: white;
+				text-decoration: none;
+			}
+
+			margin: 10px;
+		}
+	}
+}
