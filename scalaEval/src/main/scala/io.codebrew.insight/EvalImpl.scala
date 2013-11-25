@@ -31,10 +31,9 @@ class EvalImpl extends Eval.FutureIface {
 			if(compilerInfos.exists(_.severity == Severity.Error)) {
 				Result(insight = None, infos = compilerInfos, timeout = false)
 			} else {
-				// val insight = withTimeout(5.seconds){ ScalaCodeSheet.computeResults(code, false) }.map( r =>
-				// 	InsightResult(r.userRepr, r.output)
-				// )
-				val insight = None
+				val insight = withTimeout(5.seconds){ ScalaCodeSheet.computeResults(code, false) }.map( r =>
+					InsightResult(r.userRepr, r.output)
+				)
 				Result(insight, compilerInfos, timeout = insight.isEmpty)
 			}
 		}
@@ -67,8 +66,10 @@ class EvalImpl extends Eval.FutureIface {
 			val file = reload(code)
 			val ajustedPos = pos + beginWrap.length
 			val position = new OffsetPosition(file, ajustedPos)
-			val response = new Response[List[compiler.Member]]()
-			compiler.askTypeCompletion(position, response)
+			val response = withResponse[List[compiler.Member]](r => 
+				compiler.askTypeCompletion(position, r)
+			)
+
 			response.get match {
         		case Left(members) => compiler.ask( () =>
           			members.map(member => Completion(member.sym.decodedName, member.sym.defString))
@@ -98,19 +99,24 @@ class EvalImpl extends Eval.FutureIface {
 
 	private def reload(code: String): BatchSourceFile = {
 		val file = wrap(code)
-		val response = new Response[Unit]()
-		compiler.askReload(List(file), response)
-		response.get // block
+		withResponse[Unit](r => compiler.askReload(List(file), r)).get
 		file
 	}
 
 	private def parse(code: String): Unit = {
-		autocomplete(code,0) // fixme
+		val file = reload(code)
+		withResponse[compiler.Tree](r => compiler.askStructure(false)(file, r)).get
 	}
 
 	private def convert(severity: reporter.Severity): Severity = severity match {
 		case reporter.INFO => Severity.Info
 		case reporter.WARNING => Severity.Warning
 		case reporter.ERROR => Severity.Error
+	}
+
+	private def withResponse[A](op: Response[A] => Any): Response[A] = {
+		val response = new Response[A]
+		op(response)
+		response
 	}
 }
