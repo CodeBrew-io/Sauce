@@ -1,8 +1,12 @@
 package model
 
 import scalastic.elasticsearch.Indexer
-import org.elasticsearch.index.query._, FilterBuilders._, QueryBuilders._
-import org.elasticsearch.search.facet._, terms._,FacetBuilders._
+
+import org.elasticsearch._
+import search.SearchHit
+import index.query._
+import FilterBuilders._
+import QueryBuilders._
 
 import play.api.libs.json._
 
@@ -15,19 +19,6 @@ case class Snippet(
   tags: String, scalaVersion: String, user: String){
   def toJson() : JsValue = {
     Json.obj("id" -> id, "code" -> codeOrigin)
-  }
-
-  def toElasticSearchJson(): JsObject = {
-    Json.obj (
-      "title" -> title,
-      "description" -> description,
-      "code.origin" -> codeOrigin,
-      "code.raw" -> codeRaw,
-      "tags" -> tags,
-      "scalaVersion" -> scalaVersion,
-      "user.origin" -> user,
-      "user.raw" -> user
-    )
   }
 }
 
@@ -100,29 +91,39 @@ object Snippets {
     indexer.index(indexName, indexType, null, Json.stringify(jsonSnippet)).getId
   }
 
-  def querySnippets(pQuery: QueryBuilder, offset: Option[Int]): List[Snippet] = {
-
-    indexer.putMapping(indexName, indexType, snippetMapping)
-
-    val responses = indexer.search( indices = List(indexName),
+  def querySnippets(pQuery: QueryBuilder, offset: Option[Int]): Array[Snippet] = {
+    val responses = indexer.search(
+      indices = List(indexName),
       query = pQuery,
       fields = Seq("title", "description", "code.origin", "code.raw", "tags", "scalaVersion", "user.origin"),
       from = offset,
       size = Some(size)
     )
+    responses.getHits().hits().map(fromHit)
+  }
 
-    responses.getHits().hits().map( x => {
-      Snippet(
-        x.getId,
-        x.field("title").getValue(),
-        x.field("description").getValue(),
-        x.field("code.origin").getValue(),
-        x.field("code.raw").getValue(),
-        x.field("tags").getValue(),
-        x.field("scalaVersion").getValue(),
-        x.field("user.origin").getValue()
-      )
-    }).to[List]
+  def queryDistinctSnippets(pQuery: QueryBuilder, offset: Option[Int]): List[Snippet] = {
+    val responses = indexer.search(
+      indices = List(indexName),
+      query = pQuery,
+      fields = Seq("title", "description", "code.origin", "code.raw", "tags", "scalaVersion", "user.origin"),
+      from = offset,
+      size = Some(size)
+    )
+    responses.getHits().hits().map(fromHit)
+  }
+
+  private def fromHit(hit: SearchHit): Snippet = {
+    Snippet(
+      hit.getId,
+      hit.field("title").getValue(),
+      hit.field("description").getValue(),
+      hit.field("code.origin").getValue(),
+      hit.field("code.raw").getValue(),
+      hit.field("tags").getValue(),
+      hit.field("scalaVersion").getValue(),
+      hit.field("user.origin").getValue()
+    )
   }
 
   def query(terms: Option[String] = None, userName: Option[String] = None, offset: Option[Int] = None): List[Snippet] = {
@@ -144,26 +145,7 @@ object Snippets {
     querySnippets(codeTermQueryWithUserFilter, offset)
   }
 
-  def queryDistinctSnippets(pQuery: QueryBuilder, offset: Option[Int]): List[Snippet] = {
-    import scala.collection.JavaConversions._
-
-    indexer.putMapping(indexName, indexType, snippetMapping)
-
-    val responses = indexer.search( indices = List(indexName),
-      query = pQuery,
-      fields = Seq("title", "description", "code.origin", "code.raw", "tags", "scalaVersion", "user.origin"),
-      from = offset,
-      facets=Seq(termsFacet("facetDistinctCode").field("code.raw").size(size)),
-      size = Some(size)
-    )
-    val facet: TermsFacet = responses.getFacets.facet("facetDistinctCode")
-    facet.getEntries().map( _.getTerm.toString).to[List].map { x => 
-      Snippet("", "", "", x, x, "", "", "")
-    }
-  }
-
   def queryDistinct(terms: Option[String] = None, userName: Option[String] = None, offset: Option[Int] = None): List[Snippet] = {
-
     //If pTerm == None, then we don't search for a particular term, instead we return everything (matchAll)
     val codeTermQuery = terms.map (
       q => multiMatchQuery( q, "code.origin")
@@ -181,14 +163,26 @@ object Snippets {
     queryDistinctSnippets(codeTermQueryWithUserFilter, offset)
   }
 
-  def delete(id:String, username:String): Boolean = {
-    val query = boolQuery.
+  private def byId(id: String, username: String) = {
+    boolQuery.
       must(termQuery("user.raw", username)).
       must(idsQuery().ids(id))
+  }
 
+  def find(id: String, username: String) = {
+    val responses = indexer.search(
+      indices = List(indexName),
+      query = byId(id, username),
+      size = Some(1)
+    )
+
+    responses.getHits().hits().map(fromHit).headOption
+  }
+
+  def delete(id:String, username:String): Boolean = {
     indexer.deleteByQuery( 
       indices = List(indexName),
-      query = query
+      query = byId(id, username)
     ).getIndices().size == 1
   }
 }
