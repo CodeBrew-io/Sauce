@@ -56,19 +56,6 @@ case class Snippet(
   def toJson() : JsValue = {
     Json.obj("id" -> id, "code" -> codeOrigin)
   }
-
-  def toElasticSearchJson(): JsObject = {
-    Json.obj (
-      "title" -> title,
-      "description" -> description,
-      "code.origin" -> codeOrigin,
-      "code.raw" -> codeOrigin,
-      "tags" -> tags,
-      "scalaVersion" -> scalaVersion,
-      "user.origin" -> user,
-      "user.raw" -> user
-    )
-  }
 }
 
   def querySnippets(pQuery: QueryBuilder, offset: Option[Int]): Array[Snippet] = {

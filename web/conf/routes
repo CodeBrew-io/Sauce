@@ -1,6 +1,10 @@
 # Eval websocket
 GET		/eval						controllers.Eval.eval
 
+# Static assets for oauth
+GET     /webjars/*file              controllers.WebJarAssets.at(file)
+GET     /assets/*file               controllers.Assets.at(path="/public", file)
+
 # Secure social
 GET     /login                      securesocial.controllers.LoginPage.login
 GET     /logout						securesocial.controllers.LoginPage.logout
@@ -16,7 +20,4 @@ GET		/snippets/queryUser 		controllers.Snippets.queryUser
 GET     /snippets					controllers.Snippets.query(terms: Option[String], userName: Option[String], offset: Option[Int])
 POST	/snippets 					controllers.Snippets.add
 DELETE  /snippets					controllers.Snippets.delete(id: String)
-
-# Static assets for oauth
-GET     /webjars/*file              controllers.WebJarAssets.at(file)
-GET     /assets/*file               controllers.Assets.at(path="/public", file)
+GET     /:username/:id				controllers.Snippets.find(id: String, username: String)
