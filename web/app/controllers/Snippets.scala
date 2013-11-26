@@ -50,4 +50,11 @@ object Snippets extends Controller with securesocial.core.SecureSocial {
         map(_.toJson())
     ))
   }
+
+  def queryDistinct(terms: Option[String], userName:Option[String], offset: Option[Int]) = Action  { implicit request =>
+    Ok(Json.toJson(
+      model.Snippets.queryDistinct(terms.filter(_ != ""), userName.filter(_ != ""), offset).
+        map(_.toJson())
+    ))
+  }
 }

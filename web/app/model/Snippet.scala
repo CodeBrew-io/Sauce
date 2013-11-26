@@ -2,6 +2,7 @@ package model
 
 import scalastic.elasticsearch.Indexer
 import org.elasticsearch.index.query._, FilterBuilders._, QueryBuilders._
+import org.elasticsearch.search.facet._, terms._,FacetBuilders._
 
 import play.api.libs.json._
 
@@ -42,6 +43,14 @@ object Snippets {
 
   val indexName = Play.application.configuration.getString("elasticsearch.index").getOrElse("")
   val indexType = Play.application.configuration.getString("elasticsearch.userSnippetsType").getOrElse("")
+/*  val clusterName = "snippets_service_cluster"
+  val host = "localhost"
+  val port = 9300
+
+  val indexer = Indexer.transport(settings = Map("cluster.name" -> clusterName), host = host, ports=Seq(port))
+
+  val indexName = "snippets_service_index"
+  val indexType = "user_snippets"*/
 
   val snippetMapping = s"""
    |{
@@ -91,7 +100,7 @@ object Snippets {
     indexer.index(indexName, indexType, null, Json.stringify(jsonSnippet)).getId
   }
 
-  def querySnippets(pQuery: QueryBuilder, offset: Option[Int]): Array[Snippet] = {
+  def querySnippets(pQuery: QueryBuilder, offset: Option[Int]): List[Snippet] = {
 
     indexer.putMapping(indexName, indexType, snippetMapping)
 
@@ -113,10 +122,10 @@ object Snippets {
         x.field("scalaVersion").getValue(),
         x.field("user.origin").getValue()
       )
-    })
+    }).to[List]
   }
 
-  def query(terms: Option[String] = None, userName: Option[String] = None, offset: Option[Int] = None): Array[Snippet] = {
+  def query(terms: Option[String] = None, userName: Option[String] = None, offset: Option[Int] = None): List[Snippet] = {
 
     //If pTerm == None, then we don't search for a particular term, instead we return everything (matchAll)
     val codeTermQuery = terms.map (
@@ -132,9 +141,44 @@ object Snippets {
       filteredQuery(codeTermQuery, null)
     )
 
-    println(codeTermQueryWithUserFilter)
-
     querySnippets(codeTermQueryWithUserFilter, offset)
+  }
+
+  def queryDistinctSnippets(pQuery: QueryBuilder, offset: Option[Int]): List[Snippet] = {
+    import scala.collection.JavaConversions._
+
+    indexer.putMapping(indexName, indexType, snippetMapping)
+
+    val responses = indexer.search( indices = List(indexName),
+      query = pQuery,
+      fields = Seq("title", "description", "code.origin", "code.raw", "tags", "scalaVersion", "user.origin"),
+      from = offset,
+      facets=Seq(termsFacet("facetDistinctCode").field("code.raw").size(size)),
+      size = Some(size)
+    )
+    val facet: TermsFacet = responses.getFacets.facet("facetDistinctCode")
+    facet.getEntries().map( _.getTerm.toString).to[List].map { x => 
+      Snippet("", "", "", x, x, "", "", "")
+    }
+  }
+
+  def queryDistinct(terms: Option[String] = None, userName: Option[String] = None, offset: Option[Int] = None): List[Snippet] = {
+
+    //If pTerm == None, then we don't search for a particular term, instead we return everything (matchAll)
+    val codeTermQuery = terms.map (
+      q => multiMatchQuery( q, "code.origin")
+    ).getOrElse(
+      matchAllQuery()
+    )
+
+    //If pUser !== None, we return every snippets, no matter the user, else we filter for this exact user only
+    val codeTermQueryWithUserFilter = userName.map (
+      u => filteredQuery(codeTermQuery, termFilter("user.raw", u))
+     ).getOrElse(
+      filteredQuery(codeTermQuery, null)
+    )
+
+    queryDistinctSnippets(codeTermQueryWithUserFilter, offset)
   }
 
   def delete(id:String, username:String): Boolean = {
