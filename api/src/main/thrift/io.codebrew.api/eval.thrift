@@ -15,7 +15,8 @@ struct InsightResult {
 
 struct Result {
 	1: optional InsightResult insight,
-	2: list<CompilationInfo> infos
+	2: list<CompilationInfo> infos,
+	3: bool timeout
 }
 
 struct Completion {

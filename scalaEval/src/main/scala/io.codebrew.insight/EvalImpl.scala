@@ -6,7 +6,10 @@ import api.eval._
 import com.github.jedesah.codesheet.api.ScalaCodeSheet
 
 import com.twitter._
-import util.{Future, FutureTask}
+import util.Future
+
+import scala.concurrent.duration._
+import java.util.concurrent.{TimeoutException, Callable, FutureTask, TimeUnit}
 
 class EvalImpl extends Eval.FutureIface {
 
@@ -22,18 +25,39 @@ class EvalImpl extends Eval.FutureIface {
 	val compiler = new Global(settings, reporter)
 
 	def insight(code: String): Future[Result] = Future {
-		if (code == "") Result(None, Nil)
+		if (code == "") Result(insight = None, infos = Nil, timeout = false)
 		else {
-			val result = ScalaCodeSheet.computeResults(code, false)
-			if(result.subResults.exists(_.isInstanceOf[ScalaCodeSheet.CompileErrorResult])) {
-				Result(None, check(code))
+			val compilerInfos = check(code)
+			if(compilerInfos.exists(_.severity == Severity.Error)) {
+				Result(insight = None, infos = compilerInfos, timeout = false)
 			} else {
-				Result(Some(InsightResult(result.userRepr, result.output)), Nil)
+				val insight = withTimeout(5.seconds){ ScalaCodeSheet.computeResults(code, false) }.map( r =>
+					InsightResult(r.userRepr, r.output)
+				)
+				Result(insight, compilerInfos, timeout = insight.isEmpty)
 			}
 		}
 	}
 
-	private val beginWrap = "package object Codebrew {\n"
+	// TODO: avoid creating another thread for each comp. result
+	def withTimeout[T](timeout: Duration)(f: => T): Option[T]= {
+		val task = new FutureTask(new Callable[T]() {
+			def call = f
+		})
+		val thread = new Thread( task )
+		try {
+			thread.start()
+			Some(task.get(timeout.toMillis, TimeUnit.MILLISECONDS))
+		} catch {
+			case e: TimeoutException => None
+		} finally { 
+			if( thread.isAlive ){
+				thread.interrupt()
+			}
+		}
+	}
+
+	private val beginWrap = "object Codebrew {\n"
 	private val endWrap = "\n}"
 
 	def autocomplete(code: String, pos: Int): Future[List[Completion]] = Future {
@@ -42,8 +66,10 @@ class EvalImpl extends Eval.FutureIface {
 			val file = reload(code)
 			val ajustedPos = pos + beginWrap.length
 			val position = new OffsetPosition(file, ajustedPos)
-			val response = new Response[List[compiler.Member]]()
-			compiler.askTypeCompletion(position, response)
+			val response = withResponse[List[compiler.Member]](r => 
+				compiler.askTypeCompletion(position, r)
+			)
+
 			response.get match {
         		case Left(members) => compiler.ask( () =>
           			members.map(member => Completion(member.sym.decodedName, member.sym.defString))
@@ -73,19 +99,24 @@ class EvalImpl extends Eval.FutureIface {
 
 	private def reload(code: String): BatchSourceFile = {
 		val file = wrap(code)
-		val response = new Response[Unit]()
-		compiler.askReload(List(file), response)
-		response.get // block
+		withResponse[Unit](r => compiler.askReload(List(file), r)).get
 		file
 	}
 
 	private def parse(code: String): Unit = {
-		autocomplete(code,0) // fixme
+		val file = reload(code)
+		withResponse[compiler.Tree](r => compiler.askStructure(false)(file, r)).get
 	}
 
 	private def convert(severity: reporter.Severity): Severity = severity match {
 		case reporter.INFO => Severity.Info
 		case reporter.WARNING => Severity.Warning
 		case reporter.ERROR => Severity.Error
+	}
+
+	private def withResponse[A](op: Response[A] => Any): Response[A] = {
+		val response = new Response[A]
+		op(response)
+		response
 	}
 }

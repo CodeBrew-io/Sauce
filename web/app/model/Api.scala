@@ -22,7 +22,7 @@ object EvalService {
 	private def autocomplete(code: String, position: Int, cid: Int): Future[JsValue] = {
 		Registry.getEval.map(service => {
 			service.autocomplete(code, position).map(a => autocompleteResult(a, cid))
-		}).getOrElse(unavailable("autocomplete", cid))
+		}).getOrElse(unavailable("completions", cid))
 	}
 	private def fallback(): Future[JsValue] = Future {
 		JsObject(Seq("error" -> JsString("invalid request")))
@@ -81,6 +81,7 @@ object Api {
 			Seq(
 				"insight" -> JsString(insight),
 				"output" -> JsString(output),
+				"timeout" -> JsBoolean(r.timeout),
 				callback_id -> JsNumber(cid)
 			)
 		)
@@ -96,7 +97,7 @@ object Api {
 	}
 	def unavailable(serviceName: String, cid: Int): Future[JsValue] = Future(
 		JsObject(Seq(
-			"insight" -> JsString(s"$serviceName service unavailable"),
+			serviceName -> JsString(s"$serviceName service unavailable"),
 			callback_id -> JsNumber(cid)
 		))
 	)

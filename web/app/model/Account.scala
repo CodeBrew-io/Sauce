@@ -8,6 +8,11 @@ import anorm.SqlParser._
 
 import scala.language.postfixOps
 
+import play.api.libs.json._
+import play.api.libs.functional.syntax._
+
+import securesocial.core.Identity
+
 case class Account(
   firstName: String, 
   lastName: String, 
@@ -18,7 +23,18 @@ case class Account(
   userName: Pk[String] = NotAssigned
 )
 
+case class SignIn(userName: String, email: Option[String])
+
 object Account {
+  implicit object PkFormat extends Format[Pk[String]] {
+      def reads(json: JsValue): JsResult[Pk[String]] = JsSuccess (
+          json.asOpt[String].map(id => Id(id)).getOrElse(NotAssigned)
+      )
+      def writes(username: Pk[String]): JsValue = username.map(JsString(_)).getOrElse(JsNull)
+  }
+  implicit val writer = Json.writes[Account]
+
+  implicit val signUpReader = Json.reads[SignIn]
 
   def username(email: String) = email.takeWhile(_!='@')
 
@@ -35,10 +51,26 @@ object Account {
     }
   }
 
-  def find(userName: String): Option[Account] = {
+  def exists(userName: String) = !findUsername(userName).isEmpty
+
+  def findUsername(userName: String): Option[Account] = {
     DB.withConnection { implicit connection =>
       SQL("select * from account where userName = {userName} limit 1;").
         on('userName -> userName).
+        as(simple.singleOpt)
+    }
+  }
+
+  def find(su: Identity): Option[Account] = {
+    val id = su.identityId
+    Account.findProvider(id.userId, id.providerId)
+  }
+
+  private def findProvider(userId: String, providerId: String ): Option[Account] = {
+    DB.withConnection { implicit connection =>
+      SQL("select * from account where userId = {userId} AND providerId = {providerId} limit 1;").
+        on('userId -> userId,
+            'providerId -> providerId).
         as(simple.singleOpt)
     }
   }
@@ -50,7 +82,6 @@ object Account {
   }
 
   def insert(account: Account) = {
-    println(account)
     DB.withConnection { implicit connection =>
       SQL(
         """
@@ -65,7 +96,7 @@ object Account {
           )
         """
       ).on(
-        'userName -> account.email,
+        'userName -> account.userName,
         'firstName -> account.firstName,
         'lastName -> account.lastName,
         'userId -> account.userId,
