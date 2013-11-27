@@ -1,12 +1,12 @@
 package model
 
 import scalastic.elasticsearch.Indexer
+
 import org.elasticsearch._
 import search.SearchHit
 import index.query._
 import FilterBuilders._
 import QueryBuilders._
-       
 
 import play.api.libs.json._
 
@@ -24,18 +24,18 @@ case class Snippet(
 
 object Snippets {
 
-  val size = 10
+  private val size = 10
 
-  val clusterName = Play.application.configuration.getString("elasticsearch.cluster").getOrElse("")
-  val host = Play.application.configuration.getString("elasticsearch.host").getOrElse("")
-  val port = Play.application.configuration.getString("elasticsearch.port").getOrElse("").toInt
+  private val clusterName = Play.application.configuration.getString("elasticsearch.cluster").getOrElse("")
+  private val host = Play.application.configuration.getString("elasticsearch.host").getOrElse("")
+  private val port = Play.application.configuration.getString("elasticsearch.port").getOrElse("").toInt
 
-  val indexer = Indexer.transport(settings = Map("cluster.name" -> clusterName), host = host, ports=Seq(port))
+  private val indexer = Indexer.transport(settings = Map("cluster.name" -> clusterName), host = host, ports=Seq(port))
 
-  val indexName = Play.application.configuration.getString("elasticsearch.index").getOrElse("")
-  val indexType = Play.application.configuration.getString("elasticsearch.userSnippetsType").getOrElse("")
+  private val indexName = Play.application.configuration.getString("elasticsearch.index").getOrElse("")
+  private val indexType = Play.application.configuration.getString("elasticsearch.userSnippetsType").getOrElse("")
 
-  val snippetMapping = s"""
+  private val snippetMapping = s"""
    |{
    |  "$indexType":{
    |    "properties" : {
@@ -83,7 +83,7 @@ object Snippets {
     indexer.index(indexName, indexType, null, Json.stringify(jsonSnippet)).getId
   }
 
-  def querySnippets(pQuery: QueryBuilder, offset: Option[Int]): Array[Snippet] = {
+  def querySnippets(pQuery: QueryBuilder, offset: Option[Int]): List[Snippet] = {
     val responses = indexer.search(
       indices = List(indexName),
       query = pQuery,
@@ -91,26 +91,23 @@ object Snippets {
       from = offset,
       size = Some(size)
     )
-
-    responses.getHits().hits().map(fromHit)
+    responses.getHits().hits().map(fromHit).to[List]
   }
 
   private def fromHit(hit: SearchHit): Snippet = {
-    def m(f: String): String = Option(hit.field(f)).map(_.getValue()).getOrElse("")
-
     Snippet(
       hit.getId,
-      m("title"),
-      m("description"),
-      m("code.origin"),
-      m("code.raw"),
-      m("tags"),
-      m("scalaVersion"),
-      m("user.origin")
+      hit.field("title").getValue(),
+      hit.field("description").getValue(),
+      hit.field("code.origin").getValue(),
+      hit.field("code.raw").getValue(),
+      hit.field("tags").getValue(),
+      hit.field("scalaVersion").getValue(),
+      hit.field("user.origin").getValue()
     )
   }
 
-  def query(terms: Option[String] = None, userName: Option[String] = None, offset: Option[Int] = None): Array[Snippet] = {
+  def query(terms: Option[String] = None, userName: Option[String] = None, offset: Option[Int] = None): List[Snippet] = {
 
     //If pTerm == None, then we don't search for a particular term, instead we return everything (matchAll)
     val codeTermQuery = terms.map (
@@ -129,7 +126,11 @@ object Snippets {
     querySnippets(codeTermQueryWithUserFilter, offset)
   }
 
-  private def byId(id: String, username: String) = {
+  def queryDistinct(terms: Option[String] = None, userName: Option[String] = None, offset: Option[Int] = None): List[Snippet] = {
+    query(terms, userName, offset).groupBy(_.codeOrigin).values.flatMap(_.headOption).to[List]
+  }
+
+  def byId(id: String, username: String) = {
     boolQuery.
       must(termQuery("user.raw", username)).
       must(idsQuery().ids(id))
@@ -139,6 +140,7 @@ object Snippets {
     val responses = indexer.search(
       indices = List(indexName),
       query = byId(id, username),
+      fields = Seq("title", "description", "code.origin", "code.raw", "tags", "scalaVersion", "user.origin"),
       size = Some(1)
     )
 
