@@ -96,15 +96,17 @@ object Snippets {
   }
 
   private def fromHit(hit: SearchHit): Snippet = {
+    def m(f: String): String = Option(hit.field(f)).map(_.getValue()).getOrElse("")
+
     Snippet(
       hit.getId,
-      hit.field("title").getValue(),
-      hit.field("description").getValue(),
-      hit.field("code.origin").getValue(),
-      hit.field("code.raw").getValue(),
-      hit.field("tags").getValue(),
-      hit.field("scalaVersion").getValue(),
-      hit.field("user.origin").getValue()
+      m("title"),
+      m("description"),
+      m("code.origin"),
+      m("code.raw"),
+      m("tags"),
+      m("scalaVersion"),
+      m("user.origin")
     )
   }
 
