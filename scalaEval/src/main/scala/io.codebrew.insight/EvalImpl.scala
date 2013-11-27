@@ -58,7 +58,7 @@ class EvalImpl extends Eval.FutureIface {
 	}
 
 	private val beginWrap = "object Codebrew {\n"
-	private val endWrap = "}"
+	private val endWrap = "\n}"
 
 	def autocomplete(code: String, pos: Int): Future[List[Completion]] = Future {
 		if(code == "") Nil
