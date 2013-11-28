@@ -18,7 +18,7 @@ case class Snippet(
   title: String, description: String, codeOrigin: String, codeRaw: String,
   tags: String, scalaVersion: String, user: String){
   def toJson() : JsValue = {
-    Json.obj("id" -> id, "code" -> codeOrigin)
+    Json.obj("id" -> id, "code" -> codeOrigin, "user" -> user)
   }
 }
 
