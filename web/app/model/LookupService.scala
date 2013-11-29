@@ -11,7 +11,6 @@ import thrift.ThriftClientFramedCodec
 import builder.ClientBuilder
 import builder.ServerBuilder
 import builder.Server
-import scala.util.Try
 
 import scala.util.Try
 
@@ -44,25 +43,22 @@ object LookupService {
 }
 
 object Registry {
-	def getEval: Option[Eval.FinagledClient] = evals.headOption
-	def add(eval: Eval.FinagledClient): Unit = {
-		evals = eval :: evals
+	def getEval: Option[Eval.FinagledClient] = eval
+	def set(e: Eval.FinagledClient): Unit = {
+		eval = Some(e)
 	}
-	private var evals = List.empty[Eval.FinagledClient]	
+	private var eval: Option[Eval.FinagledClient] = _
 }
 
 class LookupImpl extends Lookup.FutureIface {
-	def register(info: ServiceInfo): Future[Unit] = {
-		println(s"registering service $info")
+	def register(info: ServiceInfo): Future[Unit] = Future {
+		hosts = new InetSocketAddress(info.host, info.port) :: hosts
 		val service = ClientBuilder()
-			.hosts(s"${info.host}:${info.port}")
+			.hosts(hosts)
 		    .codec(ThriftClientFramedCodec())
 		    .hostConnectionLimit(1)
 		    .build()
-
-		info.name match {
-			case eval.Config.name => Registry.add(new Eval.FinagledClient(service))
-		}
-		Future.value(())
+		Registry.set(new Eval.FinagledClient(service))
 	}
+	private var hosts = List.empty[InetSocketAddress]
 }

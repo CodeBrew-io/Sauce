@@ -18,32 +18,24 @@ case class Snippet(
   title: String, description: String, codeOrigin: String, codeRaw: String,
   tags: String, scalaVersion: String, user: String){
   def toJson() : JsValue = {
-    Json.obj("id" -> id, "code" -> codeOrigin)
+    Json.obj("id" -> id, "code" -> codeOrigin, "user" -> user)
   }
 }
 
 object Snippets {
 
-  val size = 10
+  private val size = 10
 
-  val clusterName = Play.application.configuration.getString("elasticsearch.cluster").getOrElse("")
-  val host = Play.application.configuration.getString("elasticsearch.host").getOrElse("")
-  val port = Play.application.configuration.getString("elasticsearch.port").getOrElse("").toInt
+  private val clusterName = Play.application.configuration.getString("elasticsearch.cluster").getOrElse("")
+  private val host = Play.application.configuration.getString("elasticsearch.host").getOrElse("")
+  private val port = Play.application.configuration.getString("elasticsearch.port").getOrElse("").toInt
 
-  val indexer = Indexer.transport(settings = Map("cluster.name" -> clusterName), host = host, ports=Seq(port))
+  private val indexer = Indexer.transport(settings = Map("cluster.name" -> clusterName), host = host, ports=Seq(port))
 
-  val indexName = Play.application.configuration.getString("elasticsearch.index").getOrElse("")
-  val indexType = Play.application.configuration.getString("elasticsearch.userSnippetsType").getOrElse("")
-/*  val clusterName = "snippets_service_cluster"
-  val host = "localhost"
-  val port = 9300
+  private val indexName = Play.application.configuration.getString("elasticsearch.index").getOrElse("")
+  private val indexType = Play.application.configuration.getString("elasticsearch.userSnippetsType").getOrElse("")
 
-  val indexer = Indexer.transport(settings = Map("cluster.name" -> clusterName), host = host, ports=Seq(port))
-
-  val indexName = "snippets_service_index"
-  val indexType = "user_snippets"*/
-
-  val snippetMapping = s"""
+  private val snippetMapping = s"""
    |{
    |  "$indexType":{
    |    "properties" : {
@@ -138,7 +130,7 @@ object Snippets {
     query(terms, userName, offset).groupBy(_.codeOrigin).values.flatMap(_.headOption).to[List]
   }
 
-  private def byId(id: String, username: String) = {
+  def byId(id: String, username: String) = {
     boolQuery.
       must(termQuery("user.raw", username)).
       must(idsQuery().ids(id))
@@ -148,6 +140,7 @@ object Snippets {
     val responses = indexer.search(
       indices = List(indexName),
       query = byId(id, username),
+      fields = Seq("title", "description", "code.origin", "code.raw", "tags", "scalaVersion", "user.origin"),
       size = Some(1)
     )
 

@@ -23,6 +23,7 @@ object EvalServer {
 			ServerBuilder()
 				.codec(ThriftServerFramedCodec())
 				.name("scala-eval")
+				.maxConcurrentRequests(1)
 				.bindTo(new InetSocketAddress(evalPort))
 				.build(new Eval.FinagledService(
 					new EvalImpl, 
@@ -38,36 +39,35 @@ object EvalServer {
 
 
 object Main extends App {
-	// createRunningPid()
+	override def main(args: Array[String]) = {
+		lazy val fromEnv = for {
+		        env <- Option(System.getProperty("io.codebrew.scalaEvalPort"))
+		        port <- Try(env.toInt).toOption
+		} yield { createRunningPid(); port }
 
-	val evalPort = (for {
-		env <- Option(System.getProperty("io.codebrew.scalaEvalPort"))
-		port <- Try(env.toInt).toOption
-	} yield (port)).getOrElse(Config.port)
+		val port = args.headOption.map(_.toInt) orElse fromEnv getOrElse(Config.port)
 
-	EvalSecurity.start
-	EvalServer.start(evalPort)
-	Register.ready(evalPort)
-
+		EvalSecurity.start
+		EvalServer.start(port)
+		Register.ready(port)
+	}
 	private def createRunningPid() = {
-		for {
-			pid <- ManagementFactory.getRuntimeMXBean.getName.split('@').headOption
-			userDir <- Option(System.getProperty("user.dir")) } {
-
-			val pidFile = new File(userDir, "RUNNING_PID")
-			println(userDir)
-			if (pidFile.exists) {
-				println("This application is already running (Or delete " + 
-					pidFile.getAbsolutePath + " file).")
-				System.exit(-1)
-			}
-
-			new FileOutputStream(pidFile).write(pid.getBytes)
-			Runtime.getRuntime.addShutdownHook(new Thread {
-				override def run {
-					pidFile.delete()
-				}
-			})
-		}
+	    for {
+	            pid <- ManagementFactory.getRuntimeMXBean.getName.split('@').headOption
+	            userDir <- Option(System.getProperty("user.dir")) } {
+	            val pidFile = new File(userDir, "RUNNING_PID")
+	            println(userDir)
+	            if (pidFile.exists) {
+	                    println("This application is already running (Or delete " +
+	                            pidFile.getAbsolutePath + " file).")
+	                    System.exit(-1)
+	            }
+	            new FileOutputStream(pidFile).write(pid.getBytes)
+	            Runtime.getRuntime.addShutdownHook(new Thread {
+	                    override def run {
+	                            pidFile.delete()
+	                    }
+	            })
+	    }
 	}
 }
