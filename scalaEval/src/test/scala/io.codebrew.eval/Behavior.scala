@@ -3,7 +3,7 @@ package eval
 
 import org.specs2._
 
-class ServerSpec extends Specification { def is = s2"""
+class Behavior extends Specification { def is = s2"""
 
 	Eval specification
 
