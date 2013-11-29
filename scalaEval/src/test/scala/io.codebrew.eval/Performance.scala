@@ -20,29 +20,11 @@ class Performance extends Specification { def is = s2"""
 
 	just crazy												$crazy
 """
-	val port0 = 9090
-	// args.execute(sequential = true)
-
-	// def minimal = {
-	// 	val hosts = List(new InetSocketAddress(port0))
-	// 	val dt = 30.seconds
-	// 	run(hosts, dt)
-	// }
-
-	// def dual = {
-	// 	val hosts = List(
-	// 		new InetSocketAddress(port0),
-	// 		new InetSocketAddress(port0+1)
-	// 	)
-	// 	val dt = 15.seconds
-	// 	run(hosts, dt)
-	// }
-
 	def crazy = {
 		val hosts = for {
 			h <- List("01", "02", "04", "05")
 			p <- (0 until 8)
-		} yield new InetSocketAddress(s"l4817-$h.lerb.polymtl.ca", port0 + p)
+		} yield new InetSocketAddress(s"l4817-$h.lerb.polymtl.ca", 9090 + p)
 		
 		val dt = 15.seconds
 		run(hosts.to[List], dt)
@@ -51,17 +33,39 @@ class Performance extends Specification { def is = s2"""
 	def run(hosts: List[InetSocketAddress], dt: Duration) = {
 		println(hosts)
 
-		val code = "1+1"
+		val codes = Array(
+			"1+1",
+			"""|// quicksort for dummy
+				|def quicksort(a: List[Int] = List(2, 45, 2, 1, 34, 4, 9)): List[Int] = {
+				|	if(a.isEmpty) Nil
+				|    else {
+				|        val (big, small) = a.tail.partition(_ >= a.head)
+				|        quicksort(small) ::: (a.head :: quicksort(big))
+				|    }
+				|}""".stripMargin,
+			"""|trait Animal { def speak: String }
+				|class Cat extends Animal { def speak = "miaou" }
+				|class Dog extends Animal { def speak = "wouaf" }
+				|class Bird extends Animal { def speak = "piou piou" }
+				|object Owner { def call(a: Animal) = a.speak }
+				|"hey"
+				|""".stripMargin,
+				"List(1,2,3).reverse.map(_+2)",
+				"""println("hello world!")"""
+		)
+		import scala.util.Random.nextInt
+		val randomCode = Stream.continually(codes(nextInt(codes.size)))
+
 		val service = ClientBuilder()
 			.hosts(hosts)
-		    .codec(ThriftClientFramedCodec())
-		    .hostConnectionLimit(1)
-		    .build()
+		   .codec(ThriftClientFramedCodec())
+		   .hostConnectionLimit(1)
+		   .build()
 		val client = new Eval.FinagledClient(service)
 
 		// Insight
 		within(dt) {
-			Future.collect((1 to 100).map{ _ =>
+			Future.collect(randomCode.take(100 * hosts.size).map{ code =>
 				client.insight(code)
 			}.to[Seq])
 		}
