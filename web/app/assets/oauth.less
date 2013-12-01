@@ -1,5 +1,11 @@
+@metal: #3d495f;
+
+html, body, .login {
+	height: 100%;
+	background-color: @metal;
+}
+
 .login {
-	@metal: #3d495f;
 
 	position: absolute;
 	top: 50%;
@@ -7,13 +13,6 @@
 	transform: translate(-50%, -50%);
 	-webkit-transform: translate(-50%, -50%);
 	-moz-transform: translate(-50%, -50%);
-
-	z-index: 100;
-	background-color: @metal;
-	color: white;
-	padding: 5px;
-	
-	border: 1px solid black;
 
 	label, input {
 		width: 100%;
@@ -28,7 +27,7 @@
 		}
 
 		.provider {
-			display: inline-block;
+			display: block;
 			width: 200px;
 			height: 200px;
 			font-size: 180px;

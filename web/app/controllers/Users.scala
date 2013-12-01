@@ -13,12 +13,13 @@ import anorm._
 import anorm.SqlParser._
 import scala.language.postfixOps
 
+import securesocial.core._
+
 object Users extends Controller with securesocial.core.SecureSocial {
 
 	def info = UserAwareAction { implicit request =>
 		import Account.PkFormat
 		import Account.writer
-
 		val user = request.user.map{ secureSocialUser =>
 			val securesocialJson = Json.obj(
 				"secureSocialUser" -> Json.obj(
@@ -31,9 +32,9 @@ object Users extends Controller with securesocial.core.SecureSocial {
 		 	Account.find(secureSocialUser).map{ codeBrewUser =>
 				Json.obj("codeBrewUser" -> Json.toJson(codeBrewUser))
 			}.getOrElse(securesocialJson)
-		}	
+		}.getOrElse(Json.obj())
 
-		Ok(user.getOrElse(Json.obj()))
+		Ok(user)
 	}
 
 	def exists(username: String) = Action { implicit request =>

@@ -12,17 +12,17 @@
     <meta charset="utf-8">
     <title>@Messages("securesocial.login.title")</title>
     <meta name="viewport" content="width=device-width">
-    <link rel='stylesheet' href='@routes.Assets.at("oauth.css")'>
     <link rel='stylesheet' href='@routes.WebJarAssets.at(WebJarAssets.locate("3.0.0/css/bootstrap.min.css"))'>
     <link rel='stylesheet' href='@routes.WebJarAssets.at(WebJarAssets.locate("3.0.0/css/bootstrap.min.css"))'>
     <link rel='stylesheet' href='@routes.WebJarAssets.at(WebJarAssets.locate("font-awesome.css"))'>
+    <link rel='stylesheet' href='@routes.Assets.at("oauth.css")'>
 </head>
 <body>
     @errorMsg.map { msg => <div class="alert alert-error">@Messages(msg)</div> }
     @request.flash.get("success").map { msg => <div class="alert alert-info">@msg</div>}
     @request.flash.get("error").map { msg => <div class="alert alert-error"> @msg </div> }
     @defining( Registry.providers.all.values.filter( _.id != UsernamePassword) ) { externalProviders =>
-        <form class="cb-modal login oauth">
+        <form class="login oauth">
             <ul>
                 @externalProviders.map { p =>
                     <li class="provider btn btn-primary">
