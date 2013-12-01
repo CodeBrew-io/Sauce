@@ -25,7 +25,8 @@ object ApplicationBuild extends Build {
     settings = default ++ service ++ bintrayResolverSettings ++ repl ++ Seq(
       name := "scalaEval",
       resolvers += bintray.Opts.resolver.repo("codebrew-io", "maven"),
-      libraryDependencies ++= Seq(insight, specs2)
+      libraryDependencies ++= Seq(insight, specs2),
+      initialCommands in console := """"""
     ) 
   ) dependsOn(api)
  
