@@ -52,6 +52,7 @@ object Registry {
 
 class LookupImpl extends Lookup.FutureIface {
 	def register(info: ServiceInfo): Future[Unit] = Future {
+		println(s"register $info")
 		hosts = new InetSocketAddress(info.host, info.port) :: hosts
 		val service = ClientBuilder()
 			.hosts(hosts)

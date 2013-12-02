@@ -1,0 +1,48 @@
+// You can assign this string to initialCommands in Build.scala
+      
+
+       """ import scala.tools.nsc.interactive.Global
+        import scala.tools.nsc.Settings
+        import scala.tools.nsc.reporters.StoreReporter
+        import scala.reflect.internal.util._
+        import scala.tools.nsc.interactive.Response
+
+        val reporter = new StoreReporter()
+        val settings = new Settings()
+        settings.classpath.value = System.getProperty("replhtml.class.path")
+        val compiler = new Global(settings, reporter)
+
+        val beginWrap = "object Codebrew {\n"
+        val endWrap = "\n}"
+        val code =  "List(1,2,3)."
+        val pos = 12;
+
+        def wrap(code: String): BatchSourceFile = {
+          new BatchSourceFile("default", beginWrap + code + endWrap)
+        }
+
+        def withResponse[A](op: Response[A] => Any): Response[A] = {
+          val response = new Response[A]
+          op(response)
+          response
+        }
+
+        def reload(code: String): BatchSourceFile = {
+          val file = wrap(code)
+          withResponse[Unit](r => compiler.askReload(List(file), r)).get
+          file
+        }
+        
+        val file = reload(code)
+        val ajustedPos = pos + beginWrap.length
+        val position = new OffsetPosition(file, ajustedPos)
+        val response = withResponse[List[compiler.Member]](r => 
+          compiler.askTypeCompletion(position, r)
+        )
+
+       /* val members = response.get match {
+        case Left(members) => members
+        case Right(e) => throw e
+      }
+        compiler.ask( () => members.map(member => (member.sym.decodedName, member.sym.defString)))*/
+        """

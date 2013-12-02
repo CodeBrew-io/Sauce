@@ -72,7 +72,7 @@ class EvalImpl extends Eval.FutureIface {
 
 			response.get match {
         		case Left(members) => compiler.ask( () =>
-          			members.map(member => Completion(member.sym.decodedName, member.sym.defString))
+          			members.map(member => Completion(member.sym.decodedName, member.sym.signatureString))
         		)
         		case Right(e) => throw e
       		}

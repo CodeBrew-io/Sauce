@@ -30,6 +30,7 @@ object ApplicationBuild extends Build {
         "Sonatype OSS Snapshots" at "http://oss.sonatype.org/content/repositories/snapshots/"
       ),
       libraryDependencies ++= Seq(insight, specs2)
+      initialCommands in console := ""
     ) 
   ) dependsOn(api)
  
