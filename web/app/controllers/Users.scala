@@ -23,9 +23,7 @@ object Users extends Controller with securesocial.core.SecureSocial {
 		val user = request.user.map{ secureSocialUser =>
 			val securesocialJson = Json.obj(
 				"secureSocialUser" -> Json.obj(
-					"firstname" -> secureSocialUser.firstName,
-					"lastname" -> secureSocialUser.lastName,
-					"email" -> secureSocialUser.email,
+					"fullName" -> secureSocialUser.fullName,
 					"gravatar" -> secureSocialUser.avatarUrl
 				)
 			)
@@ -37,8 +35,15 @@ object Users extends Controller with securesocial.core.SecureSocial {
 		Ok(user)
 	}
 
-	def exists(username: String) = Action { implicit request =>
+	def exists(username: String) = Action {
 		Ok(Json.obj("result" -> Account.exists(username)))
+	}
+
+	def signIn = SecuredAction { implicit request =>
+		val user = Account.find(request.user)
+
+		if(user.isEmpty) Ok(views.html.signIn(request.user))
+		else Ok(views.html.close())
 	}
 
 	def add = SecuredAction { implicit request =>
@@ -49,8 +54,7 @@ object Users extends Controller with securesocial.core.SecureSocial {
 		} yield {
 			val user = request.user
 			val newUser = Account(
-				user.firstName,
-				user.lastName,
+				user.fullName,
 				user.identityId.userId,
 				user.identityId.providerId,
 				signin.email,

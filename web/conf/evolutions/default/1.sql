@@ -4,8 +4,7 @@ set ignorecase true;
 
 create table account (
   userName								varchar(1023) not null,
-  firstName								varchar(1023) not null,
-  lastName								varchar(1023) not null,
+  fullName								varchar(1023) not null,
   userId                  	    		varchar(1023) not null,
   providerId                    		varchar(255) not null,
   email									varchar(1023),

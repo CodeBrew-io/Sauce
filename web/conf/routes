@@ -15,7 +15,7 @@ GET     /not-authorized             securesocial.controllers.ProviderController.
 GET		/user   					controllers.Users.info
 GET		/user/exists/:userName		controllers.Users.exists(userName)
 POST 	/user 						controllers.Users.add
-GET		/user/login 				controllers.Assets.at(path="/public", file="login.html")
+GET		/user/signIn 				controllers.Users.signIn
 
 GET		/snippets/queryUser 		controllers.Snippets.queryUser
 GET     /snippets					controllers.Snippets.queryDistinct(terms: Option[String], userName: Option[String], offset: Option[Int])

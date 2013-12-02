@@ -11,14 +11,9 @@ import securesocial.controllers.Registration.RegistrationInfo
 import securesocial.controllers.PasswordChange.ChangeInfo
 
 class SecureSocial(application: Application) extends TemplatesPlugin {
-  def getLoginPage[A](
-  	implicit request: Request[A], 
-  	form: Form[(String, String)], 
-  	msg: Option[String] = None): Html = {
-
+  def getLoginPage[A](implicit request: Request[A], form: Form[(String, String)], msg: Option[String] = None): Html = {
     views.html.login(form, msg)
   }
-
   def getSignUpPage[A](implicit request: Request[A], form: Form[RegistrationInfo], token: String): Html = ???
   def getStartSignUpPage[A](implicit request: Request[A], form: Form[String]): Html = ???
   def getStartResetPasswordPage[A](implicit request: Request[A], form: Form[String]): Html = ???

@@ -14,8 +14,7 @@ import play.api.libs.functional.syntax._
 import securesocial.core.Identity
 
 case class Account(
-  firstName: String, 
-  lastName: String, 
+  fullName: String, 
   userId: String,
   providerId: String, 
   email: Option[String],
@@ -36,18 +35,15 @@ object Account {
 
   implicit val signUpReader = Json.reads[SignIn]
 
-  def username(email: String) = email.takeWhile(_!='@')
-
   val simple = {
-    get[String]("account.firstName") ~
-    get[String]("account.lastName") ~
+    get[String]("account.fullName") ~
     get[String]("account.userId") ~
     get[String]("account.providerId") ~
     get[Option[String]]("account.email") ~
     get[Option[String]]("account.avatarUrl") ~
     get[Pk[String]]("account.userName") map {
-      case      firstName ~ lastName ~ userId ~ providerId ~ email ~ avatarUrl ~ userName => 
-        Account(firstName,  lastName,  userId,  providerId,  email,  avatarUrl,  userName)
+      case      fullName ~ userId ~ providerId ~ email ~ avatarUrl ~ userName => 
+        Account(fullName,  userId,  providerId,  email,  avatarUrl,  userName)
     }
   }
 
@@ -87,8 +83,7 @@ object Account {
         """
           insert into account values (
             {userName},
-            {firstName},
-            {lastName},
+            {fullName},
             {userId},
             {providerId},
             {email},
@@ -97,8 +92,7 @@ object Account {
         """
       ).on(
         'userName -> account.userName,
-        'firstName -> account.firstName,
-        'lastName -> account.lastName,
+        'fullName -> account.fullName,
         'userId -> account.userId,
         'providerId -> account.providerId,
         'email -> account.email,

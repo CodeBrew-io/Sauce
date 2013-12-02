@@ -1,0 +1,113 @@
+@(user: securesocial.core.Identity)
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>Codebrew - Sign In</title>
+    <meta name="viewport" content="width=device-width">
+
+    <link rel='stylesheet' href='@routes.WebJarAssets.at(WebJarAssets.locate("3.0.0/css/bootstrap.min.css"))'>
+    <link rel='stylesheet' href='@routes.WebJarAssets.at(WebJarAssets.locate("3.0.0/css/bootstrap.min.css"))'>
+    <link rel='stylesheet' href='@routes.WebJarAssets.at(WebJarAssets.locate("font-awesome.css"))'>
+    <link rel='stylesheet' href='@routes.Assets.at("users.css")'>
+</head>
+<body ng-app="CodeBrew">
+
+<form ng-controller="signIn" class="cb-modal signIn" name="signIn" ng-submit="save()">
+    @user.avatarUrl.map { src =>
+        <img class="avatar img-rounded" src="@src">
+    }
+    <p class="username">@{user.fullName}</p>
+
+    <h2>Choose your username</h2>
+    <p>so you can share snippet at: </p>
+    <p>/{{ userName || "bob" }}/your-snippet-title</p> 
+    <div class="form-group" ng-class="{'has-success': signIn.userName.$valid, 'has-error': withValidation() && !signIn.userName.$valid}">
+        <label class="control-label">
+            Username
+            <span ng-show="withValidation()">
+                <span class="error" ng-show="signIn.userName.$error.required">is required</span>
+                <span class="error" ng-show="signIn.userName.$error.taken">is already taken</span>
+                <span class="error" ng-show="signIn.userName.$error.pattern">contains invalid chars</span>
+                <i class="fa" ng-class="{'fa-check valid': signIn.userName.$valid, 'fa-exclamation invalid': !signIn.userName.$valid}"></i>
+            </span>
+            <input  ng-model="userName" ng-minlength="minLength" ng-maxlength="40" ng-pattern="/^[A-Za-z0-9]+$/" ng-change="userNameChange()"
+                    name="userName" type="text" placeholder="bob" required class="form-control">
+        </label>
+    </div>
+    <div class="actions">
+      <input ng-click="cancel()" value="Cancel" class="btn btn-default">
+      <input type="submit" value="Save" class="btn btn-primary">
+    </div>
+</form>
+
+<script src='@routes.WebJarAssets.at(WebJarAssets.locate("angular.js"))'></script>
+<script src='@routes.WebJarAssets.at(WebJarAssets.locate("angular-resource.js"))'></script>
+
+<script>
+var app = angular.module('CodeBrew', ["ngResource"]);
+app.factory('user', function($resource, $window) {
+    return $resource('/user',{},{
+        "exists": { method: 'GET', url: '/user/exists/:user', isArray: false },
+        "logout": { method: 'GET', url: '/logout'}
+    });
+});
+
+
+app.controller('signIn', function code($scope, $timeout, user){
+    $scope.userName = "@{sun.text.Normalizer.normalize(user.fullName.replace(" ",""), java.text.Normalizer.Form.NFKD, 0).replaceAll("\\p{InCombiningDiacriticalMarks}+", "")}";
+    $scope.takenUsername = false;
+    $scope.minLength = 3;
+
+    function present(field){
+        return angular.isDefined(field) && field.length >= $scope.minLength;
+    }
+
+    $scope.withValidation = function (){
+        return angular.isDefined($scope.signIn.userName.$viewValue);
+    };
+
+    $scope.cancel = function(){
+        user.logout();
+        window.close();
+    };
+
+    $scope.save = function(){
+        if($scope.signIn.$valid){
+            user.save({userName: $scope.userName}).$promise.then(function(d){
+                window.opener.$('body').injector().get('user').saved(d);
+                window.close();
+            });
+        }
+    };
+
+    // validate if username exists
+    $scope.userNameChange = function(){
+        $scope.signIn.userName.$error.taken = false;
+        $scope.signIn.userName.$valid = true;
+
+        if(present($scope.userName)){
+            user.exists({ user: $scope.userName }).$promise.then(function(d){
+                var exists = d.result;
+                if(exists) {
+                    $scope.signIn.userName.$valid = false;
+                    $scope.signIn.userName.$error.taken = true;
+                } else {
+                    $scope.signIn.userName.$error.taken = false;
+                }
+            });
+        }
+    };
+});
+</script>
+<script>
+  (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+  (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+  m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+  })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+  ga('create', 'UA-45227610-1', 'codebrew.io');
+  ga('send', 'pageview');
+</script>
+</body>
+</html>
