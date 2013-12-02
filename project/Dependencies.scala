@@ -1,14 +1,14 @@
 import sbt._
 
 object Dependencies {
-	val insight = "com.github.jedesah" %% "scala-insight" % "0.6.0"
+	val insight = "com.github.jedesah" %% "scalainsight" % "1.0.0"
 
 	private val finagleVer = "6.5.0"
 	lazy val thrift = "org.apache.thrift" % "libthrift" % "0.8.0"
-	val finagleCore = "com.twitter" %% "finagle-core" % finagleVer
-	val finagleThrift = "com.twitter"  %% "finagle-thrift" % finagleVer
-	//val finableOstrich = "com.twitter" %% "finagle-ostrich4" % finagleVer
-	val scroogeRuntime = "com.twitter" %% "scrooge-runtime" % "3.9.0"
+	val finagleCore = "com.twitter" % "finagle-core_2.10" % finagleVer
+	val finagleThrift = "com.twitter"  % "finagle-thrift_2.10" % finagleVer
+	//val finableOstrich = "com.twitter" % "finagle-ostrich4_2.10" % finagleVer
+	val scroogeRuntime = "com.twitter" % "scrooge-runtime_2.10" % "3.9.0"
 
 	val scroogeStack = Seq(  
 		thrift,
@@ -24,7 +24,7 @@ object Dependencies {
 		"org.webjars" %% "webjars-play" % "2.2.0-RC1"
 	)
 
-	val specs2 = "org.specs2" %% "specs2" % "2.2.3" % "test"
+	val specs2 = "org.specs2" % "specs2_2.10" % "2.2.3" % "test"
 	val scalastic = "org.scalastic" %% "scalastic" % "0.90.2"
 	val securesocial = ("securesocial" %% "securesocial" % "master-SNAPSHOT") exclude("org.scala-stm", "scala-stm_2.10.0")
 	val gravatar = "com.andersen-gott" %% "scravatar" % "1.0.2"
