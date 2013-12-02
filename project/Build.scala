@@ -26,7 +26,11 @@ object ApplicationBuild extends Build {
     settings = scrooge ++ service ++ Seq(
       scalaVersion := "2.10.4-20131126-231426-da7395016c",
       name := "api",
-      exportJars := true
+      exportJars := true,
+      resolvers ++= Seq(
+        bintray.Opts.resolver.repo("masseguillaume", "maven"),
+        bintray.Opts.resolver.repo("jedesah", "maven")
+      )
     )
   )
 
@@ -38,6 +42,7 @@ object ApplicationBuild extends Build {
       name := "scalaEval",
       resolvers ++= Seq(
         bintray.Opts.resolver.repo("masseguillaume", "maven"),
+        bintray.Opts.resolver.repo("jedesah", "maven"),
         "Sonatype OSS Snapshots" at "http://oss.sonatype.org/content/repositories/snapshots/"
       ),
       libraryDependencies ++= Seq(insight, specs2),
