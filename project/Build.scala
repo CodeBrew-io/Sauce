@@ -10,10 +10,21 @@ object ApplicationBuild extends Build {
 
   import Dependencies._
 
-  lazy val api = Project(
-    id = "api",
-    base = file("api"),
+  lazy val api1 = Project(
+    id = "api1",
+    base = file("api1"),
     settings = scrooge ++ service ++ Seq(
+      scalaVersion := "2.10.3",
+      name := "api",
+      exportJars := true
+    )
+  )
+
+  lazy val api2 = Project(
+    id = "api2",
+    base = file("api2"),
+    settings = scrooge ++ service ++ Seq(
+      scalaVersion := "2.10.4-20131126-231426-da7395016c",
       name := "api",
       exportJars := true
     )
@@ -29,10 +40,10 @@ object ApplicationBuild extends Build {
         bintray.Opts.resolver.repo("masseguillaume", "maven"),
         "Sonatype OSS Snapshots" at "http://oss.sonatype.org/content/repositories/snapshots/"
       ),
-      libraryDependencies ++= Seq(insight, specs2)
+      libraryDependencies ++= Seq(insight, specs2),
       initialCommands in console := ""
     ) 
-  ) dependsOn(api)
+  ) dependsOn(api2)
  
   lazy val web = Project(
     id = "web",
@@ -41,5 +52,5 @@ object ApplicationBuild extends Build {
       libraryDependencies ++= Seq(securesocial, scalastic, jdbc, anorm, specs2) ++ frontEnd,
       resolvers += Resolver.url("sbt-plugin-snapshots", new URL("http://repo.scala-sbt.org/scalasbt/sbt-plugin-snapshots/"))(Resolver.ivyStylePatterns)
     )
-  ) dependsOn(api)
+  ) dependsOn(api1)
 }

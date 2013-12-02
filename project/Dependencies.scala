@@ -27,5 +27,4 @@ object Dependencies {
 	val specs2 = "org.specs2" % "specs2_2.10" % "2.2.3" % "test"
 	val scalastic = "org.scalastic" %% "scalastic" % "0.90.2"
 	val securesocial = ("securesocial" %% "securesocial" % "master-SNAPSHOT") exclude("org.scala-stm", "scala-stm_2.10.0")
-	val gravatar = "com.andersen-gott" %% "scravatar" % "1.0.2"
 }
