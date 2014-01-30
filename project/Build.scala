@@ -43,9 +43,12 @@ object ApplicationBuild extends Build {
       resolvers ++= Seq(
         bintray.Opts.resolver.repo("masseguillaume", "maven"),
         bintray.Opts.resolver.repo("jedesah", "maven"),
-        "Sonatype OSS Snapshots" at "http://oss.sonatype.org/content/repositories/snapshots/"
+        "Sonatype OSS Snapshots" at "http://oss.sonatype.org/content/repositories/snapshots/",
+        "Concurrent Maven Repo" at "http://conjars.org/repo",
+        "Clo" at "http://clojars.org/repo",
+        "Typesafe" at "http://repo.typesafe.com/typesafe/repo"
       ),
-      libraryDependencies ++= Seq(insight, specs2),
+      libraryDependencies ++= Seq(insight, specs2) ++ extra,
       initialCommands in console := ""
     ) 
   ) dependsOn(api2)
