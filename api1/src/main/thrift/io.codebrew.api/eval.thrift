@@ -1,4 +1,4 @@
-namespace scala io.codebrew.api.eval
+namespace java io.codebrew.api.eval
 
 enum Severity { INFO, WARNING, ERROR }
 

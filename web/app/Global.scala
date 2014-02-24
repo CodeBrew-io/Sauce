@@ -4,10 +4,10 @@ import model._
 
 object Global extends GlobalSettings {
   override def onStart(app: Application): Unit = {
-	LookupService.start()
+	EvalClient.start()
   }
   
   override def onStop(app: Application): Unit = {
-    LookupService.stop()
+    EvalClient.stop()
   }
 }

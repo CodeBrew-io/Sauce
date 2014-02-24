@@ -7,21 +7,18 @@ import SbtNativePackager._
 import packager.Keys._
 
 object Settings {
-	lazy val default = Project.defaultSettings ++ Seq(
-		scalaVersion := "2.10.3",
-		organization := "io.codebrew"
-	) ++ versionWithGit
+	lazy val scalaEvalVersion = "2.11.0-M8"
+	lazy val scalaEvalVersion7 = "2.11.0-M7"
 
-	// scrooge
-	import com.twitter.scrooge._
-	import ScroogeSBT._
-	lazy val scrooge = 
-		Settings.default ++ 
-		ScroogeSBT.newSettings ++ 
-		Seq(
-    		scroogeBuildOptions := Seq("--ostrich","--finagle"),
-    		libraryDependencies ++= Dependencies.scroogeStack
-    	)
+	lazy val scalaWebVersionMM = "2.10"
+	lazy val scalaWebVersion = s"${scalaWebVersionMM}.3"
+
+	lazy val default = Project.defaultSettings ++ Seq(
+		organization := "io.codebrew",
+		// workaround because M7 depends on M6 for parser & xml
+		conflictWarning in Global ~= { _.copy(failOnConflict = false) },
+		resolvers += "Sonatype OSS Releases" at "http://oss.sonatype.org/content/repositories/releases/"
+	) ++ versionWithGit
 
     val setupReplClassPath = TaskKey[Unit]("setup-repl-classpath", "Set up the repl server's classpath based on our dependencies.")
 

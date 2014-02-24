@@ -1,21 +1,8 @@
 import sbt._
 
 object Dependencies {
-	val insight = "com.github.jedesah" %% "scalainsight" % "1.0.0"
-
-	private val finagleVer = "6.5.0"
-	lazy val thrift = "org.apache.thrift" % "libthrift" % "0.8.0"
-	val finagleCore = "com.twitter" % "finagle-core_2.10" % finagleVer
-	val finagleThrift = "com.twitter"  % "finagle-thrift_2.10" % finagleVer
-	//val finableOstrich = "com.twitter" % "finagle-ostrich4_2.10" % finagleVer
-	val scroogeRuntime = "com.twitter" % "scrooge-runtime_2.10" % "3.9.0"
-
-	val scroogeStack = Seq(  
-		thrift,
-		finagleCore, 
-		finagleThrift,
-		scroogeRuntime
-	)
+	def insight(v: String) = "com.github.jedesah" % s"scala-insight_$v" % "1.1.0-SNAPSHOT"
+	def specs2(v: String) = "org.specs2" % s"specs2_$v" % "2.3.7" % "test"
 
 	val frontEnd = Seq(
 		"org.webjars" % "bootstrap" % "3.0.0",
@@ -24,7 +11,11 @@ object Dependencies {
 		"org.webjars" %% "webjars-play" % "2.2.0-RC1"
 	)
 
-	val specs2 = "org.specs2" % "specs2_2.10" % "2.2.3" % "test"
+	val thrift = Seq(
+		"org.apache.thrift" % "libthrift" % "0.9.1",
+		"log4j" % "log4j" % "1.2.17",
+		"ch.qos.logback" %  "logback-classic" % "1.0.6"
+	)
 	val scalastic = "org.scalastic" %% "scalastic" % "0.90.2"
 	val securesocial = ("securesocial" %% "securesocial" % "master-SNAPSHOT") exclude("org.scala-stm", "scala-stm_2.10.0")
 }

@@ -21,7 +21,7 @@ object Eval extends Controller {
 	def eval = WebSocket.using[JsValue] { implicit request =>
 		val (enumerator, channel) = Concurrent.broadcast[JsValue]
 		val in = Iteratee.foreach[JsValue](content => {	
-			EvalService(content).map(out => channel.push(out))
+			channel.push(EvalService(content))
 		}) 
 		(in, enumerator)
 	}

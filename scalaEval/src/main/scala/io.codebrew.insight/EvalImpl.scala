@@ -5,13 +5,12 @@ import api.eval._
 
 import com.github.jedesah.codesheet.api.ScalaCodeSheet
 
-import com.twitter._
-import util.Future
-
 import scala.concurrent.duration._
 import java.util.concurrent.{TimeoutException, Callable, FutureTask, TimeUnit}
 
-class EvalImpl extends Eval.FutureIface {
+import java.util.{ArrayList, List => JList}
+
+class EvalImpl extends Eval.Iface {
 
 	import scala.tools.nsc.interactive.Global
 	import scala.tools.nsc.Settings
@@ -24,17 +23,21 @@ class EvalImpl extends Eval.FutureIface {
 	settings.classpath.value = System.getProperty("replhtml.class.path")
 	val compiler = new Global(settings, reporter)
 
-	def insight(code: String): Future[Result] = Future {
-		if (code == "") Result(insight = None, infos = Nil, timeout = false)
+	def insight(code: String): Result = {
+		if (code == "") new Result(new ArrayList[CompilationInfo](), false)
 		else {
-			val compilerInfos = check(code)
-			if(compilerInfos.exists(_.severity == Severity.Error)) {
-				Result(insight = None, infos = compilerInfos, timeout = false)
+			val (compilerInfos, hasErrors) = check(code)
+			if(hasErrors) {
+				new Result(compilerInfos, false)
 			} else {
 				val insight = withTimeout(5.seconds){ ScalaCodeSheet.computeResults(code, false) }.map( r =>
-					InsightResult(r.userRepr, r.output)
+					new InsightResult(r.userRepr, r.output)
 				)
-				Result(insight, compilerInfos, timeout = insight.isEmpty)
+				val result = new Result(compilerInfos, insight.isEmpty)
+				if(!insight.isEmpty) {
+					insight.map(result.setInsight)
+				}
+				result
 			}
 		}
 	}
@@ -60,8 +63,8 @@ class EvalImpl extends Eval.FutureIface {
 	private val beginWrap = "object Codebrew {\n"
 	private val endWrap = "\n}"
 
-	def autocomplete(code: String, pos: Int): Future[List[Completion]] = Future {
-		if(code == "") Nil
+	def autocomplete(code: String, pos: Int): JList[Completion] = {
+		if(code == "") new ArrayList[Completion]()
 		else {
 			val file = reload(code)
 			val ajustedPos = pos + beginWrap.length
@@ -71,26 +74,29 @@ class EvalImpl extends Eval.FutureIface {
 			)
 
 			response.get match {
-        		case Left(members) => compiler.ask( () =>
-          			members.map(member => Completion(member.sym.decodedName, member.sym.signatureString))
-        		)
+        		case Left(members) => compiler.ask( () => {
+        			val list = new ArrayList[Completion]()
+          			val res = members.map(member => new Completion(member.sym.decodedName, member.sym.signatureString))
+					res.foreach(list.add)
+					list
+        		})
         		case Right(e) => throw e
       		}
 		}
 	}
 
-	private def check(code: String): List[CompilationInfo] = {
-		if (code == "") (Nil)
-		else {
-			parse(code)
-			reporter.infos.map {
-				info => CompilationInfo(
-					message = info.msg,
-					pos = info.pos.point - beginWrap.length, 
-					severity = convert(info.severity)
-				)
-			}.toList
+	private def check(code: String): (JList[CompilationInfo], Boolean) = {
+		parse(code)
+		val res = reporter.infos.map {
+			info => new CompilationInfo(
+				info.msg, // message
+				info.pos.point - beginWrap.length, // pos
+				convert(info.severity) 
+			)
 		}
+		val list = new ArrayList[CompilationInfo]()
+		res.foreach(list.add)
+		(list, res.exists(_.severity == Severity.ERROR))
 	}
 
 	private def wrap(code: String): BatchSourceFile = {
@@ -109,9 +115,9 @@ class EvalImpl extends Eval.FutureIface {
 	}
 
 	private def convert(severity: reporter.Severity): Severity = severity match {
-		case reporter.INFO => Severity.Info
-		case reporter.WARNING => Severity.Warning
-		case reporter.ERROR => Severity.Error
+		case reporter.INFO => Severity.INFO
+		case reporter.WARNING => Severity.WARNING
+		case reporter.ERROR => Severity.ERROR
 	}
 
 	private def withResponse[A](op: Response[A] => Any): Response[A] = {

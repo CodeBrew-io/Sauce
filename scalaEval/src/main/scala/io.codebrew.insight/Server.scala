@@ -3,37 +3,26 @@ package eval
 
 import api.eval._
 
-import com.twitter._
-import finagle._
-import thrift.ThriftServerFramedCodec
-import builder.ServerBuilder
-import builder.Server
+import org.apache.thrift._
+import transport.TServerSocket
+import server.TServer
+import server.TThreadPoolServer
+import server.TThreadPoolServer.Args
 
-import org.apache.thrift.protocol.TBinaryProtocol
 import java.net.InetSocketAddress
 import java.io.{File, FileOutputStream}
 import java.lang.management.ManagementFactory
 
 import scala.util.Try
 
-object EvalServer {
-	var server = Option.empty[Server]
+object EvalServer {	
 	def start(evalPort: Int) {
-		server = Some(
-			ServerBuilder()
-				.codec(ThriftServerFramedCodec())
-				.name("scala-eval")
-				.maxConcurrentRequests(1)
-				.bindTo(new InetSocketAddress(evalPort))
-				.build(new Eval.FinagledService(
-					new EvalImpl, 
-					new TBinaryProtocol.Factory()
-				))
-		)
-	}
+		val eval = new EvalImpl;
+		val processor = new Eval.Processor(eval);
+		val serverTransport = new TServerSocket(evalPort);
+		val server = new TThreadPoolServer(new Args(serverTransport).processor(processor));
 
-	def stop(){
-		server.map(_.close())
+		server.serve()
 	}
 }
 
@@ -49,7 +38,6 @@ object Main extends App {
 
 		EvalSecurity.start
 		EvalServer.start(port)
-		Register.ready(port)
 	}
 	private def createRunningPid() = {
 	    for {
