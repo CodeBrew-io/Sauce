@@ -42,7 +42,7 @@ object ApplicationBuild extends Build {
       // resolvers ++= Seq(
       //   bintray.Opts.resolver.repo("masseguillaume", "maven")
       // ),
-      libraryDependencies ++= Seq(insight(scalaEvalVersion7), specs2(scalaEvalVersion)),
+      libraryDependencies ++= Seq(insight(scalaEvalVersion), specs2(scalaEvalVersion)),
       initialCommands in console := ""
     ) 
   ) dependsOn(api1)
