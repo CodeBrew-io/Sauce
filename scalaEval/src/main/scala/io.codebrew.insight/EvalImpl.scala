@@ -3,7 +3,7 @@ package eval
 
 import api.eval._
 
-import com.github.jedesah.codesheet.api.ScalaCodeSheet
+import io.codebrew.simpleinsight.Instrument
 
 import scala.concurrent.duration._
 import java.util.concurrent.{TimeoutException, Callable, FutureTask, TimeUnit}
@@ -23,6 +23,8 @@ class EvalImpl extends Eval.Iface {
 	settings.classpath.value = System.getProperty("replhtml.class.path")
 	val compiler = new Global(settings, reporter)
 
+	val instrument = new Instrument
+
 	def insight(code: String): Result = {
 		if (code == "") new Result(new ArrayList[CompilationInfo](), false)
 		else {
@@ -30,9 +32,13 @@ class EvalImpl extends Eval.Iface {
 			if(hasErrors) {
 				new Result(compilerInfos, false)
 			} else {
-				val insight = withTimeout(5.seconds){ ScalaCodeSheet.computeResults(code, false) }.map( r =>
-					new InsightResult(r.userRepr, r.output)
-				)
+				val insight = withTimeout(5.seconds){ instrument(code) }.map{ result =>
+					val output = new ArrayList[Instrumentation]()
+					result.foreach{ case (line, res) =>
+						output.add(new Instrumentation(line, res))
+					}
+					output
+				}
 				val result = new Result(compilerInfos, insight.isEmpty)
 				if(!insight.isEmpty) {
 					insight.map(result.setInsight)
@@ -42,7 +48,6 @@ class EvalImpl extends Eval.Iface {
 		}
 	}
 
-	// TODO: avoid creating another thread for each comp. result
 	def withTimeout[T](timeout: Duration)(f: => T): Option[T]= {
 		val task = new FutureTask(new Callable[T]() {
 			def call = f

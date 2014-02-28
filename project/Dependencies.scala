@@ -1,7 +1,7 @@
 import sbt._
 
 object Dependencies {
-	def insight(v: String) = "com.github.jedesah" % s"scala-insight_$v" % "1.1.0-SNAPSHOT"
+	def insight(v: String) = "io.codebrew" % s"simple-insight_$v" % "0.1.0-SNAPSHOT"
 	def specs2(v: String) = "org.specs2" % s"specs2_$v" % "2.3.7" % "test"
 
 	val frontEnd = Seq(

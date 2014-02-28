@@ -7,15 +7,13 @@ import SbtNativePackager._
 import packager.Keys._
 
 object Settings {
-	lazy val scalaEvalVersion = "2.11.0-M7"
+	lazy val scalaEvalVersion = "2.11.0-M8"
 
 	lazy val scalaWebVersionMM = "2.10"
 	lazy val scalaWebVersion = s"${scalaWebVersionMM}.3"
 
 	lazy val default = Project.defaultSettings ++ Seq(
 		organization := "io.codebrew",
-		// workaround because M7 depends on M6 for parser & xml
-		conflictWarning in Global ~= { _.copy(failOnConflict = false) },
 		resolvers += "Sonatype OSS Releases" at "http://oss.sonatype.org/content/repositories/releases/"
 	) ++ versionWithGit
 

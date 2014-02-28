@@ -11,6 +11,7 @@ object ApplicationBuild extends Build {
 
   import Dependencies._
 
+  // crossbuild give obscure errors, so we duplicate code
   lazy val apiSettings = default ++ service ++ ThriftPlugin.thriftSettings ++ Seq(
     name := "api",
     exportJars := true,

@@ -61,7 +61,11 @@ object Api {
 
 	private val callback_id = "callback_id"
 	def insightResult(r: Result, cid: Int): JsValue = {
-		val (insight, output) = Some(r.insight).map(i => (i.insight, i.output)).getOrElse(("",""))
+		import scala.collection.JavaConversions._
+		val insight: Seq[JsObject] = Option(r.insight).map{ _.map( instrumentation => JsObject(Seq(
+			"line" -> JsNumber(instrumentation.line),
+			"result" -> JsString(instrumentation.result)
+		)))}.getOrElse(Seq())
 		val groupedInfos = r.infos.asScala.groupBy(_.severity).map{ case (t, sevs) =>
 			s"${t.toString.toLowerCase}s" -> JsArray(sevs.map(s => JsObject(Seq(
 				"message" -> JsString(s.message),
@@ -69,15 +73,14 @@ object Api {
 			))))
 		}.to[Seq]
 
-		val infos = 
+		val infos: Seq[(String, JsArray)] = 
 			if(groupedInfos.isEmpty) Seq("errors" -> JsArray(), "warnings" -> JsArray(), "infos" -> JsArray())
 			else groupedInfos
 
 		JsObject(
 			infos ++
 			Seq(
-				"insight" -> JsString(insight),
-				"output" -> JsString(output),
+				"insight" -> JsArray(insight),
 				"timeout" -> JsBoolean(r.timeout),
 				callback_id -> JsNumber(cid)
 			)

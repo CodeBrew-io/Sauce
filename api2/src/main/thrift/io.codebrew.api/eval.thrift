@@ -8,13 +8,13 @@ struct CompilationInfo {
 	3: Severity severity
 }
 
-struct InsightResult {
-	1: string insight,
-	2: string output
+struct Instrumentation {
+	1: i32 line,
+	2: string result
 }
 
 struct Result {
-	1: optional InsightResult insight,
+	1: optional list<Instrumentation> insight
 	2: list<CompilationInfo> infos,
 	3: bool timeout
 }
