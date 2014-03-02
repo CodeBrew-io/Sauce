@@ -25,6 +25,13 @@ class EvalImpl extends Eval.Iface {
 
 	val instrument = new Instrument
 
+
+	def addPreface(code: String) = {
+		val nl = sys.props("line.separator")
+		val preface = "import io.codebrew.simpleinsight.representation.html._"
+		preface + nl + code
+	}
+
 	def insight(code: String): Result = {
 		if (code == "") new Result(new ArrayList[CompilationInfo](), false)
 		else {
@@ -32,10 +39,10 @@ class EvalImpl extends Eval.Iface {
 			if(hasErrors) {
 				new Result(compilerInfos, false)
 			} else {
-				val insight = withTimeout(5.seconds){ instrument(code) }.map{ result =>
+				val insight = withTimeout(5.seconds){ instrument(addPreface(code)) }.map{ result =>
 					val output = new ArrayList[Instrumentation]()
 					result.foreach{ case (line, res) =>
-						output.add(new Instrumentation(line, res))
+						output.add(new Instrumentation(line - 1, res)) // -1 for the preface
 					}
 					output
 				}
@@ -92,20 +99,24 @@ class EvalImpl extends Eval.Iface {
 
 	private def check(code: String): (JList[CompilationInfo], Boolean) = {
 		parse(code)
+		def annoying(info: CompilationInfo) = {
+			info.message == "a pure expression does nothing in statement position; you may be omitting necessary parentheses" &&
+			info.severity == Severity.WARNING
+		}
 		val res = reporter.infos.map {
 			info => new CompilationInfo(
 				info.msg, // message
 				info.pos.point - beginWrap.length, // pos
 				convert(info.severity) 
 			)
-		}
+		}.filterNot(annoying)
 		val list = new ArrayList[CompilationInfo]()
 		res.foreach(list.add)
 		(list, res.exists(_.severity == Severity.ERROR))
 	}
 
 	private def wrap(code: String): BatchSourceFile = {
-		new BatchSourceFile("default", beginWrap + code + endWrap)
+		new BatchSourceFile("default", beginWrap + addPreface(code) + endWrap)
 	}
 
 	private def reload(code: String): BatchSourceFile = {
