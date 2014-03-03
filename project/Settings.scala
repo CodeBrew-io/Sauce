@@ -20,8 +20,10 @@ object Settings {
     val setupReplClassPath = TaskKey[Unit]("setup-repl-classpath", "Set up the repl server's classpath based on our dependencies.")
 
     lazy val repl = Seq(
-		Settings.setupReplClassPath <<= (dependencyClasspath in Compile) map {cp =>
-			val cpStr = cp map { case Attributed(str) => str} mkString(System.getProperty("path.separator"))
+		Settings.setupReplClassPath <<= (dependencyClasspath in Compile, classDirectory in Compile) map {(cp, source) =>
+			val deps = cp.map { case Attributed(str) => str}
+			val cpTot = source +: deps
+			val cpStr = cpTot.mkString(System.getProperty("path.separator"))
 			System.setProperty("replhtml.class.path", cpStr)
 		},
 		run in Compile <<= (run in Compile).dependsOn(Settings.setupReplClassPath),

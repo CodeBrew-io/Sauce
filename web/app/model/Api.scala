@@ -5,7 +5,6 @@ import play.api.libs.functional.syntax._
 
 import io.codebrew.api.eval._
 
-//import scala.collection.JavaConversions
 import scala.collection.JavaConverters._
 
 object EvalService {
@@ -64,7 +63,8 @@ object Api {
 		import scala.collection.JavaConversions._
 		val insight: Seq[JsObject] = Option(r.insight).map{ _.map( instrumentation => JsObject(Seq(
 			"line" -> JsNumber(instrumentation.line),
-			"result" -> JsString(instrumentation.result)
+			"result" -> JsString(instrumentation.result),
+			"type" -> JsString(instrumentation.itype.toString)
 		)))}.getOrElse(Seq())
 		val groupedInfos = r.infos.asScala.groupBy(_.severity).map{ case (t, sevs) =>
 			s"${t.toString.toLowerCase}s" -> JsArray(sevs.map(s => JsObject(Seq(

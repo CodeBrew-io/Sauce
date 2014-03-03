@@ -8,13 +8,16 @@ struct CompilationInfo {
 	3: Severity severity
 }
 
+enum InstrumentationType {CODE, JSON}
+
 struct Instrumentation {
 	1: i32 line,
-	2: string result
+	2: string result,
+	3: InstrumentationType itype
 }
 
 struct Result {
-	1: optional list<Instrumentation> insight
+	1: optional list<Instrumentation> insight,
 	2: list<CompilationInfo> infos,
 	3: bool timeout
 }

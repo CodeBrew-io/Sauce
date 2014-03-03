@@ -3,7 +3,8 @@ package eval
 
 import api.eval._
 
-import io.codebrew.simpleinsight.Instrument
+import simpleinsight.Instrument
+import simpleinsight.Instrument.{Code, Json}
 
 import scala.concurrent.duration._
 import java.util.concurrent.{TimeoutException, Callable, FutureTask, TimeUnit}
@@ -25,11 +26,13 @@ class EvalImpl extends Eval.Iface {
 
 	val instrument = new Instrument
 
-
+	val preface = List(
+		"import io.codebrew.simpleinsight.Html._",
+		"import Generic._"
+	)
 	def addPreface(code: String) = {
 		val nl = sys.props("line.separator")
-		val preface = "import io.codebrew.simpleinsight.representation.html._"
-		preface + nl + code
+		preface.mkString(nl) + nl + code
 	}
 
 	def insight(code: String): Result = {
@@ -42,7 +45,12 @@ class EvalImpl extends Eval.Iface {
 				val insight = withTimeout(5.seconds){ instrument(addPreface(code)) }.map{ result =>
 					val output = new ArrayList[Instrumentation]()
 					result.foreach{ case (line, res) =>
-						output.add(new Instrumentation(line - 1, res)) // -1 for the preface
+						val pos = line - preface.size
+						val instrumentation = res match {
+							case Json(json) => new Instrumentation(pos, json.toString, InstrumentationType.JSON)
+							case Code(code) => new Instrumentation(pos, code, InstrumentationType.CODE)
+						}
+						output.add(instrumentation)
 					}
 					output
 				}
@@ -88,7 +96,9 @@ class EvalImpl extends Eval.Iface {
 			response.get match {
         		case Left(members) => compiler.ask( () => {
         			val list = new ArrayList[Completion]()
-          			val res = members.map(member => new Completion(member.sym.decodedName, member.sym.signatureString))
+          			val res = members.map(member => 
+          				new Completion(member.sym.decodedName, member.sym.signatureString)
+          			)
 					res.foreach(list.add)
 					list
         		})
@@ -100,7 +110,8 @@ class EvalImpl extends Eval.Iface {
 	private def check(code: String): (JList[CompilationInfo], Boolean) = {
 		parse(code)
 		def annoying(info: CompilationInfo) = {
-			info.message == "a pure expression does nothing in statement position; you may be omitting necessary parentheses" &&
+			info.message == "a pure expression does nothing in statement " +
+				"position; you may be omitting necessary parentheses" &&
 			info.severity == Severity.WARNING
 		}
 		val res = reporter.infos.map {
