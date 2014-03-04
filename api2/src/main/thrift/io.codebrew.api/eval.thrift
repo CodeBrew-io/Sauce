@@ -19,7 +19,8 @@ struct Instrumentation {
 struct Result {
 	1: optional list<Instrumentation> insight,
 	2: list<CompilationInfo> infos,
-	3: bool timeout
+	3: bool timeout,
+	4: optional string runtimeError
 }
 
 struct Completion {

@@ -6,6 +6,7 @@ import api.eval._
 import simpleinsight.Instrument
 import simpleinsight.Instrument.{Code, Json}
 
+import scala.util.control.NonFatal
 import scala.concurrent.duration._
 import java.util.concurrent.{TimeoutException, Callable, FutureTask, TimeUnit}
 
@@ -27,8 +28,8 @@ class EvalImpl extends Eval.Iface {
 	val instrument = new Instrument
 
 	val preface = List(
-		"import io.codebrew.simpleinsight.Html._",
-		"import Generic._"
+		"import io.codebrew.simpleinsight.html._",
+		"import Html._"
 	)
 	def addPreface(code: String) = {
 		val nl = sys.props("line.separator")
@@ -42,23 +43,32 @@ class EvalImpl extends Eval.Iface {
 			if(hasErrors) {
 				new Result(compilerInfos, false)
 			} else {
-				val insight = withTimeout(5.seconds){ instrument(addPreface(code)) }.map{ result =>
-					val output = new ArrayList[Instrumentation]()
-					result.foreach{ case (line, res) =>
-						val pos = line - preface.size
-						val instrumentation = res match {
-							case Json(json) => new Instrumentation(pos, json.toString, InstrumentationType.JSON)
-							case Code(code) => new Instrumentation(pos, code, InstrumentationType.CODE)
+				try { 
+					val insight = withTimeout(5.seconds){ instrument(addPreface(code)) }.map{ result =>
+						val output = new ArrayList[Instrumentation]()
+						result.foreach{ case (line, res) =>
+							val pos = line - preface.size
+							val instrumentation = res match {
+								case Json(json) => new Instrumentation(pos, json.toString, InstrumentationType.JSON)
+								case Code(code) => new Instrumentation(pos, code, InstrumentationType.CODE)
+							}
+							output.add(instrumentation)
 						}
-						output.add(instrumentation)
+						output
 					}
-					output
+					val result = new Result(compilerInfos, insight.isEmpty)
+					if(!insight.isEmpty) {
+						insight.map(result.setInsight)
+					}
+					result
+				} catch {
+				  case NonFatal(e) => {
+				  	val output = new ArrayList[Instrumentation]()
+				  	val result = new Result(compilerInfos, false)
+				  	result.setRuntimeError(e.toString)
+				  	result
+				  }
 				}
-				val result = new Result(compilerInfos, insight.isEmpty)
-				if(!insight.isEmpty) {
-					insight.map(result.setInsight)
-				}
-				result
 			}
 		}
 	}
@@ -76,6 +86,7 @@ class EvalImpl extends Eval.Iface {
 		} finally { 
 			if( thread.isAlive ){
 				thread.interrupt()
+				thread.stop()
 			}
 		}
 	}
@@ -83,11 +94,13 @@ class EvalImpl extends Eval.Iface {
 	private val beginWrap = "object Codebrew {\n"
 	private val endWrap = "\n}"
 
+	private val wrapOffset = beginWrap.size + addPreface("").size
+
 	def autocomplete(code: String, pos: Int): JList[Completion] = {
 		if(code == "") new ArrayList[Completion]()
 		else {
 			val file = reload(code)
-			val ajustedPos = pos + beginWrap.length
+			val ajustedPos = pos + wrapOffset
 			val position = new OffsetPosition(file, ajustedPos)
 			val response = withResponse[List[compiler.Member]](r => 
 				compiler.askTypeCompletion(position, r)
@@ -117,7 +130,7 @@ class EvalImpl extends Eval.Iface {
 		val res = reporter.infos.map {
 			info => new CompilationInfo(
 				info.msg, // message
-				info.pos.point - beginWrap.length, // pos
+				info.pos.point - wrapOffset, // pos
 				convert(info.severity) 
 			)
 		}.filterNot(annoying)
