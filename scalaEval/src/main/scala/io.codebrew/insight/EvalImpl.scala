@@ -28,8 +28,8 @@ class EvalImpl extends Eval.Iface {
 	val instrument = new Instrument
 
 	val preface = List(
-		"import io.codebrew.simpleinsight.html._",
-		"import Html._"
+		"io.codebrew.simpleinsight.html.Html._",
+		"io.codebrew.simpleinsight.html.Generic._"
 	)
 	def addPreface(code: String) = {
 		val nl = sys.props("line.separator")
@@ -44,7 +44,9 @@ class EvalImpl extends Eval.Iface {
 				new Result(compilerInfos, false)
 			} else {
 				try { 
-					val insight = withTimeout(5.seconds){ instrument(addPreface(code)) }.map{ result =>
+					val all = addPreface(code)
+					println(all)
+					val insight = withTimeout(5.seconds){instrument(all)}.map{ result =>
 						val output = new ArrayList[Instrumentation]()
 						result.foreach{ case (line, res) =>
 							val pos = line - preface.size
