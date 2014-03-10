@@ -40,9 +40,9 @@ object ApplicationBuild extends Build {
     settings = default ++ service ++ bintrayResolverSettings ++ repl ++ Seq(
       name := "scalaEval",
       scalaVersion := scalaEvalVersion,
-      // resolvers ++= Seq(
-      //   bintray.Opts.resolver.repo("masseguillaume", "maven")
-      // ),
+      resolvers ++= Seq(
+        bintray.Opts.resolver.repo("masseguillaume", "maven")
+      ),
       libraryDependencies ++= Seq(insight(scalaEvalVersion), specs2(scalaEvalVersion)),
       initialCommands in console := ""
     ) 

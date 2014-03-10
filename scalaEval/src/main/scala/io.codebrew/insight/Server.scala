@@ -36,8 +36,8 @@ object Main extends App {
 
 		val port = args.headOption.map(_.toInt) orElse fromEnv getOrElse(Config.port)
 
-		EvalSecurity.start
 		EvalServer.start(port)
+		EvalSecurity.start
 	}
 	private def createRunningPid() = {
 	    for {

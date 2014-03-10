@@ -7,7 +7,7 @@ import SbtNativePackager._
 import packager.Keys._
 
 object Settings {
-	lazy val scalaEvalVersion = "2.11.0-M8"
+	lazy val scalaEvalVersion = "2.11.0-RC1"
 
 	lazy val scalaWebVersionMM = "2.10"
 	lazy val scalaWebVersion = s"${scalaWebVersionMM}.3"

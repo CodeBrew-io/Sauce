@@ -35,24 +35,36 @@ class Representation extends Specification { def is = s2"""
 	}
 
 	def both = {
-		val code = """|import Plot._
-					  |val a = "a"
+		val code = """|val a = "a"
 					  |a
 					  |val b = 1
 					  |b
+					  |import io.codebrew.simpleinsight.html.Plot._
 					  |val c = List((1,1), (2,2))
 					  |c""".stripMargin
 		val server = new EvalImpl()
 		val result = server.insight(code)
-		Option(result.runtimeError) ==== None
+
+		import scala.collection.JavaConverters._
+		import api.eval._
+		import InstrumentationType._
+		import Severity._
+
+		def itype(it: InstrumentationType)(other: Instrumentation) = it === other.itype
+		def info(sev: Severity)(other: CompilationInfo) = sev ==== other.severity
+
+		(Option(result.runtimeError) ==== None) and
+		(result.infos.asScala must not contain(info(ERROR) _)) and
+		(result.insight must not beNull) and
+		(result.insight.asScala must contain(itype(CODE) _).exactly(2.times)) and
+		(result.insight.asScala must contain(itype(JSON) _).exactly(1.times))
 	}
 
 	object Lift {
-		import simpleinsight.Instrument._
-		import simpleinsight.html._
-		import Html._
-		import Generic._
-
+		import _root_.io.codebrew.simpleinsight.Instrument._
+		import _root_.io.codebrew.simpleinsight.html._
+		import _root_.io.codebrew.simpleinsight.html.Generic._
+		
 		def any = {
 			val b = 1
 			show(b) must beLike {

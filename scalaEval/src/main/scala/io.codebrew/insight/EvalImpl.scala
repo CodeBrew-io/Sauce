@@ -27,15 +27,6 @@ class EvalImpl extends Eval.Iface {
 
 	val instrument = new Instrument
 
-	val preface = List(
-		"io.codebrew.simpleinsight.html.Html._",
-		"io.codebrew.simpleinsight.html.Generic._"
-	)
-	def addPreface(code: String) = {
-		val nl = sys.props("line.separator")
-		preface.mkString(nl) + nl + code
-	}
-
 	def insight(code: String): Result = {
 		if (code == "") new Result(new ArrayList[CompilationInfo](), false)
 		else {
@@ -44,15 +35,12 @@ class EvalImpl extends Eval.Iface {
 				new Result(compilerInfos, false)
 			} else {
 				try { 
-					val all = addPreface(code)
-					println(all)
-					val insight = withTimeout(5.seconds){instrument(all)}.map{ result =>
+					val insight = withTimeout(5.seconds){instrument(code)}.map{ result =>
 						val output = new ArrayList[Instrumentation]()
 						result.foreach{ case (line, res) =>
-							val pos = line - preface.size
 							val instrumentation = res match {
-								case Json(json) => new Instrumentation(pos, json.toString, InstrumentationType.JSON)
-								case Code(code) => new Instrumentation(pos, code, InstrumentationType.CODE)
+								case Json(json) => new Instrumentation(line, json.toString, InstrumentationType.JSON)
+								case Code(code) => new Instrumentation(line, code, InstrumentationType.CODE)
 							}
 							output.add(instrumentation)
 						}
@@ -68,6 +56,8 @@ class EvalImpl extends Eval.Iface {
 				  	val output = new ArrayList[Instrumentation]()
 				  	val result = new Result(compilerInfos, false)
 				  	result.setRuntimeError(e.toString)
+				  	println(e.toString)
+				  	e.printStackTrace
 				  	result
 				  }
 				}
@@ -96,7 +86,7 @@ class EvalImpl extends Eval.Iface {
 	private val beginWrap = "object Codebrew {\n"
 	private val endWrap = "\n}"
 
-	private val wrapOffset = beginWrap.size + addPreface("").size
+	private val wrapOffset = beginWrap.size
 
 	def autocomplete(code: String, pos: Int): JList[Completion] = {
 		if(code == "") new ArrayList[Completion]()
@@ -142,7 +132,7 @@ class EvalImpl extends Eval.Iface {
 	}
 
 	private def wrap(code: String): BatchSourceFile = {
-		new BatchSourceFile("default", beginWrap + addPreface(code) + endWrap)
+		new BatchSourceFile("default", beginWrap + code + endWrap)
 	}
 
 	private def reload(code: String): BatchSourceFile = {
