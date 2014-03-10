@@ -17,23 +17,24 @@
     @user.avatarUrl.map { src =>
         <img class="avatar img-rounded" src="@src">
     }
-    <p class="username">@{user.fullName}</p>
 
     <h2>Choose your username</h2>
-    <p>so you can share snippet at: </p>
-    <p>/{{ userName || "bob" }}/your-snippet-title</p> 
     <div class="form-group" ng-class="{'has-success': signIn.userName.$valid, 'has-error': withValidation() && !signIn.userName.$valid}">
-        <label class="control-label">
-            Username
-            <span ng-show="withValidation()">
-                <span class="error" ng-show="signIn.userName.$error.required">is required</span>
-                <span class="error" ng-show="signIn.userName.$error.taken">is already taken</span>
-                <span class="error" ng-show="signIn.userName.$error.pattern">contains invalid chars</span>
-                <i class="fa" ng-class="{'fa-check valid': signIn.userName.$valid, 'fa-exclamation invalid': !signIn.userName.$valid}"></i>
-            </span>
-            <input  ng-model="userName" ng-minlength="minLength" ng-maxlength="40" ng-pattern="/^[A-Za-z0-9]+$/" ng-change="userNameChange()"
-                    name="userName" type="text" placeholder="bob" required class="form-control">
-        </label>
+            <label class="control-label">
+                Username
+                <span ng-show="withValidation()">
+                    <span class="error" ng-show="signIn.userName.$error.required">is required</span>
+                    <span class="error" ng-show="signIn.userName.$error.taken">is already taken</span>
+                    <span class="error" ng-show="signIn.userName.$error.pattern">contains invalid chars</span>
+                    <i class="fa" ng-class="{'fa-check valid': signIn.userName.$valid, 'fa-exclamation invalid': !signIn.userName.$valid}"></i>
+                </span>
+                <div class="input-group">
+                    <span class="input-group-addon">{{ host}}/</span>
+                    <input  ng-model="userName" ng-minlength="minLength" ng-maxlength="40" ng-pattern="/^[A-Za-z0-9]+$/" ng-change="userNameChange()"
+                            name="userName" type="text" placeholder="bob" required class="form-control">
+                    <span class="input-group-addon">/quicksort-overflow</span>
+                </div>
+            </label>
     </div>
     <div class="actions">
       <input ng-click="cancel()" value="Cancel" class="btn btn-default">
@@ -54,10 +55,11 @@ app.factory('user', function($resource, $window) {
 });
 
 
-app.controller('signIn', function code($scope, $timeout, user){
+app.controller('signIn', function code($scope, $timeout, $location, user){
     $scope.userName = "@{sun.text.Normalizer.normalize(user.fullName.replace(" ",""), java.text.Normalizer.Form.NFKD, 0).replaceAll("\\p{InCombiningDiacriticalMarks}+", "")}";
     $scope.takenUsername = false;
     $scope.minLength = 3;
+    $scope.host = $location.host();
 
     function present(field){
         return angular.isDefined(field) && field.length >= $scope.minLength;
@@ -98,6 +100,9 @@ app.controller('signIn', function code($scope, $timeout, user){
             });
         }
     };
+    $timeout(function(){
+        $scope.userNameChange();
+    });
 });
 </script>
 <script>

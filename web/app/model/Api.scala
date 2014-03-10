@@ -3,28 +3,24 @@ package model
 import play.api.libs.json._
 import play.api.libs.functional.syntax._
 
-import com.twitter.util.Future
-
 import io.codebrew.api.eval._
+
+import scala.collection.JavaConverters._
 
 object EvalService {
 	import Api._
 
-	def apply(json: JsValue): Future[JsValue] = {
+	def apply(json: JsValue): JsValue = {
 		all(json, insight _, autocomplete _, fallback _)
 	}
 
-	private def insight(code: String, cid: Int): Future[JsValue] = {
-		Registry.getEval.map(service => {
-			service.insight(code).map(i => insightResult(i, cid))
-		}).getOrElse(unavailable("insight", cid))
+	private def insight(code: String, cid: Int): JsValue = {
+		insightResult(EvalClient.get.insight(code), cid)
 	}
-	private def autocomplete(code: String, position: Int, cid: Int): Future[JsValue] = {
-		Registry.getEval.map(service => {
-			service.autocomplete(code, position).map(a => autocompleteResult(a, cid))
-		}).getOrElse(unavailable("completions", cid))
+	private def autocomplete(code: String, position: Int, cid: Int): JsValue = {
+		autocompleteResult(EvalClient.get.autocomplete(code, position).asScala, cid)
 	}
-	private def fallback(): Future[JsValue] = Future {
+	private def fallback(): JsValue = {
 		JsObject(Seq("error" -> JsString("invalid request")))
 	}
 }
@@ -64,23 +60,27 @@ object Api {
 
 	private val callback_id = "callback_id"
 	def insightResult(r: Result, cid: Int): JsValue = {
-		val (insight, output) = r.insight.map(i => (i.insight, i.output)).getOrElse(("",""))
-		val groupedInfos = r.infos.groupBy(_.severity).map{ case (t, sevs) =>
+		import scala.collection.JavaConversions._
+		val insight: Seq[JsObject] = Option(r.insight).map{ _.map( instrumentation => JsObject(Seq(
+			"line" -> JsNumber(instrumentation.line),
+			"result" -> JsString(instrumentation.result),
+			"type" -> JsString(instrumentation.itype.toString)
+		)))}.getOrElse(Seq())
+		val groupedInfos = r.infos.asScala.groupBy(_.severity).map{ case (t, sevs) =>
 			s"${t.toString.toLowerCase}s" -> JsArray(sevs.map(s => JsObject(Seq(
 				"message" -> JsString(s.message),
 				"position" -> JsNumber(s.pos)
 			))))
 		}.to[Seq]
 
-		val infos = 
+		val infos: Seq[(String, JsArray)] = 
 			if(groupedInfos.isEmpty) Seq("errors" -> JsArray(), "warnings" -> JsArray(), "infos" -> JsArray())
 			else groupedInfos
 
 		JsObject(
 			infos ++
 			Seq(
-				"insight" -> JsString(insight),
-				"output" -> JsString(output),
+				"insight" -> JsArray(insight),
 				"timeout" -> JsBoolean(r.timeout),
 				callback_id -> JsNumber(cid)
 			)
@@ -95,10 +95,10 @@ object Api {
 			callback_id -> JsNumber(cid)
 		))
 	}
-	def unavailable(serviceName: String, cid: Int): Future[JsValue] = Future(
+	def unavailable(serviceName: String, cid: Int): JsValue = {
 		JsObject(Seq(
 			serviceName -> JsString(s"$serviceName service unavailable"),
 			callback_id -> JsNumber(cid)
 		))
-	)
+	}
 }

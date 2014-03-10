@@ -7,27 +7,23 @@ import SbtNativePackager._
 import packager.Keys._
 
 object Settings {
-	lazy val default = Project.defaultSettings ++ Seq(
-		scalaVersion := "2.10.3",
-		organization := "io.codebrew"
-	) ++ versionWithGit
+	lazy val scalaEvalVersion = "2.11.0-RC1"
 
-	// scrooge
-	import com.twitter.scrooge._
-	import ScroogeSBT._
-	lazy val scrooge = 
-		Settings.default ++ 
-		ScroogeSBT.newSettings ++ 
-		Seq(
-    		scroogeBuildOptions := Seq("--ostrich","--finagle"),
-    		libraryDependencies ++= Dependencies.scroogeStack
-    	)
+	lazy val scalaWebVersionMM = "2.10"
+	lazy val scalaWebVersion = s"${scalaWebVersionMM}.3"
+
+	lazy val default = Project.defaultSettings ++ Seq(
+		organization := "io.codebrew",
+		resolvers += "Sonatype OSS Releases" at "http://oss.sonatype.org/content/repositories/releases/"
+	) ++ versionWithGit
 
     val setupReplClassPath = TaskKey[Unit]("setup-repl-classpath", "Set up the repl server's classpath based on our dependencies.")
 
     lazy val repl = Seq(
-		Settings.setupReplClassPath <<= (dependencyClasspath in Compile) map {cp =>
-			val cpStr = cp map { case Attributed(str) => str} mkString(System.getProperty("path.separator"))
+		Settings.setupReplClassPath <<= (dependencyClasspath in Compile, classDirectory in Compile) map {(cp, source) =>
+			val deps = cp.map { case Attributed(str) => str}
+			val cpTot = source +: deps
+			val cpStr = cpTot.mkString(System.getProperty("path.separator"))
 			System.setProperty("replhtml.class.path", cpStr)
 		},
 		run in Compile <<= (run in Compile).dependsOn(Settings.setupReplClassPath),

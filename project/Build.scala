@@ -3,6 +3,7 @@ import Keys._
 import play.Project._
 
 import bintray.Plugin.bintrayResolverSettings
+import com.github.bigtoast.sbtthrift.ThriftPlugin
 
 import Settings._
 
@@ -10,27 +11,26 @@ object ApplicationBuild extends Build {
 
   import Dependencies._
 
+  // crossbuild give obscure errors, so we duplicate code
+  lazy val apiSettings = default ++ service ++ ThriftPlugin.thriftSettings ++ Seq(
+    name := "api",
+    exportJars := true,
+    libraryDependencies ++= thrift
+  )
+
   lazy val api1 = Project(
     id = "api1",
     base = file("api1"),
-    settings = scrooge ++ service ++ Seq(
-      scalaVersion := "2.10.3",
-      name := "api",
-      exportJars := true
+    settings = apiSettings ++ Seq(
+      scalaVersion := scalaEvalVersion
     )
   )
 
   lazy val api2 = Project(
     id = "api2",
     base = file("api2"),
-    settings = scrooge ++ service ++ Seq(
-      scalaVersion := "2.10.4-20131126-231426-da7395016c",
-      name := "api",
-      exportJars := true,
-      resolvers ++= Seq(
-        bintray.Opts.resolver.repo("masseguillaume", "maven"),
-        bintray.Opts.resolver.repo("jedesah", "maven")
-      )
+    settings = apiSettings ++ Seq(
+      scalaVersion := scalaWebVersion
     )
   )
 
@@ -38,24 +38,25 @@ object ApplicationBuild extends Build {
     id = "scalaEval",
     base = file("scalaEval"),
     settings = default ++ service ++ bintrayResolverSettings ++ repl ++ Seq(
-      scalaVersion := "2.10.4-20131126-231426-da7395016c",
       name := "scalaEval",
+      scalaVersion := scalaEvalVersion,
       resolvers ++= Seq(
-        bintray.Opts.resolver.repo("masseguillaume", "maven"),
-        bintray.Opts.resolver.repo("jedesah", "maven"),
-        "Sonatype OSS Snapshots" at "http://oss.sonatype.org/content/repositories/snapshots/"
+        bintray.Opts.resolver.repo("masseguillaume", "maven")
       ),
-      libraryDependencies ++= Seq(insight, specs2),
+      libraryDependencies ++= Seq(insight(scalaEvalVersion), specs2(scalaEvalVersion)),
       initialCommands in console := ""
     ) 
-  ) dependsOn(api2)
+  ) dependsOn(api1)
  
   lazy val web = Project(
     id = "web",
     base = file("web"),
     settings = default ++ playScalaSettings ++ Seq(
-      libraryDependencies ++= Seq(securesocial, scalastic, jdbc, anorm, specs2) ++ frontEnd,
-      resolvers += Resolver.url("sbt-plugin-snapshots", new URL("http://repo.scala-sbt.org/scalasbt/sbt-plugin-snapshots/"))(Resolver.ivyStylePatterns)
+      scalaVersion := scalaWebVersion,
+      libraryDependencies ++= Seq(securesocial, scalastic, jdbc, anorm, specs2(scalaWebVersionMM)) ++ frontEnd,
+      resolvers += Resolver.url("sbt-plugin-snapshots", 
+        new URL("http://repo.scala-sbt.org/scalasbt/sbt-plugin-snapshots/")
+      )(Resolver.ivyStylePatterns)
     )
-  ) dependsOn(api1)
+  ) dependsOn(api2)
 }
