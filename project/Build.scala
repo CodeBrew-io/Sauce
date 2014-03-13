@@ -10,6 +10,7 @@ import Settings._
 object ApplicationBuild extends Build {
 
   import Dependencies._
+  import Resolvers._
 
   // crossbuild give obscure errors, so we duplicate code
   lazy val apiSettings = default ++ service ++ ThriftPlugin.thriftSettings ++ Seq(
@@ -40,9 +41,7 @@ object ApplicationBuild extends Build {
     settings = default ++ service ++ bintrayResolverSettings ++ repl ++ Seq(
       name := "scalaEval",
       scalaVersion := scalaEvalVersion,
-      resolvers ++= Seq(
-        bintray.Opts.resolver.repo("masseguillaume", "maven")
-      ),
+      resolvers ++= Seq(bintray_masseguillaume, sonatype_snapshots),
       libraryDependencies ++= Seq(insight(scalaEvalVersion), specs2(scalaEvalVersion)),
       initialCommands in console := ""
     ) 
@@ -53,10 +52,8 @@ object ApplicationBuild extends Build {
     base = file("web"),
     settings = default ++ playScalaSettings ++ Seq(
       scalaVersion := scalaWebVersion,
-      libraryDependencies ++= Seq(securesocial, scalastic, jdbc, anorm, specs2(scalaWebVersionMM)) ++ frontEnd,
-      resolvers += Resolver.url("sbt-plugin-snapshots", 
-        new URL("http://repo.scala-sbt.org/scalasbt/sbt-plugin-snapshots/")
-      )(Resolver.ivyStylePatterns)
+      libraryDependencies ++= Seq(securesocial, elastic4s, jdbc, anorm, specs2s(scalaWebVersionMM)) ++ frontEnd,
+      resolvers ++= Seq(sbt_plugins_snapshots, sonatype_snapshots)
     )
   ) dependsOn(api2)
 }

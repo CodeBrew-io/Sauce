@@ -18,7 +18,7 @@ POST 	/user 						controllers.Users.add
 GET		/user/signIn 				controllers.Users.signIn
 
 GET		/snippets/queryUser 		controllers.Snippets.queryUser
-GET     /snippets					controllers.Snippets.queryDistinct(terms: Option[String], userName: Option[String], offset: Option[Int])
+GET     /snippets					controllers.Snippets.query(terms: Option[String], userName: Option[String], offset: Option[Int])
 POST	/snippets 					controllers.Snippets.add
 DELETE  /snippets					controllers.Snippets.delete(id: String)
 GET     /snippets/u/:username/:id	controllers.Snippets.find(id: String, username: String)

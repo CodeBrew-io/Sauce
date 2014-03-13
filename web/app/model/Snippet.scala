@@ -1,156 +1,166 @@
 package model
 
-import scalastic.elasticsearch.Indexer
+import com.sksamuel.elastic4s.ElasticClient
 
-import org.elasticsearch._
-import search.SearchHit
-import index.query._
-import FilterBuilders._
-import QueryBuilders._
-
-import play.api.libs.json._
-
-import play.api.Play
+import play.api._
+import libs.json._
 import play.api.Play.current
 
-case class Snippet( 
-  id: String,
-  title: String, description: String, codeOrigin: String, codeRaw: String,
-  tags: String, scalaVersion: String, user: String){
-  def toJson() : JsValue = {
-    Json.obj("id" -> id, "code" -> codeOrigin, "user" -> user)
-  }
+import scala.concurrent._
+
+case class Snippet(id: Snippets.Id, code: String, user: String, scalaVersion: String) {
+	def toJson() : JsValue = {
+		Json.obj("id" -> id, "code" -> code, "user" -> user)
+	}
+	override def equals(other: Any) = {
+		other match {
+			case Snippet(_, code_, user_, scalaVersion_) => 
+				code_ == code &&
+				user_ == user &&
+				scalaVersion_ == scalaVersion
+			case _ => false
+		}
+	}
+}
+object Snippet {
+	def apply(code: String, user: String, scalaVersion: String): Snippet =
+		Snippet("", code, user, scalaVersion)
 }
 
-object Snippets {
+trait Setup {
+	implicit val context: ExecutionContext
+	val client: ElasticClient
+}
 
-  private val size = 10
+trait PlaySetup extends Setup {
+	implicit lazy val context = play.api.libs.concurrent.Execution.Implicits.defaultContext
+	val client = 
+		if(Play.isDev(Play.current)){
+			ElasticClient.local
+		} else {
+			ElasticClient.remote("localhost", 9300)
+		}
+}
 
-  private val clusterName = Play.application.configuration.getString("elasticsearch.cluster").getOrElse("")
-  private val host = Play.application.configuration.getString("elasticsearch.host").getOrElse("")
-  private val port = Play.application.configuration.getString("elasticsearch.port").getOrElse("").toInt
+trait TestSetup extends Setup {
+	implicit lazy val context = ExecutionContext.Implicits.global
+	val client = ElasticClient.local
+}
 
-  private val indexer = Indexer.transport(settings = Map("cluster.name" -> clusterName), host = host, ports=Seq(port))
+object Snippets extends PlaySetup with SimpleSnippets
+object TestSnippets extends TestSetup with SimpleSnippets
 
-  private val indexName = Play.application.configuration.getString("elasticsearch.index").getOrElse("")
-  private val indexType = Play.application.configuration.getString("elasticsearch.userSnippetsType").getOrElse("")
+trait SimpleSnippets { self: Setup =>
+	import org.elasticsearch.action.get.GetResponse
+	import org.elasticsearch.action.delete.DeleteResponse
+	import org.elasticsearch.action.update.UpdateResponse
 
-  private val snippetMapping = s"""
-   |{
-   |  "$indexType":{
-   |    "properties" : {
-   |       "title" : {"type" : "string", "analyzer" : "snowball"},
-   |       "description" : {"type" : "string", "analyzer" : "snowball"},
-   |       "code" : {
-   |           "type" : "multi_field",
-   |           "fields" : {
-   |              "origin" : {"type" : "string", "index" : "analyzed"},
-   |              "raw" : {"type" : "string", "index" : "not_analyzed"}
-   |           }
-   |        },
-   |       "tags" : {"type" : "string", "analyzer" : "keyword"},
-   |       "scalaVersion": {"type" : "string"},
-   |       "user ": {
-   |           "type" : "multi_field",
-   |           "fields" : {
-   |              "origin" : {"type" : "string", "index" : "analyzed"},
-   |              "raw" : {"type" : "string", "index" : "not_analyzed"}
-   |        }
-   |      }
-   |    }
-   |  }
-   |}""".stripMargin
+	import com.sksamuel.elastic4s.ElasticDsl._
+	import com.sksamuel.elastic4s.mapping.FieldType._
 
+	import scala.collection.JavaConversions._
 
-  if (!indexer.exists(indexName).isExists()) {
-    indexer.createIndex(indexName, settings = Map("number_of_shards" -> "1"))
-    indexer.waitTillActive()
-  }
+	type Id = String
+	type Resource = (Id, String)
 
-  def add(snippet: Snippet): String = {
-    val jsonSnippet = Json.obj (
-      "title" -> snippet.title,
-      "description" -> snippet.description,
-      "code.origin" -> snippet.codeOrigin,
-      "code.raw" -> snippet.codeOrigin,
-      "tags" -> snippet.tags,
-      "scalaVersion" -> snippet.scalaVersion,
-      "user.origin" -> snippet.user,
-      "user.raw" -> snippet.user
-    )
+	val indexName = "katas"
+	val indexType = "snippets"
+	val fullindex = s"$indexName/$indexType"
 
-    indexer.putMapping(indexName, indexType, snippetMapping)
-    indexer.index(indexName, indexType, null, Json.stringify(jsonSnippet)).getId
-  }
+	import scala.concurrent.duration._
+	val timeout = 10.minutes
 
-  def querySnippets(pQuery: QueryBuilder, offset: Option[Int]): List[Snippet] = {
-    val responses = indexer.search(
-      indices = List(indexName),
-      query = pQuery,
-      fields = Seq("title", "description", "code.origin", "code.raw", "tags", "scalaVersion", "user.origin"),
-      from = offset,
-      size = Some(size)
-    )
-    responses.getHits().hits().map(fromHit).to[List]
-  }
+	// create index unless present
+	val indexExists = Await.result(client.exists(indexName).map(_.isExists), timeout)
+	if(!indexExists) {
+		Await.ready(client execute {
+			create.index(indexName).mappings(
+				indexType as (
+					id typed StringType,
+					"code" typed StringType,
+					"scalaVersion" typed StringType,
+					"user" multi(
+						"user" typed StringType index "analyzed",
+						"user_raw" typed StringType index "not_analyzed"
+					)
+				)
+			)
+		}, timeout)
+	}
+	import scala.collection.JavaConversions._
 
-  private def fromHit(hit: SearchHit): Snippet = {
-    Snippet(
-      hit.getId,
-      hit.field("title").getValue(),
-      hit.field("description").getValue(),
-      hit.field("code.origin").getValue(),
-      hit.field("code.raw").getValue(),
-      hit.field("tags").getValue(),
-      hit.field("scalaVersion").getValue(),
-      hit.field("user.origin").getValue()
-    )
-  }
+	private def from(id: Id, m: Map[String, Any]): Snippet = {
+		val ms = m.mapValues(_.asInstanceOf[String])
+		Snippet(
+			id,
+			ms("code"),
+			ms("user"),
+			ms("scalaVersion")
+		)
+	}
 
-  def query(terms: Option[String] = None, userName: Option[String] = None, offset: Option[Int] = None): List[Snippet] = {
+	def query(	terms: Option[String] = None, 
+				userName: Option[String] = None, 
+				offset: Option[Int] = None) : Future[List[Snippet]] = {
 
-    //If pTerm == None, then we don't search for a particular term, instead we return everything (matchAll)
-    val codeTermQuery = terms.map (
-      q => multiMatchQuery( q, "code.origin")
-    ).getOrElse(
-      matchAllQuery()
-    )
+		val termQuery = terms.map(t => term("code",t)).getOrElse(matchall)
+		val userQuery = userName.map(u => term("user_raw", u)).getOrElse(matchall)
 
-    //If pUser !== None, we return every snippets, no matter the user, else we filter for this exact user only
-    val codeTermQueryWithUserFilter = userName.map (
-      u => filteredQuery(codeTermQuery, termFilter("user.raw", u))
-     ).getOrElse(
-      filteredQuery(codeTermQuery, null)
-    )
+		client execute {
+			search in fullindex query {
+				bool { must(termQuery, userQuery) }
+			}
+		} map { response =>
+			response.getHits().to[List].map(hit => from(hit.getId, hit.getSource.toMap))
+		}
+	}
 
-    querySnippets(codeTermQueryWithUserFilter, offset)
-  }
+	def find(resource: Resource): Future[Option[Snippet]] = {
+		val (snippetId, userName) = resource
+		client execute {
+		  get id snippetId from fullindex
+		} map { s =>
+			// println(s.getId)
+			// if(s.getSourceAsMap == null) println("null pointer")
+			
+			val fieldmap = s.getSourceAsMap.toMap
+			fieldmap.get("user").flatMap{ user =>
+				if(user == userName) Some(from(s.getId, fieldmap))
+				else None
+			}
+		}
+	}
 
-  def queryDistinct(terms: Option[String] = None, userName: Option[String] = None, offset: Option[Int] = None): List[Snippet] = {
-    query(terms, userName, offset).groupBy(_.codeOrigin).values.flatMap(_.headOption).to[List]
-  }
+	def add(snippet: Snippet): Future[Id] = {
+		client execute {
+			index into fullindex fields (
+				"code" -> snippet.code,
+				"scalaVersion" -> snippet.scalaVersion,
+				"user" -> snippet.user
+			)
+		} map (_.getId)
+	}
 
-  def byId(id: String, username: String) = {
-    boolQuery.
-      must(termQuery("user.raw", username)).
-      must(idsQuery().ids(id))
-  }
+	def size: Future[Long] = {
+		client execute {
+			count from fullindex
+		} map(_.getCount)
+	}
 
-  def find(id: String, username: String) = {
-    val responses = indexer.search(
-      indices = List(indexName),
-      query = byId(id, username),
-      fields = Seq("title", "description", "code.origin", "code.raw", "tags", "scalaVersion", "user.origin"),
-      size = Some(1)
-    )
+	// def modify(resource: Resource, code: String): Future[Option[UpdateResponse]] = {
+	// 	// if we find the resource update it
+	// 	val (i, _) = resource
+	// 	lazy val updateQuery = client execute { update id i in(fullindex) doc ("code" -> code) }
+	// 	for {
+	// 		response <- find(resource)
+	// 		_ <- response
+	// 		updateResponse <- updateQuery
+	// 	} yield updateResponse
+	// }
 
-    responses.getHits().hits().map(fromHit).headOption
-  }
-
-  def delete(id:String, username:String): Boolean = {
-    indexer.deleteByQuery( 
-      indices = List(indexName),
-      query = byId(id, username)
-    ).getIndices().size == 1
-  }
+	// isFound
+	def remove(resource: Resource): Future[DeleteResponse] = {
+		val (i, userName) = resource
+		client execute { delete id i from fullindex }
+	}
 }
