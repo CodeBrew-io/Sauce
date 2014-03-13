@@ -17,12 +17,15 @@ object Snippets extends Controller with securesocial.core.SecureSocial {
 
   def add = UserAwareAction { implicit request => withUsername { username =>
     val scalaVersion = scala.util.Properties.versionString
-    for {
-      //JsObject(Seq(("code", JsString(code)))) <- request.body.asJson
-      id <- model.Snippets.add(Snippet("1+1", username, scalaVersion))
-    } yield Ok(Json.obj("id" -> id))
 
-    //resp.getOrElse(BadRequest("Cannot add")) // todo: why ?
+    request.body.asJson match {
+      case Some(JsObject(Seq(("code", JsString(code))))) => {
+        model.Snippets.add(Snippet(code, username, scalaVersion)) map { id =>
+          Ok(Json.obj("id" -> id))
+        }
+      }
+      case _ => Future { BadRequest(s"expected: {code: '1+1'}, received: ${request.body}") }
+    }
   }}
 
   def queryUser = UserAwareAction { implicit request => withUsername { username =>
