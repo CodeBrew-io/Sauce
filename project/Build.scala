@@ -42,7 +42,7 @@ object ApplicationBuild extends Build {
       name := "scalaEval",
       scalaVersion := scalaEvalVersion,
       resolvers ++= Seq(bintray_masseguillaume, sonatype_snapshots),
-      libraryDependencies ++= Seq(insight(scalaEvalVersion), specs2(scalaEvalVersion)),
+      libraryDependencies ++= Seq(insight(scalaEvalVersionMM), specs2(scalaEvalVersionMM)),
       initialCommands in console := ""
     ) 
   ) dependsOn(api1)

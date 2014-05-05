@@ -8,7 +8,7 @@ struct CompilationInfo {
 	3: Severity severity
 }
 
-enum InstrumentationType {CODE, JSON}
+enum InstrumentationType {CODE}
 
 struct Instrumentation {
 	1: i32 line,

@@ -18,12 +18,6 @@ class EvalSecurityPolicy extends Policy {
   websitePermissions.add(new AllPermission)
 
   private val scriptPermissions = new Permissions
-  scriptPermissions.add(new FilePermission("-","read"))
-  scriptPermissions.add(new FilePermission("/tmp/sandbox","write"))
-  scriptPermissions.add(new RuntimePermission("accessDeclaredMembers")) // reflexion
-  scriptPermissions.add(new ReflectPermission("suppressAccessChecks"))
-  scriptPermissions.add(new RuntimePermission("getenv.*"))
-  scriptPermissions.add(new PropertyPermission("com.twitter.finagle.*","read"))
 
   override def getPermissions( sourceCode: CodeSource ) = {
     if(sourceCode.getLocation == null) {

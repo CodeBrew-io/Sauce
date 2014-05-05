@@ -1,9 +1,9 @@
 import sbt._
 
 object Dependencies {
-	def insight(v: String) = "io.codebrew" % s"simple-insight_$v" % "0.1.0"
+	def insight(v: String) = "io.codebrew" % s"simple-insight_$v" % "0.2.1"
 	def specs2s(v: String) = "org.specs2" % s"specs2_$v" % "2.4-SNAPSHOT" % "test"
-	def specs2(v: String) = "org.specs2" % s"specs2_$v" % "2.3.10" % "test"
+	def specs2(v: String) = "org.specs2" % s"specs2_$v" % "2.3.11" % "test"
 	
 
 	val frontEnd = Seq(

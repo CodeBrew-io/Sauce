@@ -20,11 +20,13 @@ object Snippets extends Controller with securesocial.core.SecureSocial {
 
     request.body.asJson match {
       case Some(JsObject(Seq(("code", JsString(code))))) => {
-        model.Snippets.add(Snippet(code, username, scalaVersion)) map { id =>
-          Ok(Json.obj("id" -> id))
+        model.Snippets.add(Snippet(code, username, scalaVersion)) map { snippet =>
+          Ok(Json.toJson(snippet.toJson))
         }
       }
-      case _ => Future { BadRequest(s"expected: {code: '1+1'}, received: ${request.body}") }
+      case _ => Future { 
+        BadRequest(s"expected: {code: '1+1'}, received: ${request.body}") 
+      }
     }
   }}
 

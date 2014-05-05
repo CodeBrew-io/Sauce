@@ -111,7 +111,9 @@ trait SimpleSnippets { self: Setup =>
 				bool { must(termQuery, userQuery) }
 			}
 		} map { response =>
-			response.getHits().to[List].map(hit => from(hit.getId, hit.getSource.toMap))
+			response.getHits().to[List].map(hit => 
+				from(hit.getId, hit.getSource.toMap)
+			)
 		}
 	}
 
@@ -131,14 +133,14 @@ trait SimpleSnippets { self: Setup =>
 		}
 	}
 
-	def add(snippet: Snippet): Future[Id] = {
+	def add(snippet: Snippet): Future[Snippet] = {
 		client execute {
 			index into fullindex fields (
 				"code" -> snippet.code,
 				"scalaVersion" -> snippet.scalaVersion,
 				"user" -> snippet.user
 			)
-		} map (_.getId)
+		} map (s => snippet.copy(id = s.getId))
 	}
 
 	def size: Future[Long] = {
