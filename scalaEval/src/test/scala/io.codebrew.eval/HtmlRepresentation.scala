@@ -94,3 +94,26 @@ class Representation extends Specification { def is = s2"""
 		}
 	}
 }
+
+/*
+
+import scala.math.Ordering
+
+val a = List(1,2,3) map (_+2)
+
+def quicksort[T](xs: List[T])(implicit cmp: Ordering[T]): List[T] = {
+	if(xs.isEmpty) Nil
+    else {
+    	val (small, large) = xs.tail.partition(v => cmp.lt(v, xs.head))
+        quicksort(small) ++ List(xs.head) ++ quicksort(large)
+    }
+}
+
+quicksort(List(1,5,2,3,4))
+
+case class Test(a: Int) {
+	def f = a + 1
+}
+
+Test(1).f
+*/

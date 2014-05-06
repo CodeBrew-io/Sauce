@@ -4,7 +4,7 @@ package eval
 import api.eval._
 
 import simpleinsight.Instrument
-import simpleinsight.Instrument.{Code, Json}
+import simpleinsight.Instrument.Code
 
 import scala.util.control.NonFatal
 import scala.concurrent.duration._
@@ -35,11 +35,10 @@ class EvalImpl extends Eval.Iface {
 				new Result(compilerInfos, false)
 			} else {
 				try { 
-					val insight = withTimeout(5.seconds){instrument(code)}.map{ result =>
+					val insight = withTimeout(20.seconds){instrument(code)}.map{ result =>
 						val output = new ArrayList[Instrumentation]()
 						result.foreach{ case (line, res) =>
 							val instrumentation = res match {
-								case Json(json) => new Instrumentation(line, json.toString, InstrumentationType.JSON)
 								case Code(code) => new Instrumentation(line, code, InstrumentationType.CODE)
 							}
 							output.add(instrumentation)
@@ -52,14 +51,17 @@ class EvalImpl extends Eval.Iface {
 					}
 					result
 				} catch {
-				  case NonFatal(e) => {
-				  	val output = new ArrayList[Instrumentation]()
-				  	val result = new Result(compilerInfos, false)
-				  	result.setRuntimeError(e.toString)
-				  	println(e.toString)
-				  	e.printStackTrace
-				  	result
-				  }
+					case NonFatal(e) => {
+						val result = new Result(compilerInfos, false)
+						for {
+							e1 <- Option(e.getCause)
+							e2 <- Option(e1.getCause)
+						} yield {
+							val error = new RuntimeError(e2.toString, e2.getStackTrace.head.getLineNumber)
+							result.setRuntimeError(error)
+						}
+						result
+					}
 				}
 			}
 		}

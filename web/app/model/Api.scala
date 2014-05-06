@@ -66,6 +66,7 @@ object Api {
 			"result" -> JsString(instrumentation.result),
 			"type" -> JsString(instrumentation.itype.toString)
 		)))}.getOrElse(Seq())
+
 		val groupedInfos = r.infos.asScala.groupBy(_.severity).map{ case (t, sevs) =>
 			s"${t.toString.toLowerCase}s" -> JsArray(sevs.map(s => JsObject(Seq(
 				"message" -> JsString(s.message),
@@ -77,11 +78,17 @@ object Api {
 			if(groupedInfos.isEmpty) Seq("errors" -> JsArray(), "warnings" -> JsArray(), "infos" -> JsArray())
 			else groupedInfos
 
+		val runtimeError = Option(r.runtimeError).map(v => Seq(
+			"message" -> JsString(v.message),
+			"line" -> JsNumber(v.line)
+		))
+
 		JsObject(
 			infos ++
 			Seq(
 				"insight" -> JsArray(insight),
 				"timeout" -> JsBoolean(r.timeout),
+				"runtimeError" -> runtimeError.map(JsObject).getOrElse(JsObject(Seq())),
 				callback_id -> JsNumber(cid)
 			)
 		)

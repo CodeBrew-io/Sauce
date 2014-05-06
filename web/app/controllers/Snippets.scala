@@ -9,53 +9,60 @@ import model.{Account, Snippet}
 
 import securesocial.core._
 
+import scala.concurrent.Future
+
 object Snippets extends Controller with securesocial.core.SecureSocial {
 
+  import play.api.libs.concurrent.Execution.Implicits._
+
   def add = UserAwareAction { implicit request => withUsername { username =>
-    (for {
-      JsObject(Seq(("code", JsString(code)))) <- request.body.asJson
-    } yield {
-      val id = model.Snippets.add(Snippet("", "", "", code, "", "", "2.10.3", username))
-      Ok(Json.obj("id" -> id)) 
-    }).getOrElse(BadRequest(""))
+    val scalaVersion = scala.util.Properties.versionString
+
+    request.body.asJson match {
+      case Some(JsObject(Seq(("code", JsString(code))))) => {
+        model.Snippets.add(Snippet(code, username, scalaVersion)) map { snippet =>
+          Ok(Json.toJson(snippet.toJson))
+        }
+      }
+      case _ => Future { 
+        BadRequest(s"expected: {code: '1+1'}, received: ${request.body}") 
+      }
+    }
   }}
 
   def queryUser = UserAwareAction { implicit request => withUsername { username =>
-    Ok(Json.toJson(
-      model.Snippets.query(terms = None, userName = Some(username)).map(_.toJson())
-    ))
+    for {
+      response <- model.Snippets.query(terms = None, userName = Some(username))
+    } yield Ok(Json.toJson(response.map(_.toJson)))
   }}
 
   def delete(id: String) = UserAwareAction { implicit request => withUsername { username =>
-    if(model.Snippets.delete(id, username)) Ok("")
-    else BadRequest("")
+    model.Snippets.remove(id, username).map{ snippet =>
+      if(snippet.isFound) Ok(Json.obj("id" -> id))
+      else NotFound(s"snippet not found $id")
+    }
   }}
 
-  def find(id: String, username: String) = Action { implicit request =>
-    Ok(Json.toJson(model.Snippets.find(id, username).map(_.toJson())))
+  def find(id: String, username: String) = Action.async { implicit request =>
+    model.Snippets.find(id, username).map{
+      case Some(snippet) => Ok(Json.toJson(snippet.toJson))
+      case None => NotFound(s"snippet not found $id $username")
+    }
   }
 
-  private def withUsername[T](f: (String) => Result)(implicit request: RequestWithUser[T]) = {
+  def query(terms: Option[String], userName:Option[String], offset: Option[Int]) = Action.async { implicit request =>
+    for {
+      response <- model.Snippets.query(terms.filter(_ != ""), userName.filter(_ != ""), offset)
+    } yield Ok(Json.toJson(response.map(_.toJson())))
+  }
+
+  private def withUsername[T](f: (String) => Future[Result])(implicit request: RequestWithUser[T]) = {
     (for {
       su <- request.user
       user <- Account.find(su)
       username <- user.userName
     } yield {
-      f(username)
+      Async { f(username) }
     }).getOrElse(BadRequest(""))
-  }
-
-  def query(terms: Option[String], userName:Option[String], offset: Option[Int]) = Action  { implicit request =>
-    Ok(Json.toJson(
-      model.Snippets.query(terms.filter(_ != ""), userName.filter(_ != ""), offset).
-        map(_.toJson())
-    ))
-  }
-
-  def queryDistinct(terms: Option[String], userName:Option[String], offset: Option[Int]) = Action  { implicit request =>
-    Ok(Json.toJson(
-      model.Snippets.queryDistinct(terms.filter(_ != ""), userName.filter(_ != ""), offset).
-        map(_.toJson())
-    ))
   }
 }

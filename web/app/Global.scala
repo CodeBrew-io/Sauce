@@ -9,5 +9,6 @@ object Global extends GlobalSettings {
   
   override def onStop(app: Application): Unit = {
     EvalClient.stop()
+    Snippets.client.shutdown()
   }
 }
