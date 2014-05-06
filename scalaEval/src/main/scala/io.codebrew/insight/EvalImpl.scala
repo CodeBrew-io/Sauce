@@ -52,11 +52,14 @@ class EvalImpl extends Eval.Iface {
 					result
 				} catch {
 					case NonFatal(e) => {
-						val output = new ArrayList[Instrumentation]()
 						val result = new Result(compilerInfos, false)
-						result.setRuntimeError(e.toString)
-						println(e.toString)
-						e.printStackTrace
+						for {
+							e1 <- Option(e.getCause)
+							e2 <- Option(e1.getCause)
+						} yield {
+							val error = new RuntimeError(e2.toString, e2.getStackTrace.head.getLineNumber)
+							result.setRuntimeError(error)
+						}
 						result
 					}
 				}
